@@ -36,7 +36,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=compare-v3">
+  <link rel="stylesheet" href="style.css?v=compare-v4">
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
@@ -601,10 +601,10 @@
       </div>
 
       <!-- Selector Strip: Slot A vs Slot B with Swap Button -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+      <div id="compare-selectors-row" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center relative z-40">
         
         <!-- Slot A Selector -->
-        <div class="md:col-span-5 tactical-card p-3.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 relative">
+        <div id="compare-slot-card-a" class="md:col-span-5 tactical-card p-3.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 relative z-40 overflow-visible">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1.5">
               <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
@@ -627,14 +627,14 @@
         </div>
 
         <!-- Central Swap Button (⇄) -->
-        <div class="md:col-span-2 flex justify-center py-1 md:py-0">
+        <div class="md:col-span-2 flex justify-center py-1 md:py-0 relative z-20">
           <button onclick="swapCompareUnits()" aria-label="Inverser les deux personnages" class="w-10 h-10 rounded-full bg-[#090e1c] hover:bg-sky-600 hover:text-white border border-slate-700/80 text-sky-400 flex items-center justify-center tap-scale transition-colors shadow-md group" title="Inverser A ⇄ B">
             <i data-lucide="arrow-left-right" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" stroke-width="2.5"></i>
           </button>
         </div>
 
         <!-- Slot B Selector -->
-        <div class="md:col-span-5 tactical-card p-3.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 relative">
+        <div id="compare-slot-card-b" class="md:col-span-5 tactical-card p-3.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 relative z-30 overflow-visible">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1.5">
               <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
@@ -659,7 +659,7 @@
       </div>
 
       <!-- Quick Dual Preset Suggestions -->
-      <div id="compare-presets-strip" class="flex items-center flex-wrap gap-2 text-xs text-slate-400 bg-[#090e1c]/70 p-2.5 rounded-xl border border-slate-800/80">
+      <div id="compare-presets-strip" class="flex items-center flex-wrap gap-2 text-xs text-slate-400 bg-[#090e1c]/70 p-2.5 rounded-xl border border-slate-800/80 relative z-20">
         <span class="text-[11px] font-semibold text-slate-400 flex items-center gap-1 shrink-0">
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400"></i>
           Duels populaires :
@@ -676,7 +676,7 @@
       </div>
 
       <!-- Dynamic Comparison Content Display -->
-      <div id="compare-display-area" class="space-y-4">
+      <div id="compare-display-area" class="space-y-4 relative z-10">
         <!-- Rendered dynamically by renderCompareView() -->
       </div>
 
@@ -930,6 +930,6 @@
   </div>
 
   <!-- Application Logic -->
-  <script src="app.js?v=compare-v3"></script>
+  <script src="app.js?v=compare-v4"></script>
 </body>
 </html>

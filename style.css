@@ -366,14 +366,14 @@ body {
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 40;
+  z-index: 999;
   max-height: 280px;
   overflow-y: auto;
-  background-color: #0f1629;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: #0b1120;
+  border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: 0.75rem;
-  box-shadow: var(--shadow-elevation-2);
-  margin-top: 4px;
+  box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.85), 0 10px 15px -5px rgba(0, 0, 0, 0.7);
+  margin-top: 6px;
 }
 
 /* better-ui: Toast Notification Enter & Exit */

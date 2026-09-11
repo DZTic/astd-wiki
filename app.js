@@ -2261,7 +2261,7 @@ function getUnitCompareStats(unit, at175, withIdol) {
   const maxDmg = Math.round((unit.max_damage || baseDmg) * mult);
   const maxRange = Math.round(((unit.max_range || 0) * rangeMult) * 10) / 10;
   const minSpa = Math.round(((unit.min_spa || 0) * spaMult) * 10) / 10;
-  const maxDps = (maxDmg && minSpa > 0) ? Math.round(maxDmg / minSpa) : Math.round((unit.max_dps || 0) * mult);
+  const maxDps = (unit.max_dps && unit.max_dps > 0) ? Math.round(unit.max_dps * mult) : ((maxDmg && minSpa > 0) ? Math.round(maxDmg / minSpa) : 0);
   const deployCost = unit.deployment_cost || 0;
   const totalCost = unit.total_cost || 0;
   const costPerDps = (totalCost > 0 && maxDps > 0) ? Math.round((totalCost / maxDps) * 10) / 10 : 0;
@@ -2362,22 +2362,22 @@ function generateTacticalVerdict(sA, sB) {
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
         <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
           <span class="text-[10px] text-slate-400 block font-semibold uppercase">💥 DPS Brut</span>
-          <span class="font-bold text-amber-300 truncate block mt-0.5" title="${dpsLeader}">${dpsLeader}</span>
+          <span class="font-bold ${dpsEval.winner === 'a' ? 'text-sky-300' : (dpsEval.winner === 'b' ? 'text-amber-300' : 'text-slate-200')} truncate block mt-0.5" title="${dpsLeader}">${dpsLeader}</span>
           <span class="text-[9px] text-slate-400">${dpsEval.pctDiffText} d'écart</span>
         </div>
         <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
           <span class="text-[10px] text-slate-400 block font-semibold uppercase">⚡ Cadence (SPA)</span>
-          <span class="font-bold text-sky-300 truncate block mt-0.5" title="${spaLeader}">${spaLeader}</span>
+          <span class="font-bold ${spaEval.winner === 'a' ? 'text-sky-300' : (spaEval.winner === 'b' ? 'text-amber-300' : 'text-slate-200')} truncate block mt-0.5" title="${spaLeader}">${spaLeader}</span>
           <span class="text-[9px] text-slate-400">${spaEval.pctDiffText} plus rapide</span>
         </div>
         <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
           <span class="text-[10px] text-slate-400 block font-semibold uppercase">🎯 Portée</span>
-          <span class="font-bold text-slate-200 truncate block mt-0.5" title="${rangeLeader}">${rangeLeader}</span>
+          <span class="font-bold ${rangeEval.winner === 'a' ? 'text-sky-300' : (rangeEval.winner === 'b' ? 'text-amber-300' : 'text-slate-200')} truncate block mt-0.5" title="${rangeLeader}">${rangeLeader}</span>
           <span class="text-[9px] text-slate-400">${rangeEval.pctDiffText} de rayon</span>
         </div>
         <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
           <span class="text-[10px] text-slate-400 block font-semibold uppercase">💰 Rentabilité ($/DPS)</span>
-          <span class="font-bold text-slate-200 truncate block mt-0.5" title="${costLeader}">${costLeader}</span>
+          <span class="font-bold ${costEval.winner === 'a' ? 'text-sky-300' : (costEval.winner === 'b' ? 'text-amber-300' : 'text-slate-200')} truncate block mt-0.5" title="${costLeader}">${costLeader}</span>
           <span class="text-[9px] text-slate-400">meilleur ratio</span>
         </div>
       </div>
@@ -2443,7 +2443,7 @@ function renderCompareView() {
     { label: "Coût de Déploiement", key: 'deployCost', valA: sA.deployCost, valB: sB.deployCost, higherBetter: false, format: v => '$' + v.toLocaleString(), isDps: false, note: "Plus bas = plus facile à poser" },
     { label: "Coût Total d'Amélioration", key: 'totalCost', valA: sA.totalCost, valB: sB.totalCost, higherBetter: false, format: v => '$' + v.toLocaleString(), isDps: false, note: "Plus bas = maxé plus tôt" },
     { label: "Coût par point de DPS ($/DPS)", key: 'costPerDps', valA: sA.costPerDps, valB: sB.costPerDps, higherBetter: false, format: v => '$' + v, isDps: false, note: "Plus bas = plus rentable" },
-    { label: "Paliers d'Amélioration", key: 'upgradeCount', valA: sA.upgradeCount, valB: sB.upgradeCount, higherBetter: true, format: v => v + ' paliers', isDps: false }
+    { label: "Paliers d'Amélioration", key: 'upgradeCount', valA: sA.upgradeCount, valB: sB.upgradeCount, higherBetter: false, format: v => v + ' paliers', isDps: false, note: "Moins de paliers = maxé plus rapidement" }
   ];
 
   container.innerHTML = `
@@ -2463,7 +2463,10 @@ function renderCompareView() {
                 <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded">${compareUnitA.tower_type || 'Ground'}</span>
                 <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 rounded">${compareUnitA.attack_type || 'AoE'}</span>
               </div>
-              <h3 class="font-bold text-sm sm:text-base text-white truncate mt-1">${compareUnitA.name}</h3>
+              <h3 class="font-bold text-sm sm:text-base text-white truncate mt-1 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span>
+                <span>${compareUnitA.name}</span>
+              </h3>
               <p class="text-[11px] text-slate-400 truncate">${compareUnitA.anime_origin || 'All Star'}</p>
             </div>
           </div>
@@ -2474,11 +2477,11 @@ function renderCompareView() {
 
         <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800 font-mono-num text-[11px]">
           <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
-            <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS Max</span>
-            <span class="font-bold text-amber-300 text-xs">${sA.maxDps.toLocaleString()}</span>
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS Max (A)</span>
+            <span class="font-bold text-sky-300 text-xs">${sA.maxDps.toLocaleString()}</span>
           </div>
           <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
-            <span class="text-slate-400 block text-[9px] font-sans uppercase">Dégâts Max</span>
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">Dégâts Max (A)</span>
             <span class="font-bold text-slate-100 text-xs">${sA.maxDmg.toLocaleString()}</span>
           </div>
         </div>
@@ -2497,7 +2500,10 @@ function renderCompareView() {
                 <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded">${compareUnitB.tower_type || 'Ground'}</span>
                 <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 rounded">${compareUnitB.attack_type || 'AoE'}</span>
               </div>
-              <h3 class="font-bold text-sm sm:text-base text-white truncate mt-1">${compareUnitB.name}</h3>
+              <h3 class="font-bold text-sm sm:text-base text-white truncate mt-1 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+                <span>${compareUnitB.name}</span>
+              </h3>
               <p class="text-[11px] text-slate-400 truncate">${compareUnitB.anime_origin || 'All Star'}</p>
             </div>
           </div>
@@ -2508,11 +2514,11 @@ function renderCompareView() {
 
         <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800 font-mono-num text-[11px]">
           <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
-            <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS Max</span>
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS Max (B)</span>
             <span class="font-bold text-amber-300 text-xs">${sB.maxDps.toLocaleString()}</span>
           </div>
           <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
-            <span class="text-slate-400 block text-[9px] font-sans uppercase">Dégâts Max</span>
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">Dégâts Max (B)</span>
             <span class="font-bold text-slate-100 text-xs">${sB.maxDmg.toLocaleString()}</span>
           </div>
         </div>
@@ -2525,14 +2531,22 @@ function renderCompareView() {
 
     <!-- 3. Direct Metrics Comparison Table with Gauges -->
     <div class="tactical-card rounded-xl border border-slate-800/80 bg-[#0f1629]/95 overflow-hidden">
-      <div class="p-3.5 bg-[#141d33] border-b border-slate-800 flex items-center justify-between">
-        <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+      <div class="p-3.5 bg-[#141d33] border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
           <i data-lucide="sliders-horizontal" class="w-4 h-4 text-sky-400"></i>
-          <span>Tableau Comparatif des Statistiques (Palier Max)</span>
-        </h3>
-        <span class="text-[10px] text-slate-400 font-sans">
-          Mode : <strong class="text-slate-200">${at175 ? 'Level 175' : 'Level 1'}</strong> ${withIdol ? '• avec Buff Idol' : ''}
-        </span>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Tableau Comparatif des Statistiques (Palier Max)</h3>
+        </div>
+        <div class="flex items-center gap-2 text-[11px] font-mono-num flex-wrap">
+          <span class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-sky-950/60 border border-sky-500/40 text-sky-300 font-bold">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            <span>A : ${compareUnitA.name}</span>
+          </span>
+          <span class="text-slate-500 font-sans">vs</span>
+          <span class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 font-bold">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span>B : ${compareUnitB.name}</span>
+          </span>
+        </div>
       </div>
 
       <div class="divide-y divide-slate-800/70">
@@ -2540,28 +2554,29 @@ function renderCompareView() {
           const ev = evalMetric(m.valA, m.valB, m.higherBetter);
           const isAWin = ev.winner === 'a';
           const isBWin = ev.winner === 'b';
+          const winnerName = isAWin ? compareUnitA.name : compareUnitB.name;
           return `
             <div class="p-3.5 hover:bg-slate-800/30 transition-colors">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
-                <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1.5">
+                <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5 flex-wrap">
                   <span>${m.label}</span>
-                  ${m.note ? `<span class="text-[10px] text-slate-500 font-normal font-sans">(${m.note})</span>` : ''}
+                  ${m.note ? `<span class="text-[10px] text-slate-400 font-normal font-sans">(${m.note})</span>` : ''}
                 </span>
                 
-                <div class="flex items-center gap-2 text-xs font-mono-num">
-                  <span class="text-[11px] ${isAWin ? 'text-sky-300 font-bold' : 'text-slate-400'}">
-                    ${m.format(m.valA)}
+                <div class="flex items-center gap-2 text-xs font-mono-num flex-wrap">
+                  <span class="px-2 py-0.5 rounded text-[11px] ${isAWin ? 'bg-sky-500/20 text-sky-300 font-bold border border-sky-500/40 shadow-sm' : 'text-slate-300 bg-slate-900/60 border border-slate-800'}">
+                    <span class="text-[9px] text-sky-400/80 mr-1 font-sans font-semibold">A:</span>${m.format(m.valA)}
                   </span>
                   <span class="text-[10px] text-slate-500">vs</span>
-                  <span class="text-[11px] ${isBWin ? 'text-amber-300 font-bold' : 'text-slate-400'}">
-                    ${m.format(m.valB)}
+                  <span class="px-2 py-0.5 rounded text-[11px] ${isBWin ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40 shadow-sm' : 'text-slate-300 bg-slate-900/60 border border-slate-800'}">
+                    <span class="text-[9px] text-amber-400/80 mr-1 font-sans font-semibold">B:</span>${m.format(m.valB)}
                   </span>
                   ${ev.winner !== 'tie' ? `
-                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${isAWin ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
-                      ${isAWin ? 'A' : 'B'} ${ev.pctDiffText}
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isAWin ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
+                      ${isAWin ? 'A' : 'B'} +${ev.pctDiffText.replace('+', '')} (${winnerName})
                     </span>
                   ` : `
-                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
                       Égalité
                     </span>
                   `}
@@ -2569,9 +2584,15 @@ function renderCompareView() {
               </div>
 
               <!-- Relative Gauge Bar -->
-              <div class="compare-gauge-track flex">
-                <div class="compare-gauge-fill-a" style="width: ${ev.pctA}%" title="${compareUnitA.name}: ${ev.pctA}%"></div>
-                <div class="compare-gauge-fill-b" style="width: ${ev.pctB}%" title="${compareUnitB.name}: ${ev.pctB}%"></div>
+              <div class="space-y-1 mt-1.5">
+                <div class="compare-gauge-track flex">
+                  <div class="compare-gauge-fill-a" style="width: ${ev.pctA}%" title="${compareUnitA.name}: ${ev.pctA}%"></div>
+                  <div class="compare-gauge-fill-b" style="width: ${ev.pctB}%" title="${compareUnitB.name}: ${ev.pctB}%"></div>
+                </div>
+                <div class="flex justify-between items-center text-[9px] font-mono-num text-slate-400">
+                  <span class="${isAWin ? 'text-sky-300 font-bold' : ''}">A (${compareUnitA.name}) : ${ev.pctA}%</span>
+                  <span class="${isBWin ? 'text-amber-300 font-bold' : ''}">B (${compareUnitB.name}) : ${ev.pctB}%</span>
+                </div>
               </div>
             </div>
           `;
