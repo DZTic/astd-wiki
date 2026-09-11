@@ -16,6 +16,10 @@ window.ALL_UNITS = ALL_UNITS;
 window.getGlobalUnits = () => ALL_UNITS;
 window.setGlobalUnits = (list) => { ALL_UNITS = list; window.ALL_UNITS = list; };
 
+window.ORBS_DATA = ORBS_DATA;
+window.getGlobalOrbs = () => ORBS_DATA;
+window.setGlobalOrbs = (list) => { ORBS_DATA = list; window.ORBS_DATA = list; };
+
 let currentTab = 'units';
 let currentStarFilter = 'all';
 let currentViewMode = 'grid'; // 'grid' | 'table'
@@ -285,6 +289,30 @@ const I18N = {
     no_orbs_found: "Aucun orbe trouvé",
     no_orbs_query: "Aucun orbe ne correspond à la recherche « {q} ».",
     clear_search: "Effacer la recherche",
+    comm_stat_orbs: "Orbes",
+    add_orb_btn: "Ajouter un Orbe",
+    comm_badge_orb: "Communauté",
+    comm_btn_edit_orb_title: "Modifier cet orbe",
+    comm_orb_new_badge: "Création locale",
+    comm_orb_mod_badge: "Modifié localement",
+    comm_title_add_orb: "Créer & Proposer un Nouvel Orbe",
+    comm_title_edit_orb: "Modifier l'Orbe : {name}",
+    comm_title_select_orb: "Modifier un orbe existant",
+    comm_select_orb_to_edit: "Choisissez un orbe à modifier :",
+    comm_btn_edit_orb_now: "Modifier cet orbe",
+    comm_btn_save_orb_local: "Enregistrer Localement",
+    comm_btn_propose_orb_github: "Enregistrer & Proposer au Wiki Officiel",
+    comm_field_orb_name: "Nom de l'orbe *",
+    comm_field_orb_effect: "Effet / Bonus Statistique *",
+    comm_field_orb_require: "Compatibilité (Condition requise) *",
+    comm_field_orb_obtain: "Méthode d'Obtention",
+    comm_field_orb_image: "Illustration de l'Orbe (Fichier local ou URL)",
+    comm_preview_live_title: "Aperçu en Direct",
+    comm_preview_badge: "Aperçu Direct",
+    comm_orb_saved: "Orbe « {name} » enregistré avec succès !",
+    comm_orb_removed: "Orbe « {name} » retiré.",
+    comm_orb_restored: "Orbe « {name} » restauré !",
+    comm_confirm_delete_orb: "Voulez-vous vraiment retirer l'orbe « {name} » ? (Vous pourrez le restaurer à tout moment).",
 
     // Gamemodes
     gamemodes_heading: "Modes de Jeu & Raids",
@@ -639,6 +667,30 @@ const I18N = {
     no_orbs_found: "No orbs found",
     no_orbs_query: "No orbs match the search \"{q}\".",
     clear_search: "Clear search",
+    comm_stat_orbs: "Orbs",
+    add_orb_btn: "Add an Orb",
+    comm_badge_orb: "Community",
+    comm_btn_edit_orb_title: "Edit this orb",
+    comm_orb_new_badge: "Local creation",
+    comm_orb_mod_badge: "Locally modified",
+    comm_title_add_orb: "Create & Propose a New Orb",
+    comm_title_edit_orb: "Edit Orb: {name}",
+    comm_title_select_orb: "Edit an Existing Orb",
+    comm_select_orb_to_edit: "Select an orb to edit:",
+    comm_btn_edit_orb_now: "Edit this orb",
+    comm_btn_save_orb_local: "Save Locally",
+    comm_btn_propose_orb_github: "Save & Propose to Official Wiki",
+    comm_field_orb_name: "Orb Name *",
+    comm_field_orb_effect: "Effect / Stat Bonus *",
+    comm_field_orb_require: "Compatibility (Requirement) *",
+    comm_field_orb_obtain: "Obtainment Method",
+    comm_field_orb_image: "Orb Illustration (Local file or URL)",
+    comm_preview_live_title: "Live Preview",
+    comm_preview_badge: "Live Preview",
+    comm_orb_saved: "Orb \"{name}\" saved successfully!",
+    comm_orb_removed: "Orb \"{name}\" removed.",
+    comm_orb_restored: "Orb \"{name}\" restored!",
+    comm_confirm_delete_orb: "Are you sure you want to remove the orb \"{name}\"? (You can restore it anytime).",
 
     // Gamemodes
     gamemodes_heading: "Game Modes & Raids",
@@ -3280,6 +3332,8 @@ function renderOrbCard(o) {
   const isUniversal = /toutes les unit|all units/i.test(o.require || '');
   const requireText = isUniversal ? t('all_units_badge', '★ Toutes les unités') : o.require;
   const requireTitle = isUniversal ? t('universal_orb_title', 'Équipable par toutes les unités') : t('restricted_orb_title', 'Réservé à cette unité (ou sa famille)');
+  const isCommunity = !!(o._is_community || o._is_community_new || o._is_community_modified);
+  const encodedName = encodeURIComponent(o.name || '');
 
   return `
     <div class="tactical-card rounded-xl p-4 border border-slate-800/80 bg-[#0f1629]/95 flex flex-col justify-between space-y-3 hover:border-sky-500/40 tap-scale-subtle transition-colors">
@@ -3289,8 +3343,15 @@ function renderOrbCard(o) {
             <img src="${o.image || fallback}" alt="${o.name}" class="max-h-full max-w-full object-contain img-outline rounded"
                  onerror="this.src='${fallback}'">
           </div>
-          <div class="min-w-0">
-            <h4 class="font-bold text-xs text-white truncate">${o.name}</h4>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-1">
+              <h4 class="font-bold text-xs text-white truncate">${o.name}</h4>
+              ${isCommunity ? `
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase shrink-0">
+                  ${t('comm_badge_orb', 'Communauté')}
+                </span>
+              ` : ''}
+            </div>
             <span class="text-[10px] font-semibold ${isUniversal ? 'text-sky-300' : 'text-slate-400'}"
                   title="${requireTitle}">
               ${requireText}
@@ -3311,6 +3372,16 @@ function renderOrbCard(o) {
             <strong class="text-slate-300 font-sans">${t('compatible_label', 'Compatible :')}</strong> <span class="text-sky-300">${o.require}</span>
           </div>` : ''}
         </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px]">
+        <span class="text-[10px] text-slate-500 font-mono-num">
+          ${isCommunity ? (o._is_community_new ? t('comm_orb_new_badge', 'Création locale') : t('comm_orb_mod_badge', 'Modifié localement')) : 'Wiki Officiel'}
+        </span>
+        <button onclick="if(window.CommunityUI) CommunityUI.openOrbModalForEdit(decodeURIComponent('${encodedName}'))" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-600 hover:text-white text-slate-300 font-semibold text-xs tap-scale flex items-center gap-1.5 transition-colors" title="${t('comm_btn_edit_orb_title', 'Modifier cet orbe')}">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>${t('comm_action_edit', 'Éditer')}</span>
+        </button>
       </div>
     </div>
   `;
@@ -4333,6 +4404,8 @@ if (typeof window !== 'undefined') {
   window.copyCodeText = copyCodeText;
   window.copyLatestCode = copyLatestCode;
   window.filterOrbs = filterOrbs;
+  window.renderOrbs = renderOrbs;
+  window.renderOrbCard = renderOrbCard;
   window.showToast = showToast;
   window.initSafeAds = initSafeAds;
   window.focusMainSearch = focusMainSearch;

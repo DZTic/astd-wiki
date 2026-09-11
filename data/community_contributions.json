@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "last_updated": "2026-09-11T19:59:23.662193+00:00",
+  "last_updated": "2026-09-11T20:30:40.436418+00:00",
   "units": {
     "Goku_Ultra_Instinct_Custom": {
       "id": "Goku_Ultra_Instinct_Custom",
@@ -65,10 +65,12 @@
         }
       ],
       "_community": true,
-      "created_at": "2026-09-11T19:59:20.014Z"
+      "created_at": "2026-09-11T20:30:36.825Z"
     }
   },
   "deleted_units": [],
+  "orbs": {},
+  "deleted_orbs": [],
   "codes": [
     {
       "code": "COMMUNITY2026",
@@ -81,38 +83,10 @@
   "tips": {
     "Goku_Ultra_Instinct_Custom": [
       {
-        "id": "tip_1789156762187",
+        "id": "tip_1789158638890",
         "author": "VegetaMaster",
         "type": "raid",
         "text": "Excellente unite en Raid 2 : placez-la en debut de chemin pour appliquer ses degats de zone.",
-        "date": "11/09/2026"
-      },
-      {
-        "id": "tip_1789156442998",
-        "author": "VegetaMaster",
-        "type": "raid",
-        "text": "Excellente unite en Raid 2 : placez-la en debut de chemin pour appliquer ses degats de zone.",
-        "date": "11/09/2026"
-      },
-      {
-        "id": "tip_1789155711517",
-        "author": "VegetaMaster",
-        "type": "raid",
-        "text": "Excellente unite en Raid 2 : placez-la en debut de chemin pour appliquer ses degats de zone.",
-        "date": "11/09/2026"
-      },
-      {
-        "id": "tip_1789155346907",
-        "author": "VegetaMaster",
-        "type": "raid",
-        "text": "Excellente unite en Raid 2 : placez-la en debut de chemin pour appliquer ses degats de zone.",
-        "date": "11/09/2026"
-      },
-      {
-        "id": "tip_1789147845240",
-        "author": "VegetaMaster",
-        "type": "raid",
-        "text": "Excellente unité en Raid 2 : placez-la en début de chemin pour appliquer ses dégâts de zone colossaux.",
         "date": "11/09/2026"
       }
     ]

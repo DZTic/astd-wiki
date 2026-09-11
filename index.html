@@ -545,13 +545,19 @@
             Bonus de statistiques, méthodes de drop (Trials, Raids) et compatibilité des unités.
           </p>
         </div>
-        <div class="w-full sm:w-64">
-          <label for="search-orbs" class="sr-only" data-i18n="search_orbs_sr">Rechercher un orbe ou un effet</label>
-          <input type="text" id="search-orbs" oninput="filterOrbs()" placeholder="Rechercher un orbe ou un effet..." 
-                 data-i18n-placeholder="search_orbs_placeholder"
-                 aria-label="Rechercher un orbe ou un effet"
-                 data-i18n-aria="search_orbs_aria"
-                 class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="w-full sm:w-64">
+            <label for="search-orbs" class="sr-only" data-i18n="search_orbs_sr">Rechercher un orbe ou un effet</label>
+            <input type="text" id="search-orbs" oninput="filterOrbs()" placeholder="Rechercher un orbe ou un effet..." 
+                   data-i18n-placeholder="search_orbs_placeholder"
+                   aria-label="Rechercher un orbe ou un effet"
+                   data-i18n-aria="search_orbs_aria"
+                   class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+          </div>
+          <button type="button" onclick="CommunityUI.openOrbModalForAdd()" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tap-scale flex items-center gap-1.5 shadow-sm shrink-0" title="Ajouter un nouvel orbe à la communauté">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span data-i18n="add_orb_btn">Ajouter un Orbe</span>
+          </button>
         </div>
       </div>
 

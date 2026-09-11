@@ -303,6 +303,68 @@ def apply_code_payload(code_data):
     return code_obj
 
 
+def apply_orb_payload(orb_data):
+    """Intègre ou met à jour un orbe dans data/orbs.json."""
+    orbs_file = os.path.join(DATA_DIR, 'orbs.json')
+    if not os.path.exists(orbs_file):
+        raise FileNotFoundError(f"Fichier introuvable : {orbs_file}")
+
+    with open(orbs_file, 'r', encoding='utf-8') as f:
+        orbs = json.load(f)
+
+    orb_name = str(orb_data.get('name', '')).strip()
+    if not orb_name:
+        raise ValueError("Le nom de l'orbe est requis.")
+
+    orb_obj = {
+        "name": orb_name,
+        "image": orb_data.get('image') or "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png",
+        "effect": orb_data.get('effect') or "Bonus spécial",
+        "obtain": orb_data.get('obtain') or "Proposition Communautaire validée",
+        "require": orb_data.get('require') or "All units",
+        "_community_approved": True,
+        "_approved_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    existing_idx = next((i for i, o in enumerate(orbs) if o.get('name', '').lower() == orb_name.lower()), -1)
+    is_update = existing_idx >= 0
+
+    if is_update:
+        orig = orbs[existing_idx]
+        if not orb_data.get('image') and orig.get('image'):
+            orb_obj['image'] = orig['image']
+        orbs[existing_idx] = orb_obj
+        action_msg = f"Mise à jour de l'orbe existant '{orb_name}'"
+    else:
+        orbs.insert(0, orb_obj)
+        action_msg = f"Ajout du nouvel orbe '{orb_name}'"
+
+    temp_file = orbs_file + '.tmp'
+    with open(temp_file, 'w', encoding='utf-8') as f:
+        json.dump(orbs, f, ensure_ascii=False, indent=2)
+    os.replace(temp_file, orbs_file)
+
+    log(f"data/orbs.json mis à jour : {action_msg}")
+
+    # Nettoyage synchronisé de data/community_contributions.json
+    comm_file = os.path.join(DATA_DIR, 'community_contributions.json')
+    if os.path.exists(comm_file):
+        try:
+            with open(comm_file, 'r', encoding='utf-8') as f:
+                comm_data = json.load(f)
+            if 'orbs' in comm_data and orb_name in comm_data['orbs']:
+                del comm_data['orbs'][orb_name]
+            if 'deleted_orbs' in comm_data and orb_name in comm_data['deleted_orbs']:
+                comm_data['deleted_orbs'].remove(orb_name)
+            with open(comm_file, 'w', encoding='utf-8') as f:
+                json.dump(comm_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            log(f"Note : Impossible de nettoyer community_contributions.json : {e}")
+
+    update_meta()
+    return orb_obj, is_update
+
+
 def update_meta():
     """Met à jour l'horodatage dans data/meta.json."""
     meta_file = os.path.join(DATA_DIR, 'meta.json')
@@ -421,6 +483,20 @@ def main():
             f"🎉 **Code Promo validé !**\n\n"
             f"Le code `{code.get('code')}` a été automatiquement intégré à la liste officielle des codes ASTD (`data/codes.json`).\n\n"
             f"🚀 *Le site GitHub Pages est en cours de redéploiement automatique (~1 minute).*"
+        )
+
+    elif item_type == 'orb':
+        orb, is_update = apply_orb_payload(item_data)
+        o_name = orb.get('name')
+        verb = "mis à jour" if is_update else "ajouté"
+
+        feedback_msg = (
+            f"🎉 **Orbe validé !**\n\n"
+            f"L'orbe **{o_name}** a été automatiquement {verb} au Compendium officiel des orbes ASTD (`data/orbs.json`).\n\n"
+            f"- **Effet :** {orb.get('effect', '-')}\n"
+            f"- **Compatibilité :** {orb.get('require', '-')}\n"
+            f"- **Obtention :** {orb.get('obtain', '-')}\n\n"
+            f"🚀 *Le site GitHub Pages est en cours de redéploiement automatique (~1 minute).* Merci pour votre contribution !"
         )
 
     else:

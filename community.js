@@ -31,19 +31,26 @@ const CommunityManager = (function() {
     last_updated: new Date().toISOString(),
     units: {},         // { [unitId]: unitObject }
     deleted_units: [], // [ unitId1, unitId2... ]
+    orbs: {},          // { [orbName]: orbObject }
+    deleted_orbs: [],  // [ orbName1, orbName2... ]
     codes: [],         // [ { code, reward, date, status } ]
     tips: {}           // { [unitId]: [ { id, author, type, text, date } ] }
   };
 
   let isServerAvailable = false;
   let originalUnitsBackup = null;
+  let originalOrbsBackup = null;
 
   // Initialisation : charge depuis le serveur ou localStorage
   async function init() {
-    // 1. Sauvegarder une copie propre des unités officielles au premier chargement
+    // 1. Sauvegarder une copie propre des unités et orbes officiels au premier chargement
     const currentList = window.getGlobalUnits ? window.getGlobalUnits() : window.ALL_UNITS;
     if (!originalUnitsBackup && Array.isArray(currentList) && currentList.length > 0) {
       originalUnitsBackup = JSON.parse(JSON.stringify(currentList));
+    }
+    const currentOrbsList = window.getGlobalOrbs ? window.getGlobalOrbs() : window.ORBS_DATA;
+    if (!originalOrbsBackup && Array.isArray(currentOrbsList) && currentOrbsList.length > 0) {
+      originalOrbsBackup = JSON.parse(JSON.stringify(currentOrbsList));
     }
 
     // 2. Tenter de charger depuis l'API locale du serveur
@@ -54,6 +61,8 @@ const CommunityManager = (function() {
         if (data && typeof data === 'object') {
           state.units = data.units || {};
           state.deleted_units = data.deleted_units || [];
+          state.orbs = data.orbs || {};
+          state.deleted_orbs = data.deleted_orbs || [];
           state.codes = data.codes || [];
           state.tips = data.tips || {};
           isServerAvailable = true;
@@ -78,6 +87,8 @@ const CommunityManager = (function() {
         const parsed = JSON.parse(stored);
         state.units = parsed.units || {};
         state.deleted_units = parsed.deleted_units || [];
+        state.orbs = parsed.orbs || {};
+        state.deleted_orbs = parsed.deleted_orbs || [];
         state.codes = parsed.codes || [];
         state.tips = parsed.tips || {};
       }
@@ -112,47 +123,89 @@ const CommunityManager = (function() {
   // Fusionne les modifications communautaires dans les données du site
   function applyToGlobalData() {
     const currentList = window.getGlobalUnits ? window.getGlobalUnits() : window.ALL_UNITS;
-    if (!Array.isArray(currentList)) return;
-
-    if (!originalUnitsBackup) {
-      originalUnitsBackup = JSON.parse(JSON.stringify(currentList));
-    }
-
-    // Recommencer à partir de la sauvegarde officielle
-    let workingList = JSON.parse(JSON.stringify(originalUnitsBackup));
-
-    // 1. Filtrer les unités supprimées / masquées par la communauté
-    const deletedSet = new Set(state.deleted_units || []);
-    workingList = workingList.filter(u => !deletedSet.has(u.id));
-
-    // 2. Appliquer les unités modifiées ou ajoutées
-    const communityUnits = Object.values(state.units || {});
-    communityUnits.forEach(commUnit => {
-      if (deletedSet.has(commUnit.id)) return;
-      const existingIdx = workingList.findIndex(u => u.id === commUnit.id);
-      if (existingIdx >= 0) {
-        // Unité modifiée
-        workingList[existingIdx] = {
-          ...workingList[existingIdx],
-          ...commUnit,
-          _is_community_modified: true
-        };
-      } else {
-        // Nouvelle unité ajoutée
-        workingList.unshift({
-          ...commUnit,
-          _is_community_new: true
-        });
+    if (Array.isArray(currentList)) {
+      if (!originalUnitsBackup) {
+        originalUnitsBackup = JSON.parse(JSON.stringify(currentList));
       }
-    });
 
-    if (window.setGlobalUnits) {
-      window.setGlobalUnits(workingList);
-    } else {
-      window.ALL_UNITS = workingList;
+      // Recommencer à partir de la sauvegarde officielle
+      let workingList = JSON.parse(JSON.stringify(originalUnitsBackup));
+
+      // 1. Filtrer les unités supprimées / masquées par la communauté
+      const deletedSet = new Set(state.deleted_units || []);
+      workingList = workingList.filter(u => !deletedSet.has(u.id));
+
+      // 2. Appliquer les unités modifiées ou ajoutées
+      const communityUnits = Object.values(state.units || {});
+      communityUnits.forEach(commUnit => {
+        if (deletedSet.has(commUnit.id)) return;
+        const existingIdx = workingList.findIndex(u => u.id === commUnit.id);
+        if (existingIdx >= 0) {
+          // Unité modifiée
+          workingList[existingIdx] = {
+            ...workingList[existingIdx],
+            ...commUnit,
+            _is_community_modified: true
+          };
+        } else {
+          // Nouvelle unité ajoutée
+          workingList.unshift({
+            ...commUnit,
+            _is_community_new: true
+          });
+        }
+      });
+
+      if (window.setGlobalUnits) {
+        window.setGlobalUnits(workingList);
+      } else {
+        window.ALL_UNITS = workingList;
+      }
     }
 
-    // 3. Fusionner les codes promotionnels communautaires
+    // 3. Fusionner les orbes communautaires
+    const currentOrbs = window.getGlobalOrbs ? window.getGlobalOrbs() : window.ORBS_DATA;
+    if (Array.isArray(currentOrbs)) {
+      if (!originalOrbsBackup && currentOrbs.length > 0) {
+        originalOrbsBackup = JSON.parse(JSON.stringify(currentOrbs));
+      }
+      if (originalOrbsBackup) {
+        let workingOrbs = JSON.parse(JSON.stringify(originalOrbsBackup));
+        const deletedOrbsSet = new Set((state.deleted_orbs || []).map(n => (n || '').toLowerCase()));
+        workingOrbs = workingOrbs.filter(o => !deletedOrbsSet.has((o.name || '').toLowerCase()));
+
+        const communityOrbs = Object.values(state.orbs || {});
+        communityOrbs.forEach(commOrb => {
+          if (!commOrb || !commOrb.name) return;
+          if (deletedOrbsSet.has(commOrb.name.toLowerCase())) return;
+          const existingIdx = workingOrbs.findIndex(o => (o.name || '').toLowerCase() === commOrb.name.toLowerCase());
+          if (existingIdx >= 0) {
+            workingOrbs[existingIdx] = {
+              ...workingOrbs[existingIdx],
+              ...commOrb,
+              _is_community_modified: true
+            };
+          } else {
+            workingOrbs.unshift({
+              ...commOrb,
+              _is_community_new: true
+            });
+          }
+        });
+
+        if (window.setGlobalOrbs) {
+          window.setGlobalOrbs(workingOrbs);
+        } else {
+          window.ORBS_DATA = workingOrbs;
+        }
+
+        const statOrbsEl = document.getElementById('stat-orbs-count');
+        if (statOrbsEl) statOrbsEl.textContent = workingOrbs.length;
+        if (window.renderOrbs) window.renderOrbs();
+      }
+    }
+
+    // 4. Fusionner les codes promotionnels communautaires
     if (window.CODES_DATA && Array.isArray(state.codes) && state.codes.length > 0) {
       state.codes.forEach(commCode => {
         const targetList = commCode.status === 'expired' ? window.CODES_DATA.expired : window.CODES_DATA.active;
@@ -172,6 +225,8 @@ const CommunityManager = (function() {
   function updateCommunityBadge() {
     const count = Object.keys(state.units || {}).length +
                   (state.deleted_units || []).length +
+                  Object.keys(state.orbs || {}).length +
+                  (state.deleted_orbs || []).length +
                   (state.codes || []).length;
     const badge = document.getElementById('badge-community-count');
     if (badge) {
@@ -305,6 +360,91 @@ const CommunityManager = (function() {
     if (window.showToast) window.showToast(msg);
   }
 
+  // --- ACTIONS CRUD ORBES ---
+
+  async function saveOrb(orbData) {
+    const name = stripHtml(orbData.name);
+    if (!name) {
+      alert(window.t ? window.t('comm_orb_name_required', 'Le nom de l\'orbe est obligatoire.') : 'Le nom de l\'orbe est obligatoire.');
+      return false;
+    }
+
+    const orbObj = {
+      name: name,
+      image: orbData.image && orbData.image.trim() ? orbData.image.trim() : 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png',
+      effect: orbData.effect ? stripHtml(orbData.effect) : 'Bonus spécial',
+      obtain: orbData.obtain ? stripHtml(orbData.obtain) : 'Fabrication Boutique / Raids',
+      require: orbData.require ? stripHtml(orbData.require) : 'All units',
+      _is_community: true,
+      created_at: orbData.created_at || new Date().toISOString()
+    };
+
+    if (!state.orbs) state.orbs = {};
+
+    // Si l'orbe a été renommé lors de l'édition, nettoyer l'ancien nom
+    if (orbData._original_name && orbData._original_name !== name) {
+      if (state.orbs[orbData._original_name]) {
+        delete state.orbs[orbData._original_name];
+      }
+      if (originalOrbsBackup && originalOrbsBackup.some(o => o.name.toLowerCase() === orbData._original_name.toLowerCase())) {
+        if (!state.deleted_orbs) state.deleted_orbs = [];
+        if (!state.deleted_orbs.includes(orbData._original_name)) {
+          state.deleted_orbs.push(orbData._original_name);
+        }
+      }
+    }
+
+    state.orbs[name] = orbObj;
+    state.deleted_orbs = (state.deleted_orbs || []).filter(n => (n || '').toLowerCase() !== name.toLowerCase());
+
+    await syncWithServer('save_orb', { orb: orbObj });
+    applyToGlobalData();
+
+    if (window.renderOrbs) window.renderOrbs();
+    renderCommunityHub();
+
+    const msg = window.t ? window.t('comm_orb_saved', 'Orbe "{name}" enregistré avec succès !').replace('{name}', name) : `Orbe "${name}" enregistré avec succès !`;
+    if (window.showToast) window.showToast(msg);
+    return true;
+  }
+
+  async function deleteOrb(orbName) {
+    const confirmMsg = window.t ?
+      window.t('comm_confirm_delete_orb', 'Voulez-vous vraiment retirer l\'orbe "{name}" ? (Vous pourrez le restaurer à tout moment).').replace('{name}', orbName) :
+      `Voulez-vous vraiment retirer l'orbe "${orbName}" ? (Vous pourrez le restaurer à tout moment).`;
+
+    if (!confirm(confirmMsg)) return;
+
+    if (state.orbs && state.orbs[orbName]) {
+      delete state.orbs[orbName];
+    }
+    if (!state.deleted_orbs) state.deleted_orbs = [];
+    if (!state.deleted_orbs.includes(orbName)) {
+      state.deleted_orbs.push(orbName);
+    }
+
+    await syncWithServer('delete_orb', { name: orbName });
+    applyToGlobalData();
+
+    if (window.renderOrbs) window.renderOrbs();
+    renderCommunityHub();
+
+    const msg = window.t ? window.t('comm_orb_removed', 'Orbe "{name}" retiré.').replace('{name}', orbName) : `Orbe "${orbName}" retiré.`;
+    if (window.showToast) window.showToast(msg);
+  }
+
+  async function restoreOrb(orbName) {
+    state.deleted_orbs = (state.deleted_orbs || []).filter(n => (n || '').toLowerCase() !== (orbName || '').toLowerCase());
+    await syncWithServer('restore_orb', { name: orbName });
+    applyToGlobalData();
+
+    if (window.renderOrbs) window.renderOrbs();
+    renderCommunityHub();
+
+    const msg = window.t ? window.t('comm_orb_restored', 'Orbe "{name}" restauré !').replace('{name}', orbName) : `Orbe "${orbName}" restauré !`;
+    if (window.showToast) window.showToast(msg);
+  }
+
   // --- ACTIONS CRUD CODES ---
 
   async function saveCode(codeData) {
@@ -434,6 +574,8 @@ const CommunityManager = (function() {
       last_updated: new Date().toISOString(),
       units: {},
       deleted_units: [],
+      orbs: {},
+      deleted_orbs: [],
       codes: [],
       tips: {}
     };
@@ -443,6 +585,7 @@ const CommunityManager = (function() {
 
     if (window.applyUnitFilters) window.applyUnitFilters();
     else if (window.filterUnits) window.filterUnits();
+    if (window.renderOrbs) window.renderOrbs();
     if (window.renderCodes) window.renderCodes();
     renderCommunityHub();
 
@@ -475,6 +618,8 @@ const CommunityManager = (function() {
         if (data && typeof data === 'object') {
           state.units = { ...(state.units || {}), ...(data.units || {}) };
           state.deleted_units = Array.from(new Set([...(state.deleted_units || []), ...(data.deleted_units || [])]));
+          state.orbs = { ...(state.orbs || {}), ...(data.orbs || {}) };
+          state.deleted_orbs = Array.from(new Set([...(state.deleted_orbs || []), ...(data.deleted_orbs || [])]));
           state.codes = [...(data.codes || []), ...(state.codes || [])];
           state.tips = { ...(state.tips || {}), ...(data.tips || {}) };
 
@@ -483,6 +628,7 @@ const CommunityManager = (function() {
 
           if (window.applyUnitFilters) window.applyUnitFilters();
           else if (window.filterUnits) window.filterUnits();
+          if (window.renderOrbs) window.renderOrbs();
           if (window.renderCodes) window.renderCodes();
           renderCommunityHub();
 
@@ -613,6 +759,37 @@ const CommunityManager = (function() {
              `<!-- ASTD_PAYLOAD_START\n${JSON.stringify(payload)}\nASTD_PAYLOAD_END -->\n\n` +
              `<details>\n<summary>🤖 Données techniques JSON</summary>\n\n` +
              `\`\`\`json\n${JSON.stringify(payload, null, 2)}\n\`\`\`\n\n</details>`;
+
+    } else if (type === 'orb') {
+      const isLocalImage = data.image && data.image.startsWith('data:image');
+      const payload = {
+        version: 1,
+        type: 'orb',
+        action: 'save_orb',
+        data: {
+          name: data.name || 'Nouvel Orbe',
+          image: isLocalImage ? '' : (data.image || ''),
+          effect: data.effect || 'Bonus spécial',
+          obtain: data.obtain || 'Fabrication / Raids',
+          require: data.require || 'All units'
+        }
+      };
+
+      title = `[Proposition Orbe] ${data.name || 'Nouvel Orbe'}`;
+      body = `### 🔮 Proposition d'Orbe ASTD\n\n` +
+             `| Champ | Valeur |\n` +
+             `| :--- | :--- |\n` +
+             `| **Nom de l'Orbe** | **${data.name || '-'}** |\n` +
+             `| **Effet / Bonus** | ${data.effect || '-'} |\n` +
+             `| **Compatibilité** | ${data.require || 'All units'} |\n` +
+             `| **Obtention** | ${data.obtain || '-'} |\n\n` +
+             (isLocalImage ? `> ⚠️ **Image Locale Détectée :** Une image sur votre ordinateur a été utilisée. Veuillez glisser-déposer votre fichier image directement dans cette issue GitHub pour qu'elle s'affiche.\n\n` : (data.image ? `**Image :** ${data.image}\n\n` : '')) +
+             `---\n` +
+             `### 🛠️ Validation Automatique du Wiki (Mainteneurs)\n` +
+             `> Ajoutez le label **\`validé\`** ou commentez **/valider** pour intégrer automatiquement cet orbe dans \`data/orbs.json\`.\n\n` +
+             `<!-- ASTD_PAYLOAD_START\n${JSON.stringify(payload)}\nASTD_PAYLOAD_END -->\n\n` +
+             `<details>\n<summary>🤖 Données techniques JSON</summary>\n\n` +
+             `\`\`\`json\n${JSON.stringify(payload, null, 2)}\n\`\`\`\n\n</details>`;
     }
 
     return `${base}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&labels=${encodeURIComponent(labels)}`;
@@ -631,6 +808,11 @@ const CommunityManager = (function() {
       text = `**[ASTD Wiki] Nouveau Code Promo :** \`${data.code}\`\n` +
              `> Récompenses : ${data.reward}\n` +
              `> Statut : ${data.status === 'active' ? 'ACTIF' : 'EXPIRÉ'}`;
+    } else if (type === 'orb') {
+      text = `**[ASTD Wiki - Communauté] Orbe : ${data.name}**\n` +
+             `> Bonus : ${data.effect || '-'}\n` +
+             `> Compatible : ${data.require || 'All units'}\n` +
+             `> Obtention : ${data.obtain || '-'}`;
     }
 
     navigator.clipboard.writeText(text).then(() => {
@@ -650,6 +832,8 @@ const CommunityManager = (function() {
       const u = (originalUnitsBackup || []).find(x => x.id === id);
       return u || { id, name: id, star: '?' };
     });
+    const modifiedOrbsList = Object.values(state.orbs || {});
+    const deletedOrbsList = state.deleted_orbs || [];
     const communityCodes = state.codes || [];
     const allTips = Object.entries(state.tips || {}).flatMap(([uId, tList]) => tList.map(t => ({ ...t, unitId: uId })));
 
@@ -666,15 +850,19 @@ const CommunityManager = (function() {
               ${window.t ? window.t('comm_hub_title', 'Hub de Contribution Communautaire ASTD') : 'Hub de Contribution Communautaire ASTD'}
             </h2>
             <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
-              ${window.t ? window.t('comm_hub_desc', 'Ajoutez de nouvelles unités, corrigez des statistiques inexactes, partagez de nouveaux codes cadeaux ou donnez vos conseils tactiques. Aucune connaissance technique requise, tout est guidé pas-à-pas et 100% réversible !') : 'Ajoutez de nouvelles unités, corrigez des statistiques inexactes, partagez de nouveaux codes cadeaux ou donnez vos conseils tactiques. Aucune connaissance technique requise, tout est guidé pas-à-pas et 100% réversible !'}
+              ${window.t ? window.t('comm_hub_desc', 'Ajoutez ou modifiez des unités et des orbes, partagez de nouveaux codes cadeaux ou donnez vos conseils tactiques. Aucune connaissance technique requise, tout est guidé pas-à-pas et 100% réversible !') : 'Ajoutez ou modifiez des unités et des orbes, partagez de nouveaux codes cadeaux ou donnez vos conseils tactiques. Aucune connaissance technique requise, tout est guidé pas-à-pas et 100% réversible !'}
             </p>
           </div>
 
           <!-- Statistiques rapides -->
-          <div class="grid grid-cols-3 gap-2 sm:gap-3 shrink-0 text-center font-mono-num">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 shrink-0 text-center font-mono-num">
             <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
               <span class="text-[10px] text-slate-400 font-sans block uppercase font-bold">${window.t ? window.t('comm_stat_units', 'Unités') : 'Unités'}</span>
               <span class="text-base font-bold text-sky-400">${modifiedUnitsList.length}</span>
+            </div>
+            <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
+              <span class="text-[10px] text-slate-400 font-sans block uppercase font-bold">${window.t ? window.t('comm_stat_orbs', 'Orbes') : 'Orbes'}</span>
+              <span class="text-base font-bold text-cyan-400">${modifiedOrbsList.length}</span>
             </div>
             <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
               <span class="text-[10px] text-slate-400 font-sans block uppercase font-bold">${window.t ? window.t('comm_stat_codes', 'Codes') : 'Codes'}</span>
@@ -687,15 +875,25 @@ const CommunityManager = (function() {
           </div>
         </div>
 
-        <!-- 3 Cartes d'Actions Rapides Débutant -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-slate-800/80">
+        <!-- 4 Cartes d'Actions Rapides Débutant -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-800/80">
           <button onclick="CommunityUI.openUnitModalForAdd()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-sky-600/20 border border-slate-800 hover:border-sky-500/50 text-left transition-all tap-scale group flex items-start gap-3">
             <div class="w-10 h-10 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center shrink-0 text-sky-400 group-hover:scale-105 transition-transform">
               <i data-lucide="plus-circle" class="w-5 h-5" stroke-width="2"></i>
             </div>
             <div class="min-w-0">
-              <h3 class="text-xs font-bold text-white group-hover:text-sky-300 transition-colors">${window.t ? window.t('comm_btn_add_unit_title', 'Ajouter une Nouvelle Unité') : 'Ajouter une Nouvelle Unité'}</h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">${window.t ? window.t('comm_btn_add_unit_desc', 'Formulaire assisté avec calcul de DPS et aperçu en direct.') : 'Formulaire assisté avec calcul de DPS et aperçu en direct.'}</p>
+              <h3 class="text-xs font-bold text-white group-hover:text-sky-300 transition-colors">${window.t ? window.t('comm_btn_add_unit_title', 'Ajouter une Unité') : 'Ajouter une Unité'}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">${window.t ? window.t('comm_btn_add_unit_desc', 'Formulaire assisté avec calcul de DPS et aperçu.') : 'Formulaire assisté avec calcul de DPS et aperçu.'}</p>
+            </div>
+          </button>
+
+          <button onclick="CommunityUI.openOrbModalForAdd()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-cyan-600/20 border border-slate-800 hover:border-cyan-500/50 text-left transition-all tap-scale group flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center shrink-0 text-cyan-400 group-hover:scale-105 transition-transform">
+              <i data-lucide="sparkles" class="w-5 h-5" stroke-width="2"></i>
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">${window.t ? window.t('comm_btn_add_orb_title', 'Ajouter / Modifier un Orbe') : 'Ajouter / Modifier un Orbe'}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">${window.t ? window.t('comm_btn_add_orb_desc', 'Créer un nouvel orbe ou ajuster ses effets.') : 'Créer un nouvel orbe ou ajuster ses effets.'}</p>
             </div>
           </button>
 
@@ -704,8 +902,8 @@ const CommunityManager = (function() {
               <i data-lucide="edit-3" class="w-5 h-5" stroke-width="2"></i>
             </div>
             <div class="min-w-0">
-              <h3 class="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">${window.t ? window.t('comm_btn_edit_unit_title', 'Modifier une Fiche Existante') : 'Modifier une Fiche Existante'}</h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">${window.t ? window.t('comm_btn_edit_unit_desc', 'Corriger les dégâts, le placement, ou la description.') : 'Corriger les dégâts, le placement, ou la description.'}</p>
+              <h3 class="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">${window.t ? window.t('comm_btn_edit_unit_title', 'Modifier une Fiche') : 'Modifier une Fiche'}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">${window.t ? window.t('comm_btn_edit_unit_desc', 'Corriger les dégâts, le placement ou la description.') : 'Corriger les dégâts, le placement ou la description.'}</p>
             </div>
           </button>
 
@@ -808,6 +1006,91 @@ const CommunityManager = (function() {
             </div>
           `}
         </div>
+
+        <!-- Section Orbes modifiés ou créés -->
+        <div class="tactical-card rounded-xl p-4 border border-cyan-500/30 bg-cyan-950/10 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i>
+              <h3 class="text-sm font-bold text-white">${window.t ? window.t('comm_list_orbs_title', 'Orbes & Reliques de la Communauté') : 'Orbes & Reliques de la Communauté'}</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 font-mono-num">${modifiedOrbsList.length}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="CommunityUI.openOrbSelectorForEdit()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 tap-scale" title="Modifier un orbe officiel ou existant">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>${window.t ? window.t('comm_btn_edit_existing', 'Modifier existant') : 'Modifier existant'}</span>
+              </button>
+              <button onclick="CommunityUI.openOrbModalForAdd()" class="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center gap-1 tap-scale shadow-sm">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>${window.t ? window.t('comm_btn_add', 'Ajouter') : 'Ajouter'}</span>
+              </button>
+            </div>
+          </div>
+
+          ${modifiedOrbsList.length === 0 ? `
+            <div class="p-6 text-center text-slate-400 bg-[#090e1c] rounded-xl border border-slate-800 text-xs">
+              ${window.t ? window.t('comm_no_orbs', 'Aucun orbe personnalisé pour le moment. Cliquez sur "Ajouter" pour créer un nouvel orbe ou "Modifier existant" pour ajuster un orbe officiel !') : 'Aucun orbe personnalisé pour le moment. Cliquez sur "Ajouter" pour créer un nouvel orbe ou "Modifier existant" pour ajuster un orbe officiel !'}
+            </div>
+          ` : `
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              ${modifiedOrbsList.map(o => `
+                <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex flex-col justify-between space-y-2 hover:border-cyan-500/40 transition-colors">
+                  <div class="flex items-start gap-2.5">
+                    <img src="${o.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="w-12 h-12 rounded-lg bg-slate-900 border border-slate-800 p-1 object-contain shrink-0" onerror="this.src='https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'">
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-1.5">
+                        <span class="font-bold text-white text-xs truncate">${escapeHtml(o.name)}</span>
+                        <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase">Orbe</span>
+                      </div>
+                      <div class="text-[10px] text-amber-300 font-medium truncate mt-0.5">${escapeHtml(o.effect || 'Bonus spécial')}</div>
+                      <div class="text-[10px] text-slate-400 truncate mt-0.5">Compatible: <span class="text-sky-300">${escapeHtml(o.require || 'All units')}</span></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px]">
+                    <button onclick="CommunityUI.openOrbModalForEdit(decodeURIComponent('${encodeURIComponent(o.name)}'))" class="px-2 py-1 rounded bg-slate-800 hover:bg-amber-600 hover:text-white text-slate-300 font-semibold tap-scale">
+                      ${window.t ? window.t('comm_action_edit', 'Éditer') : 'Éditer'}
+                    </button>
+                    <div class="flex items-center gap-1">
+                      <a href="${generateGitHubIssueURL('orb', o)}" target="_blank" rel="noopener noreferrer" class="p-1 rounded bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white tap-scale flex items-center justify-center" title="Proposer sur GitHub">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                      </a>
+                      <button onclick="CommunityManager.copyForDiscord('orb', ${JSON.stringify(o).replace(/"/g, '&quot;')})" class="p-1 rounded bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white tap-scale" title="Copier le résumé pour Discord">
+                        <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <button onclick="CommunityManager.deleteOrb(decodeURIComponent('${encodeURIComponent(o.name)}'))" class="p-1 rounded bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white tap-scale" title="Supprimer ou masquer">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+
+        <!-- Section Orbes Masqués -->
+        ${deletedOrbsList.length > 0 ? `
+          <div class="tactical-card rounded-xl p-4 border border-rose-500/30 bg-rose-950/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i data-lucide="eye-off" class="w-4 h-4 text-rose-400"></i>
+                <h3 class="text-sm font-bold text-rose-300">${window.t ? window.t('comm_list_deleted_orbs_title', 'Orbes Masqués / Désactivés') : 'Orbes Masqués / Désactivés'}</h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 font-mono-num">${deletedOrbsList.length}</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              ${deletedOrbsList.map(name => `
+                <div class="p-2.5 rounded-lg bg-[#090e1c] border border-slate-800 flex items-center justify-between gap-2 text-xs">
+                  <span class="font-semibold text-slate-300 truncate">${escapeHtml(name)}</span>
+                  <button onclick="CommunityManager.restoreOrb(decodeURIComponent('${encodeURIComponent(name)}'))" class="px-2 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white font-bold text-[10px] tap-scale flex items-center gap-1 shrink-0">
+                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                    <span>${window.t ? window.t('comm_action_restore', 'Restaurer') : 'Restaurer'}</span>
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
 
         <!-- Section Unités Masquées -->
         ${deletedUnitsList.length > 0 ? `
@@ -946,6 +1229,9 @@ const CommunityManager = (function() {
     saveUnit,
     deleteUnit,
     restoreUnit,
+    saveOrb,
+    deleteOrb,
+    restoreOrb,
     saveCode,
     toggleCodeExpired,
     deleteCode,
@@ -969,11 +1255,14 @@ const CommunityManager = (function() {
 // ==========================================================================
 
 const CommunityUI = (function() {
-  let currentFormMode = 'unit'; // 'unit' | 'code' | 'tip'
+  let currentFormMode = 'unit'; // 'unit' | 'code' | 'tip' | 'orb'
   let editingUnitId = null;
+  let editingOrbName = null;
   let currentUnitUpgrades = [];
   let currentUploadedImageDataUrl = null;
   let currentUploadedImageName = '';
+  let currentUploadedOrbImageDataUrl = null;
+  let currentUploadedOrbImageName = '';
 
   function openUnitModalForAdd() {
     currentFormMode = 'unit';
@@ -987,6 +1276,48 @@ const CommunityUI = (function() {
     editingUnitId = unitId;
     openModal();
     setupUnitForm(unitId);
+  }
+
+  function openOrbModalForAdd() {
+    currentFormMode = 'orb';
+    editingOrbName = null;
+    currentUploadedOrbImageDataUrl = null;
+    currentUploadedOrbImageName = '';
+    openModal();
+    setupOrbForm();
+  }
+
+  function openOrbModalForEdit(orbName) {
+    currentFormMode = 'orb';
+    editingOrbName = orbName;
+    currentUploadedOrbImageDataUrl = null;
+    currentUploadedOrbImageName = '';
+    openModal();
+    setupOrbForm(orbName);
+  }
+
+  function openOrbSelectorForEdit() {
+    const orbs = window.ORBS_DATA || (window.getGlobalOrbs ? window.getGlobalOrbs() : []);
+    if (orbs.length === 0) return;
+    const selectHtml = `
+      <div class="space-y-4">
+        <label class="block text-xs font-bold text-slate-200">
+          ${window.t ? window.t('comm_select_orb_to_edit', 'Choisissez un orbe à modifier :') : 'Choisissez un orbe à modifier :'}
+        </label>
+        <select id="select-orb-to-edit" class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+          ${orbs.map(o => `<option value="${encodeURIComponent(o.name)}">${escapeHtml(o.name)} (${escapeHtml(o.require || 'All units')})</option>`).join('')}
+        </select>
+        <div class="flex justify-end gap-2 pt-2">
+          <button onclick="CommunityUI.closeModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold tap-scale">
+            ${window.t ? window.t('cancel', 'Annuler') : 'Annuler'}
+          </button>
+          <button onclick="CommunityUI.openOrbModalForEdit(decodeURIComponent(document.getElementById('select-orb-to-edit').value))" class="px-4 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold tap-scale">
+            ${window.t ? window.t('comm_btn_edit_orb_now', 'Modifier cet orbe') : 'Modifier cet orbe'}
+          </button>
+        </div>
+      </div>
+    `;
+    showCustomModalContent(window.t ? window.t('comm_title_select_orb', 'Modifier un orbe existant') : 'Modifier un orbe existant', selectHtml);
   }
 
   function openUnitSelectorForEdit() {
@@ -1927,7 +2258,7 @@ const CommunityUI = (function() {
     const success = await CommunityManager.saveUnit(unitData);
     if (success) {
       closeModal();
-      const issueUrl = generateGitHubIssueURL('unit', unitData);
+      const issueUrl = CommunityManager.generateGitHubIssueURL('unit', unitData);
       window.open(issueUrl, '_blank', 'noopener,noreferrer');
       if (window.showToast) {
         window.showToast(window.t ? window.t('comm_github_opened', 'Page GitHub ouverte ! Soumettez l\'issue pour l\'intégration automatique.') : 'Page GitHub ouverte ! Soumettez l\'issue pour l\'intégration automatique.');
@@ -2093,17 +2424,439 @@ const CommunityUI = (function() {
     }
   }
 
+  // --- FORMULAIRE ORBES & RELIQUES TACTIQUES ---
+
+  function setupOrbForm(orbName = null) {
+    const titleEl = document.getElementById('community-modal-title');
+    const bodyEl = document.getElementById('community-modal-body');
+    if (!bodyEl) return;
+
+    const allOrbs = window.ORBS_DATA || (window.getGlobalOrbs ? window.getGlobalOrbs() : []);
+    let existing = null;
+    if (orbName) {
+      existing = allOrbs.find(o => (o.name || '').toLowerCase() === (orbName || '').toLowerCase()) || null;
+    }
+
+    const isEdit = !!existing;
+    if (titleEl) {
+      titleEl.textContent = isEdit ?
+        (window.t ? window.t('comm_title_edit_orb', 'Modifier l\'Orbe : {name}').replace('{name}', existing.name) : `Modifier l'Orbe : ${existing.name}`) :
+        (window.t ? window.t('comm_title_add_orb', 'Créer & Proposer un Nouvel Orbe') : 'Créer & Proposer un Nouvel Orbe');
+    }
+
+    if (existing?.image && existing.image.startsWith('data:image')) {
+      currentUploadedOrbImageDataUrl = existing.image;
+      currentUploadedOrbImageName = 'image_existante.png';
+    } else {
+      currentUploadedOrbImageDataUrl = null;
+      currentUploadedOrbImageName = '';
+    }
+
+    bodyEl.innerHTML = `
+      <form id="comm-orb-form" onsubmit="event.preventDefault(); CommunityUI.submitOrbForm();" class="space-y-4">
+        
+        <!-- Aide Débutant & Guide -->
+        <div class="bg-cyan-950/30 border border-cyan-500/30 rounded-xl p-3 text-xs text-cyan-200 flex items-start gap-2.5">
+          <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
+          <div>
+            <strong>${window.t ? window.t('comm_orb_help_title', 'Atelier d\'Orbes & Reliques :') : 'Atelier d\'Orbes & Reliques :'}</strong>
+            <span>${window.t ? window.t('comm_orb_help_desc', 'Ajoutez un nouvel orbe ou ajustez les statistiques et compatibilités d\'un orbe existant. L\'aperçu en direct vous montre immédiatement la carte telle qu\'elle figurera dans le compendium.') : 'Ajoutez un nouvel orbe ou ajustez les statistiques et compatibilités d\'un orbe existant. L\'aperçu en direct vous montre immédiatement la carte telle qu\'elle figurera dans le compendium.'}</span>
+          </div>
+        </div>
+
+        <!-- Section Grille : Formulaire (7 cols) + Live Preview (5 cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          
+          <!-- Colonne Champs Principaux (7 cols) -->
+          <div class="lg:col-span-7 space-y-3 text-xs">
+            
+            <!-- Nom de l'orbe -->
+            <div>
+              <label class="block font-bold text-slate-200 mb-1">
+                ${window.t ? window.t('comm_field_orb_name', 'Nom de l\'orbe *') : 'Nom de l\'orbe *'}
+              </label>
+              <input type="text" id="comm-orb-name" required value="${escapeHtml(existing?.name || '')}"
+                     placeholder="Ex: Fire Orb, Cost Orb, Death Orb..."
+                     class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                     oninput="CommunityUI.updateLiveOrbPreview()">
+            </div>
+
+            <!-- Effet / Bonus Statistique -->
+            <div>
+              <label class="block font-bold text-slate-200 mb-1">
+                ${window.t ? window.t('comm_field_orb_effect', 'Effet / Bonus Statistique *') : 'Effet / Bonus Statistique *'}
+              </label>
+              <textarea id="comm-orb-effect" required rows="2"
+                        placeholder="Ex: +15% Portée & +10% Dégâts sur tous les paliers..."
+                        class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-500"
+                        oninput="CommunityUI.updateLiveOrbPreview()">${escapeHtml(existing?.effect || '')}</textarea>
+            </div>
+
+            <!-- Compatibilité & Obtention -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-200 mb-1">
+                  ${window.t ? window.t('comm_field_orb_require', 'Compatibilité (Condition requise) *') : 'Compatibilité (Condition requise) *'}
+                </label>
+                <input type="text" id="comm-orb-require" required value="${escapeHtml(existing?.require || 'All units')}"
+                       placeholder="Ex: All units, Goku, 6 Star Units..."
+                       list="orb-require-suggestions"
+                       class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                       oninput="CommunityUI.updateLiveOrbPreview()">
+                <datalist id="orb-require-suggestions">
+                  <option value="All units">Toutes les unités</option>
+                  <option value="6 Star Units">Unités 6★ uniquement</option>
+                  <option value="7 Star Units">Unités 7★ uniquement</option>
+                  <option value="Ground Units">Unités Sol</option>
+                  <option value="Air Units">Unités Aériennes</option>
+                </datalist>
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-200 mb-1">
+                  ${window.t ? window.t('comm_field_orb_obtain', 'Méthode d\'Obtention') : 'Méthode d\'Obtention'}
+                </label>
+                <input type="text" id="comm-orb-obtain" value="${escapeHtml(existing?.obtain || 'Trial 1')}"
+                       placeholder="Ex: Trial 1, Extreme Raid, Crafting..."
+                       class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                       oninput="CommunityUI.updateLiveOrbPreview()">
+              </div>
+            </div>
+
+            <!-- Illustration / Image de l'Orbe -->
+            <div class="space-y-2 p-3 rounded-xl bg-[#070b14] border border-slate-800">
+              <label class="block font-bold text-slate-200">
+                ${window.t ? window.t('comm_field_orb_image', 'Illustration de l\'Orbe (Fichier local ou URL)') : 'Illustration de l\'Orbe (Fichier local ou URL)'}
+              </label>
+
+              <!-- Option 1 : Téléversement local -->
+              <div class="flex items-center gap-2">
+                <label for="comm-orb-file-input"
+                       class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold tap-scale transition-colors">
+                  <i data-lucide="upload" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  <span>${window.t ? window.t('comm_btn_upload_pc', 'Choisir une image sur mon PC...') : 'Choisir une image sur mon PC...'}</span>
+                </label>
+                <input type="file" id="comm-orb-file-input" accept="image/png, image/jpeg, image/webp" class="hidden"
+                       onchange="CommunityUI.handleOrbImageFileUpload(this.files[0])">
+                <span class="text-[10px] text-slate-400 font-medium">PNG, JPG, WebP (auto-redimensionné)</span>
+              </div>
+
+              <!-- Prévisualisation du fichier local s'il existe -->
+              <div id="comm-orb-img-preview-wrap"></div>
+
+              <!-- Option 2 : URL d'image externe -->
+              <div class="pt-1">
+                <span class="block text-[10px] text-slate-400 font-semibold mb-1">
+                  ${window.t ? window.t('comm_or_image_url', '...ou collez directement un lien d\'image Web (URL) :') : '...ou collez directement un lien d\'image Web (URL) :'}
+                </span>
+                <input type="url" id="comm-orb-image" value="${(!currentUploadedOrbImageDataUrl && existing?.image) ? escapeHtml(existing.image) : ''}"
+                       placeholder="https://static.wikia.nocookie.net/... ou lien .png/.jpg"
+                       class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500 font-mono-num"
+                       oninput="CommunityUI.onOrbImageUrlInput()">
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Colonne Prévisualisation en direct (5 cols) -->
+          <div class="lg:col-span-5 flex flex-col items-center justify-start space-y-3 bg-[#070b14] p-4 rounded-xl border border-slate-800/80">
+            <div class="w-full flex items-center justify-between text-xs pb-2 border-b border-slate-800">
+              <span class="font-bold text-cyan-400 flex items-center gap-1">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span>${window.t ? window.t('comm_preview_live_title', 'Aperçu en Direct') : 'Aperçu en Direct'}</span>
+              </span>
+              <span class="text-[10px] text-slate-400 uppercase font-bold">Rendu de la Carte</span>
+            </div>
+
+            <!-- Conteneur Carte Preview -->
+            <div id="live-preview-orb-card" class="w-full max-w-xs"></div>
+            
+            <p class="text-[10px] text-slate-500 text-center leading-normal">
+              ${window.t ? window.t('comm_orb_preview_note', 'Cette carte est mise à jour instantanément à chaque frappe de clavier.') : 'Cette carte est mise à jour instantanément à chaque frappe de clavier.'}
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Boutons d'Action -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-3 border-t border-slate-800">
+          <button type="button" onclick="CommunityUI.closeModal()"
+                  class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs tap-scale">
+            ${window.t ? window.t('cancel', 'Annuler') : 'Annuler'}
+          </button>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <button type="submit" id="comm-orb-submit-btn" onclick="event.preventDefault(); CommunityUI.submitOrbForm();"
+                    class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 tap-scale shadow-sm">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>${window.t ? window.t('comm_btn_save_orb_local', 'Enregistrer Localement') : 'Enregistrer Localement'}</span>
+            </button>
+            <button type="button" id="comm-orb-github-btn" onclick="CommunityUI.submitAndProposeOrbToGitHub();"
+                    class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 tap-scale shadow-sm"
+                    title="${window.t ? window.t('comm_btn_propose_orb_github_tip', 'Enregistrer puis proposer l\'orbe sur GitHub pour le wiki officiel') : 'Enregistrer puis proposer l\'orbe sur GitHub pour le wiki officiel'}">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              <span>${window.t ? window.t('comm_btn_propose_orb_github', 'Enregistrer & Proposer au Wiki Officiel') : 'Enregistrer & Proposer au Wiki Officiel'}</span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    `;
+
+    renderOrbImagePreviewWidget();
+    updateLiveOrbPreview();
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function handleOrbImageFileUpload(file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert(window.t ? window.t('comm_invalid_img_file', 'Veuillez sélectionner un fichier image valide (.png, .jpg, .webp).') : 'Veuillez sélectionner un fichier image valide (.png, .jpg, .webp).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const rawDataUrl = e.target.result;
+      const img = new Image();
+      img.onload = function() {
+        const maxDim = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        currentUploadedOrbImageDataUrl = canvas.toDataURL('image/png');
+        currentUploadedOrbImageName = file.name;
+
+        const urlInput = document.getElementById('comm-orb-image');
+        if (urlInput) urlInput.value = '';
+
+        renderOrbImagePreviewWidget();
+        updateLiveOrbPreview();
+      };
+      img.src = rawDataUrl;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeUploadedOrbImage() {
+    currentUploadedOrbImageDataUrl = null;
+    currentUploadedOrbImageName = '';
+    const fileInput = document.getElementById('comm-orb-file-input');
+    if (fileInput) fileInput.value = '';
+    renderOrbImagePreviewWidget();
+    updateLiveOrbPreview();
+  }
+
+  function onOrbImageUrlInput() {
+    const urlInput = document.getElementById('comm-orb-image');
+    if (urlInput && urlInput.value.trim()) {
+      currentUploadedOrbImageDataUrl = null;
+      currentUploadedOrbImageName = '';
+      const fileInput = document.getElementById('comm-orb-file-input');
+      if (fileInput) fileInput.value = '';
+      renderOrbImagePreviewWidget();
+    }
+    updateLiveOrbPreview();
+  }
+
+  function renderOrbImagePreviewWidget() {
+    const previewWrap = document.getElementById('comm-orb-img-preview-wrap');
+    if (!previewWrap) return;
+
+    if (currentUploadedOrbImageDataUrl) {
+      previewWrap.innerHTML = `
+        <div class="flex items-center gap-2.5 p-2 rounded-lg bg-cyan-950/50 border border-cyan-500/40 mt-1">
+          <img src="${currentUploadedOrbImageDataUrl}" class="w-10 h-10 rounded object-contain bg-slate-900 border border-slate-700 shrink-0 p-0.5" alt="Aperçu orbe importé">
+          <div class="min-w-0 flex-1">
+            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-cyan-300 uppercase">
+              <i data-lucide="check-circle" class="w-3 h-3 text-cyan-400"></i>
+              ${window.t ? window.t('comm_img_from_pc_loaded', 'Fichier PC importé') : 'Fichier PC importé'}
+            </span>
+            <div class="text-xs font-semibold text-white truncate">${escapeHtml(currentUploadedOrbImageName || 'orb_image.png')}</div>
+          </div>
+          <button type="button" onclick="CommunityUI.removeUploadedOrbImage()"
+                  class="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 font-semibold text-[11px] tap-scale flex items-center gap-1 shrink-0"
+                  title="${window.t ? window.t('comm_img_remove', 'Retirer cette image') : 'Retirer cette image'}">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            <span>${window.t ? window.t('delete', 'Retirer') : 'Retirer'}</span>
+          </button>
+        </div>
+      `;
+    } else {
+      previewWrap.innerHTML = '';
+    }
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function updateLiveOrbPreview() {
+    const previewContainer = document.getElementById('live-preview-orb-card');
+    if (!previewContainer) return;
+
+    const name = document.getElementById('comm-orb-name')?.value?.trim() || 'Nom de l\'Orbe';
+    const effect = document.getElementById('comm-orb-effect')?.value?.trim() || '+15% Dégâts & +10% Portée';
+    const require = document.getElementById('comm-orb-require')?.value?.trim() || 'All units';
+    const obtain = document.getElementById('comm-orb-obtain')?.value?.trim() || 'Trial 1';
+    const inputUrl = document.getElementById('comm-orb-image')?.value?.trim();
+    const fallbackImg = 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
+    const image = currentUploadedOrbImageDataUrl || inputUrl || fallbackImg;
+
+    const isUniversal = /toutes les unit|all units/i.test(require);
+    const requireText = isUniversal ? (window.t ? window.t('all_units_badge', '★ Toutes les unités') : '★ Toutes les unités') : require;
+
+    previewContainer.innerHTML = `
+      <div class="tactical-card rounded-xl p-4 border border-cyan-500/40 bg-[#0f1629]/95 flex flex-col justify-between space-y-3 shadow-lg">
+        <div>
+          <div class="flex items-center space-x-3 mb-2.5">
+            <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center shrink-0">
+              <img src="${image}" alt="${escapeHtml(name)}" class="max-h-full max-w-full object-contain img-outline rounded"
+                   onerror="this.src='${fallbackImg}'">
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-1">
+                <h4 class="font-bold text-xs text-white truncate">${escapeHtml(name)}</h4>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase shrink-0">
+                  ${window.t ? window.t('comm_badge_orb', 'Communauté') : 'Communauté'}
+                </span>
+              </div>
+              <span class="text-[10px] font-semibold ${isUniversal ? 'text-sky-300' : 'text-slate-400'}">
+                ${escapeHtml(requireText)}
+              </span>
+            </div>
+          </div>
+
+          <div class="space-y-1.5 text-xs">
+            <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/80">
+              <strong class="text-amber-300 block text-[10px] uppercase font-sans">
+                ${window.t ? window.t('stat_bonus_label', 'Bonus statistique :') : 'Bonus statistique :'}
+              </strong>
+              <span class="text-slate-100 font-medium font-mono-num text-[11px]">${escapeHtml(effect)}</span>
+            </div>
+            <div class="text-[11px] text-slate-400">
+              <strong class="text-slate-300 font-sans">${window.t ? window.t('obtain_label', 'Obtention :') : 'Obtention :'}</strong> ${escapeHtml(obtain)}
+            </div>
+            ${!isUniversal ? `
+            <div class="text-[11px] text-slate-400">
+              <strong class="text-slate-300 font-sans">${window.t ? window.t('compatible_label', 'Compatible :') : 'Compatible :'}</strong> <span class="text-sky-300">${escapeHtml(require)}</span>
+            </div>` : ''}
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px]">
+          <span class="text-[10px] text-cyan-400 font-mono-num">
+            ${editingOrbName ? (window.t ? window.t('comm_orb_mod_badge', 'Modifié localement') : 'Modifié localement') : (window.t ? window.t('comm_orb_new_badge', 'Création locale') : 'Création locale')}
+          </span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-semibold">
+            ${window.t ? window.t('comm_preview_badge', 'Aperçu Direct') : 'Aperçu Direct'}
+          </span>
+        </div>
+      </div>
+    `;
+  }
+
+  async function submitOrbForm() {
+    const name = document.getElementById('comm-orb-name')?.value?.trim();
+    if (!name) {
+      alert(window.t ? window.t('comm_orb_name_required', 'Le nom de l\'orbe est obligatoire.') : 'Le nom de l\'orbe est obligatoire.');
+      return;
+    }
+
+    const effect = document.getElementById('comm-orb-effect')?.value?.trim();
+    if (!effect) {
+      alert(window.t ? window.t('comm_orb_effect_required', 'L\'effet de l\'orbe est obligatoire.') : 'L\'effet de l\'orbe est obligatoire.');
+      return;
+    }
+
+    const require = document.getElementById('comm-orb-require')?.value?.trim() || 'All units';
+    const obtain = document.getElementById('comm-orb-obtain')?.value?.trim() || 'Trial 1';
+    const inputUrl = document.getElementById('comm-orb-image')?.value?.trim();
+    const finalImage = currentUploadedOrbImageDataUrl || inputUrl || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
+
+    const orbData = {
+      name: name,
+      effect: effect,
+      require: require,
+      obtain: obtain,
+      image: finalImage,
+      _original_name: editingOrbName || undefined
+    };
+
+    const success = await CommunityManager.saveOrb(orbData);
+    if (success) {
+      closeModal();
+    }
+  }
+
+  async function submitAndProposeOrbToGitHub() {
+    const name = document.getElementById('comm-orb-name')?.value?.trim();
+    if (!name) {
+      alert(window.t ? window.t('comm_orb_name_required', 'Le nom de l\'orbe est obligatoire.') : 'Le nom de l\'orbe est obligatoire.');
+      return;
+    }
+
+    const effect = document.getElementById('comm-orb-effect')?.value?.trim();
+    if (!effect) {
+      alert(window.t ? window.t('comm_orb_effect_required', 'L\'effet de l\'orbe est obligatoire.') : 'L\'effet de l\'orbe est obligatoire.');
+      return;
+    }
+
+    const require = document.getElementById('comm-orb-require')?.value?.trim() || 'All units';
+    const obtain = document.getElementById('comm-orb-obtain')?.value?.trim() || 'Trial 1';
+    const inputUrl = document.getElementById('comm-orb-image')?.value?.trim();
+    const finalImage = currentUploadedOrbImageDataUrl || inputUrl || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
+
+    const orbData = {
+      name: name,
+      effect: effect,
+      require: require,
+      obtain: obtain,
+      image: finalImage,
+      _original_name: editingOrbName || undefined
+    };
+
+    const success = await CommunityManager.saveOrb(orbData);
+    if (success) {
+      closeModal();
+      const issueUrl = CommunityManager.generateGitHubIssueURL('orb', orbData);
+      window.open(issueUrl, '_blank', 'noopener,noreferrer');
+      if (window.showToast) {
+        window.showToast(window.t ? window.t('comm_github_opened', 'Page GitHub ouverte ! Soumettez l\'issue pour l\'intégration automatique.') : 'Page GitHub ouverte ! Soumettez l\'issue pour l\'intégration automatique.');
+      }
+    }
+  }
+
   return {
     openUnitModalForAdd,
     openUnitModalForEdit,
     openUnitSelectorForEdit,
+    openOrbModalForAdd,
+    openOrbModalForEdit,
+    openOrbSelectorForEdit,
     openCodeModalForAdd,
     openTipModalForUnit,
     openModal,
     closeModal,
     updateLivePreview,
+    updateLiveOrbPreview,
     submitUnitForm,
     submitAndProposeToGitHub,
+    submitOrbForm,
+    submitAndProposeOrbToGitHub,
     submitCodeForm,
     submitTipForm,
     addUpgradeRow,
@@ -2115,7 +2868,12 @@ const CommunityUI = (function() {
     removeUploadedImage,
     onImageUrlInput,
     renderImagePreviewWidget,
+    handleOrbImageFileUpload,
+    removeUploadedOrbImage,
+    onOrbImageUrlInput,
+    renderOrbImagePreviewWidget,
     getCurrentUploadedImageDataUrl: () => currentUploadedImageDataUrl,
+    getCurrentUploadedOrbImageDataUrl: () => currentUploadedOrbImageDataUrl,
     computeUnitTowerType,
     onTopTowerTypeChange
   };
