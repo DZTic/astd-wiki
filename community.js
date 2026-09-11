@@ -194,9 +194,36 @@ const CommunityManager = (function() {
     }
 
     const id = unitData.id || name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-    const dmg = parseFloat(unitData.max_damage) || 0;
-    const spa = parseFloat(unitData.min_spa) || 1;
-    const dps = spa > 0 ? parseFloat((dmg / spa).toFixed(1)) : dmg;
+
+    // Récupérer les paliers d'amélioration manuels saisis par l'utilisateur
+    let upgrades = Array.isArray(unitData.upgrades) && unitData.upgrades.length > 0 ? unitData.upgrades : null;
+
+    let deployCost = parseInt(unitData.deployment_cost, 10) || 500;
+    let totCost = parseInt(unitData.total_cost, 10) || 5000;
+    let dmg = parseFloat(unitData.max_damage) || 0;
+    let rng = parseInt(unitData.max_range, 10) || 60;
+    let spa = parseFloat(unitData.min_spa) || 1;
+    let dps = spa > 0 ? parseFloat((dmg / spa).toFixed(1)) : dmg;
+
+    // Dériver directement les statistiques globales à partir des paliers manuels sans calcul arbitraire
+    if (upgrades && upgrades.length > 0) {
+      deployCost = Number(upgrades[0].cost) || 0;
+      totCost = upgrades.reduce((acc, u) => acc + (Number(u.cost) || 0), 0);
+      dmg = Math.max(...upgrades.map(u => Number(u.damage) || 0));
+      rng = Math.max(...upgrades.map(u => Number(u.range) || 0));
+      const validSpas = upgrades.map(u => Number(u.spa) || 0).filter(s => s > 0);
+      spa = validSpas.length > 0 ? Math.min(...validSpas) : 1;
+      const dpsList = upgrades.map(u => {
+        const d = Number(u.damage) || 0;
+        const s = Number(u.spa) || 0;
+        return s > 0 ? d / s : d;
+      });
+      dps = Math.round(Math.max(...dpsList));
+    } else {
+      upgrades = [
+        { level: 0, cost: deployCost, damage: dmg, range: rng, spa: spa, dps: dps, tower_type: unitData.tower_type || 'Ground', attack_type: unitData.attack_type || 'AoE (Circle)', abilities: [] }
+      ];
+    }
 
     const unitObj = {
       id: id,
@@ -204,10 +231,10 @@ const CommunityManager = (function() {
       star: parseInt(unitData.star, 10) || 5,
       tower_type: unitData.tower_type || 'Ground',
       attack_type: unitData.attack_type || 'AoE (Circle)',
-      deployment_cost: parseInt(unitData.deployment_cost, 10) || 500,
-      total_cost: parseInt(unitData.total_cost, 10) || (parseInt(unitData.deployment_cost, 10) * 15 || 5000),
+      deployment_cost: deployCost,
+      total_cost: totCost,
       max_damage: dmg,
-      max_range: parseInt(unitData.max_range, 10) || 60,
+      max_range: rng,
       min_spa: spa,
       max_dps: dps,
       character_origin: unitData.character_origin ? stripHtml(unitData.character_origin) : null,
@@ -216,18 +243,10 @@ const CommunityManager = (function() {
       image: unitData.image && unitData.image.trim() ? unitData.image.trim() : 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png',
       is_tradeable: !!unitData.is_tradeable,
       is_unobtainable: !!unitData.is_unobtainable,
+      upgrades: upgrades,
       _community: true,
       created_at: unitData.created_at || new Date().toISOString()
     };
-
-    // Améliorations par défaut
-    if (!unitObj.upgrades || unitObj.upgrades.length === 0) {
-      unitObj.upgrades = [
-        { level: 0, cost: unitObj.deployment_cost, damage: Math.round(dmg * 0.1), range: Math.round(unitObj.max_range * 0.7), spa: spa, dps: Math.round(dps * 0.1), tower_type: unitObj.tower_type, attack_type: unitObj.attack_type, abilities: [] },
-        { level: 1, cost: Math.round(unitObj.deployment_cost * 2), damage: Math.round(dmg * 0.3), range: Math.round(unitObj.max_range * 0.8), spa: spa, dps: Math.round(dps * 0.3), tower_type: '', attack_type: '', abilities: [] },
-        { level: 2, cost: Math.round(unitObj.deployment_cost * 5), damage: dmg, range: unitObj.max_range, spa: spa, dps: dps, tower_type: '', attack_type: '', abilities: ['+ Max Upgrade'] }
-      ];
-    }
 
     state.units[id] = unitObj;
     state.deleted_units = state.deleted_units.filter(uId => uId !== id);
@@ -485,6 +504,10 @@ const CommunityManager = (function() {
     let body = '';
 
     if (type === 'unit') {
+      const upgFormatted = (data.upgrades && data.upgrades.length > 0)
+        ? data.upgrades.map(u => `  - Palier ${u.level}: Coût: $${(u.cost || 0).toLocaleString()} | Dégâts: ${(u.damage || 0).toLocaleString()} | Portée: ${u.range || 0} | SPA: ${u.spa || 0}s${(u.abilities && u.abilities.length > 0) ? ` | Effets: ${u.abilities.join(', ')}` : ''}`).join('\n')
+        : '-';
+
       title = `[Proposition Communauté] Unité : ${data.name || 'Nouvelle Unité'}`;
       body = `### Proposition d'ajout / modification d'unité ASTD\n\n` +
              `**Nom :** ${data.name || '-'}\n` +
@@ -492,11 +515,14 @@ const CommunityManager = (function() {
              `**Franchise Anime :** ${data.anime_origin || '-'}\n` +
              `**Type de Tour :** ${data.tower_type || '-'}\n` +
              `**Zone d'Attaque :** ${data.attack_type || '-'}\n` +
-             `**Dégâts Max :** ${data.max_damage || '-'}\n` +
+             `**Coût Déploiement :** $${data.deployment_cost?.toLocaleString() || '-'}\n` +
+             `**Coût Total :** $${data.total_cost?.toLocaleString() || '-'}\n` +
+             `**Dégâts Max :** ${data.max_damage?.toLocaleString() || '-'}\n` +
              `**SPA :** ${data.min_spa || '-'}s\n` +
-             `**DPS Calculé :** ${data.max_dps || '-'}\n` +
+             `**DPS Estimé :** ${data.max_dps?.toLocaleString() || '-'}\n` +
              `**Portée :** ${data.max_range || '-'}\n` +
              `**Description :** ${data.overview || '-'}\n\n` +
+             `### Paliers d'Amélioration :\n${upgFormatted}\n\n` +
              `*Généré automatiquement depuis l'Assistant Communautaire ASTD Wiki.*`;
     } else if (type === 'code') {
       title = `[Proposition Communauté] Code Promo : ${data.code || ''}`;
@@ -513,10 +539,11 @@ const CommunityManager = (function() {
   function copyForDiscord(type, data) {
     let text = '';
     if (type === 'unit') {
+      const upgCount = (data.upgrades && data.upgrades.length) || 0;
       text = `**[ASTD Wiki - Communauté] Fiche Unité : ${data.name}** (${data.star}★)\n` +
              `> Anime: ${data.anime_origin || 'ASTD'} | Type: ${data.tower_type} (${data.attack_type})\n` +
-             `> DMG: ${data.max_damage?.toLocaleString()} | SPA: ${data.min_spa}s | DPS: ${data.max_dps?.toLocaleString()}\n` +
-             `> Portée: ${data.max_range} | Coût: $${data.deployment_cost?.toLocaleString()}\n` +
+             `> DMG Max: ${data.max_damage?.toLocaleString()} | SPA Min: ${data.min_spa}s | DPS Max: ${data.max_dps?.toLocaleString()}\n` +
+             `> Portée: ${data.max_range} | Déploiement: $${data.deployment_cost?.toLocaleString()} | Coût Total: $${data.total_cost?.toLocaleString()} (${upgCount} paliers)\n` +
              `> Description: ${data.overview || '-'}`;
     } else if (type === 'code') {
       text = `**[ASTD Wiki] Nouveau Code Promo :** \`${data.code}\`\n` +
@@ -862,6 +889,7 @@ const CommunityManager = (function() {
 const CommunityUI = (function() {
   let currentFormMode = 'unit'; // 'unit' | 'code' | 'tip'
   let editingUnitId = null;
+  let currentUnitUpgrades = [];
 
   function openUnitModalForAdd() {
     currentFormMode = 'unit';
@@ -941,6 +969,193 @@ const CommunityUI = (function() {
     if (window.lucide) lucide.createIcons();
   }
 
+  // --- GESTION ET CALCUL DES PALIERS D'AMÉLIORATION MANUELS ---
+
+  function computeTierStats() {
+    if (!currentUnitUpgrades || currentUnitUpgrades.length === 0) {
+      return {
+        deployment_cost: 0,
+        total_cost: 0,
+        max_damage: 0,
+        max_range: 0,
+        min_spa: 0,
+        max_dps: 0
+      };
+    }
+    const deployCost = Number(currentUnitUpgrades[0].cost) || 0;
+    const totalCost = currentUnitUpgrades.reduce((acc, u) => acc + (Number(u.cost) || 0), 0);
+    const maxDamage = Math.max(...currentUnitUpgrades.map(u => Number(u.damage) || 0));
+    const maxRange = Math.max(...currentUnitUpgrades.map(u => Number(u.range) || 0));
+    const validSpas = currentUnitUpgrades.map(u => Number(u.spa) || 0).filter(s => s > 0);
+    const minSpa = validSpas.length > 0 ? Math.min(...validSpas) : 1;
+    const dpsList = currentUnitUpgrades.map(u => {
+      const d = Number(u.damage) || 0;
+      const s = Number(u.spa) || 0;
+      return s > 0 ? (d / s) : d;
+    });
+    const maxDps = Math.max(...dpsList);
+    return {
+      deployment_cost: deployCost,
+      total_cost: totalCost,
+      max_damage: maxDamage,
+      max_range: maxRange,
+      min_spa: minSpa,
+      max_dps: maxDps
+    };
+  }
+
+  function updateTiersSummaryBadges() {
+    const stats = computeTierStats();
+    const deployEl = document.getElementById('comm-summary-deploy');
+    const totalEl = document.getElementById('comm-summary-total');
+    const dmgEl = document.getElementById('comm-summary-damage');
+    const rangeEl = document.getElementById('comm-summary-range');
+    const spaEl = document.getElementById('comm-summary-spa');
+    const dpsEl = document.getElementById('comm-summary-dps');
+
+    if (deployEl) deployEl.textContent = `$${stats.deployment_cost.toLocaleString()}`;
+    if (totalEl) totalEl.textContent = `$${stats.total_cost.toLocaleString()}`;
+    if (dmgEl) dmgEl.textContent = stats.max_damage.toLocaleString();
+    if (rangeEl) rangeEl.textContent = stats.max_range;
+    if (spaEl) spaEl.textContent = `${stats.min_spa}s`;
+    if (dpsEl) dpsEl.textContent = Math.round(stats.max_dps).toLocaleString();
+  }
+
+  function renderUpgradeRows() {
+    const tbody = document.getElementById('comm-upgrades-tbody');
+    if (!tbody) return;
+
+    if (!currentUnitUpgrades || currentUnitUpgrades.length === 0) {
+      currentUnitUpgrades = [
+        { level: 0, cost: 500, damage: 1500, range: 25, spa: 4.0, abilities: [] }
+      ];
+    }
+
+    tbody.innerHTML = currentUnitUpgrades.map((tier, idx) => {
+      const isDeploy = idx === 0;
+      const levelLabel = isDeploy ? (window.t ? window.t('comm_tier_deploy', '0 (Déploiement)') : '0 (Déploiement)') : `Palier ${tier.level !== undefined ? tier.level : idx}`;
+      const dps = tier.spa > 0 ? (tier.damage / tier.spa) : tier.damage;
+      const abilitiesStr = (tier.abilities || []).join(', ');
+
+      return `
+        <tr class="transition">
+          <td class="whitespace-nowrap font-mono-num">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${isDeploy ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40' : 'bg-slate-800 text-slate-300 border border-slate-700'}">
+              ${levelLabel}
+            </span>
+          </td>
+          <td style="min-width: 110px;">
+            <div class="relative">
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 font-mono-num text-xs">$</span>
+              <input type="number" min="0" step="50" value="${tier.cost || 0}"
+                     aria-label="Coût palier ${idx}"
+                     class="comm-upg-input pl-5 text-xs font-mono-num"
+                     oninput="CommunityUI.onUpgradeChange(${idx}, 'cost', this.value)">
+            </div>
+          </td>
+          <td style="min-width: 110px;">
+            <input type="number" min="0" step="100" value="${tier.damage || 0}"
+                   aria-label="Dégâts palier ${idx}"
+                   class="comm-upg-input text-xs font-mono-num font-bold text-slate-100"
+                   oninput="CommunityUI.onUpgradeChange(${idx}, 'damage', this.value)">
+          </td>
+          <td style="min-width: 80px;">
+            <input type="number" min="1" max="500" step="1" value="${tier.range || 30}"
+                   aria-label="Portée palier ${idx}"
+                   class="comm-upg-input text-xs font-mono-num"
+                   oninput="CommunityUI.onUpgradeChange(${idx}, 'range', this.value)">
+          </td>
+          <td style="min-width: 80px;">
+            <input type="number" min="0.1" max="60" step="0.1" value="${tier.spa || 4}"
+                   aria-label="SPA palier ${idx}"
+                   class="comm-upg-input text-xs font-mono-num"
+                   oninput="CommunityUI.onUpgradeChange(${idx}, 'spa', this.value)">
+          </td>
+          <td style="min-width: 90px;" class="text-center font-mono-num">
+            <span id="comm-upg-dps-${idx}" class="inline-block px-2 py-1 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold text-xs">
+              ${Math.round(dps).toLocaleString()}
+            </span>
+          </td>
+          <td style="min-width: 160px;">
+            <input type="text" value="${escapeHtml(abilitiesStr)}"
+                   placeholder="${isDeploy ? 'Capacité initiale...' : 'Ex: + Max Upgrade, Full AoE...'}"
+                   aria-label="Effets palier ${idx}"
+                   class="comm-upg-input text-xs font-sans"
+                   oninput="CommunityUI.onUpgradeChange(${idx}, 'abilities', this.value)">
+          </td>
+          <td class="text-right whitespace-nowrap">
+            ${currentUnitUpgrades.length > 1 ? `
+              <button type="button" onclick="CommunityUI.removeUpgradeRow(${idx})"
+                      class="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 transition tap-scale"
+                      title="${window.t ? window.t('comm_del_tier', 'Supprimer ce palier') : 'Supprimer ce palier'}">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            ` : `
+              <span class="text-slate-600 text-xs px-2">—</span>
+            `}
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    updateTiersSummaryBadges();
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function addUpgradeRow() {
+    const nextLevel = currentUnitUpgrades.length;
+    const prevTier = currentUnitUpgrades[nextLevel - 1] || { cost: 1000, damage: 2000, range: 30, spa: 4, abilities: [] };
+
+    // Suggérer des valeurs de départ que l'utilisateur peut modifier à sa guise
+    currentUnitUpgrades.push({
+      level: nextLevel,
+      cost: prevTier.cost > 0 ? Math.round(prevTier.cost * 1.5) : 1000,
+      damage: prevTier.damage > 0 ? Math.round(prevTier.damage * 1.5) : 3000,
+      range: prevTier.range || 30,
+      spa: prevTier.spa || 4,
+      abilities: []
+    });
+
+    renderUpgradeRows();
+    updateLivePreview();
+  }
+
+  function removeUpgradeRow(idx) {
+    if (currentUnitUpgrades.length <= 1) return;
+    currentUnitUpgrades.splice(idx, 1);
+    currentUnitUpgrades.forEach((u, i) => { u.level = i; });
+    renderUpgradeRows();
+    updateLivePreview();
+  }
+
+  function onUpgradeChange(idx, field, value) {
+    if (!currentUnitUpgrades[idx]) return;
+
+    if (field === 'cost') {
+      currentUnitUpgrades[idx].cost = Math.max(0, parseInt(value, 10) || 0);
+    } else if (field === 'damage') {
+      currentUnitUpgrades[idx].damage = Math.max(0, parseFloat(value) || 0);
+    } else if (field === 'range') {
+      currentUnitUpgrades[idx].range = Math.max(1, parseInt(value, 10) || 1);
+    } else if (field === 'spa') {
+      currentUnitUpgrades[idx].spa = Math.max(0.1, parseFloat(value) || 0.1);
+    } else if (field === 'abilities') {
+      currentUnitUpgrades[idx].abilities = value ? value.split(',').map(s => s.trim()).filter(Boolean) : [];
+    }
+
+    // Mettre à jour le badge DPS du palier en direct
+    const rowDpsEl = document.getElementById(`comm-upg-dps-${idx}`);
+    if (rowDpsEl) {
+      const dmg = currentUnitUpgrades[idx].damage || 0;
+      const spa = currentUnitUpgrades[idx].spa || 1;
+      const rowDps = spa > 0 ? (dmg / spa) : dmg;
+      rowDpsEl.textContent = Math.round(rowDps).toLocaleString();
+    }
+
+    updateTiersSummaryBadges();
+    updateLivePreview();
+  }
+
   // --- FORMULAIRE UNITÉ AVEC LIVE PREVIEW ---
 
   function setupUnitForm(unitId = null) {
@@ -960,6 +1175,33 @@ const CommunityUI = (function() {
         (window.t ? window.t('comm_title_add_unit', 'Créer & Proposer une Nouvelle Unité') : 'Créer & Proposer une Nouvelle Unité');
     }
 
+    // Initialiser les paliers d'amélioration
+    if (existing && Array.isArray(existing.upgrades) && existing.upgrades.length > 0) {
+      currentUnitUpgrades = existing.upgrades.map((u, idx) => ({
+        level: u.level !== undefined ? u.level : idx,
+        cost: Number(u.cost) || 0,
+        damage: Number(u.damage) || 0,
+        range: Number(u.range) || 0,
+        spa: Number(u.spa) || 1,
+        abilities: Array.isArray(u.abilities) ? [...u.abilities] : (u.abilities ? [String(u.abilities)] : [])
+      }));
+    } else if (existing) {
+      currentUnitUpgrades = [{
+        level: 0,
+        cost: Number(existing.deployment_cost) || 500,
+        damage: Number(existing.max_damage) || 1000,
+        range: Number(existing.max_range) || 30,
+        spa: Number(existing.min_spa) || 4,
+        abilities: []
+      }];
+    } else {
+      currentUnitUpgrades = [
+        { level: 0, cost: 500, damage: 1500, range: 25, spa: 4.0, abilities: [] },
+        { level: 1, cost: 1200, damage: 5500, range: 32, spa: 4.0, abilities: [] },
+        { level: 2, cost: 3500, damage: 18000, range: 45, spa: 3.5, abilities: ['+ Max Upgrade'] }
+      ];
+    }
+
     const defaultImg = existing?.image || "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
     const animeOptions = Array.from(new Set(
       (window.ALL_UNITS || [])
@@ -975,14 +1217,15 @@ const CommunityUI = (function() {
           <i data-lucide="info" class="w-4 h-4 text-sky-400 shrink-0 mt-0.5"></i>
           <div>
             <strong>${window.t ? window.t('comm_help_title', 'Assistant Débutant :') : 'Assistant Débutant :'}</strong>
-            <span>${window.t ? window.t('comm_help_desc', 'Remplissez les champs ci-dessous. Le DPS se calcule automatiquement et la carte de prévisualisation se met à jour en temps réel.') : 'Remplissez les champs ci-dessous. Le DPS se calcule automatiquement et la carte de prévisualisation se met à jour en temps réel.'}</span>
+            <span>${window.t ? window.t('comm_help_desc_upgrades', 'Remplissez les informations générales et saisissez chaque palier d\'amélioration manuellement. Le coût total et les statistiques maximales sont calculés directement à partir de vos paliers.') : 'Remplissez les informations générales et saisissez chaque palier d\'amélioration manuellement. Le coût total et les statistiques maximales sont calculés directement à partir de vos paliers.'}</span>
           </div>
         </div>
 
+        <!-- Section 1 : Informations Générales & Live Preview -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
           
-          <!-- Colonne Formulaire (7 cols) -->
-          <div class="lg:col-span-7 space-y-3.5 text-xs">
+          <!-- Colonne Champs Principaux (7 cols) -->
+          <div class="lg:col-span-7 space-y-3 text-xs">
             
             <!-- Nom et Rareté -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1073,79 +1316,6 @@ const CommunityUI = (function() {
               </div>
             </div>
 
-            <!-- Statistiques de Combat avec Calcul Automatique -->
-            <div class="p-3.5 rounded-xl bg-[#090e1c] border border-slate-800 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-slate-200 flex items-center gap-1.5">
-                  <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
-                  <span>${window.t ? window.t('comm_stats_title', 'Statistiques de Combat (Niveau Max)') : 'Statistiques de Combat (Niveau Max)'}</span>
-                </span>
-                <span class="text-[11px] text-sky-400 font-semibold">${window.t ? window.t('comm_auto_calc', '✨ DPS automatique') : '✨ DPS automatique'}</span>
-              </div>
-
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-mono-num">
-                <div>
-                  <label class="block text-[10px] uppercase text-slate-400 font-sans mb-1">${window.t ? window.t('hud_max_dmg', 'Dégâts Max') : 'Dégâts Max'}</label>
-                  <input type="number" id="comm-unit-damage" value="${existing?.max_damage || 150000}" min="1" step="100"
-                         class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold focus:outline-none focus:border-sky-500 text-xs"
-                         oninput="CommunityUI.updateLivePreview()">
-                </div>
-                <div>
-                  <label class="block text-[10px] uppercase text-slate-400 font-sans mb-1">${window.t ? window.t('hud_spa', 'SPA (secondes)') : 'SPA (secondes)'}</label>
-                  <input type="number" id="comm-unit-spa" value="${existing?.min_spa || 4}" min="0.5" max="30" step="0.5"
-                         class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold focus:outline-none focus:border-sky-500 text-xs"
-                         oninput="CommunityUI.updateLivePreview()">
-                </div>
-                <div>
-                  <label class="block text-[10px] uppercase text-slate-400 font-sans mb-1">${window.t ? window.t('hud_range', 'Portée') : 'Portée'}</label>
-                  <input type="number" id="comm-unit-range" value="${existing?.max_range || 60}" min="10" max="500" step="5"
-                         class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold focus:outline-none focus:border-sky-500 text-xs"
-                         oninput="CommunityUI.updateLivePreview()">
-                </div>
-                <div>
-                  <label class="block text-[10px] uppercase text-amber-400 font-sans mb-1">${window.t ? window.t('hud_dps', 'DPS Calculé') : 'DPS Calculé'}</label>
-                  <div id="comm-unit-dps-badge" class="w-full bg-amber-500/15 border border-amber-500/30 rounded-lg px-2.5 py-1.5 text-amber-300 font-black text-xs">
-                    37 500
-                  </div>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2.5 font-mono-num pt-1">
-                <div>
-                  <label class="block text-[10px] uppercase text-slate-400 font-sans mb-1">${window.t ? window.t('hud_deploy_cost', 'Coût Déploiement ($)') : 'Coût Déploiement ($)'}</label>
-                  <input type="number" id="comm-unit-deploy-cost" value="${existing?.deployment_cost || 500}" min="50" step="50"
-                         class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-sky-500 text-xs">
-                </div>
-                <div>
-                  <label class="block text-[10px] uppercase text-slate-400 font-sans mb-1">${window.t ? window.t('hud_total_cost', 'Coût Total ($)') : 'Coût Total ($)'}</label>
-                  <input type="number" id="comm-unit-total-cost" value="${existing?.total_cost || 150000}" min="500" step="500"
-                         class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-sky-500 text-xs">
-                </div>
-              </div>
-            </div>
-
-            <!-- Description -->
-            <div>
-              <label class="block font-bold text-slate-200 mb-1">
-                ${window.t ? window.t('comm_field_overview', 'Description / Remarque') : 'Description / Remarque'}
-              </label>
-              <textarea id="comm-unit-overview" rows="2"
-                        placeholder="Présentation de l'unité, capacités notables, obtention..."
-                        class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-sky-500 text-xs">${existing?.overview || ''}</textarea>
-            </div>
-
-            <!-- Options -->
-            <div class="flex items-center gap-4 text-xs">
-              <label class="flex items-center gap-1.5 cursor-pointer">
-                <input type="checkbox" id="comm-unit-tradeable" ${existing?.is_tradeable ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-600">
-                <span class="text-slate-300">Échangeable (Tradeable)</span>
-              </label>
-              <label class="flex items-center gap-1.5 cursor-pointer">
-                <input type="checkbox" id="comm-unit-unobtainable" ${existing?.is_unobtainable ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-600">
-                <span class="text-slate-300">Retirée du jeu (Introuvable)</span>
-              </label>
-            </div>
-
           </div>
 
           <!-- Colonne Prévisualisation en direct (5 cols) -->
@@ -1159,15 +1329,105 @@ const CommunityUI = (function() {
             </div>
 
             <!-- Conteneur Carte Preview -->
-            <div id="live-preview-card" class="w-full max-w-xs">
-              <!-- Rendu injecté par updateLivePreview() -->
-            </div>
+            <div id="live-preview-card" class="w-full max-w-xs"></div>
             
             <p class="text-[10px] text-slate-500 text-center leading-normal">
-              Cette carte correspond exactement à ce qui sera visible dans la liste d'unités pour les utilisateurs.
+              Les statistiques max et coûts de cette carte sont calculés directement à partir de vos paliers ci-dessous.
             </p>
           </div>
 
+        </div>
+
+        <!-- Section 2 : Éditeur Manuel des Paliers d'Amélioration (Full Width) -->
+        <div class="tactical-card rounded-xl p-4 border border-slate-800 space-y-3 bg-[#0c1222]/80">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-800">
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
+                <i data-lucide="layers" class="w-4 h-4 text-sky-400"></i>
+                <span>${window.t ? window.t('comm_upgrades_section_title', 'Paliers d\'Amélioration (Saisie Manuelle)') : 'Paliers d\'Amélioration (Saisie Manuelle)'}</span>
+              </h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                ${window.t ? window.t('comm_upgrades_section_desc', 'Renseignez à la main le coût, les dégâts, la portée et le SPA de chaque palier. Aucun multiplicateur automatique n\'est imposé.') : 'Renseignez à la main le coût, les dégâts, la portée et le SPA de chaque palier. Aucun multiplicateur automatique n\'est imposé.'}
+              </p>
+            </div>
+            <button type="button" onclick="CommunityUI.addUpgradeRow()"
+                    class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 tap-scale shrink-0 shadow-sm">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>${window.t ? window.t('comm_btn_add_tier', 'Ajouter un palier') : 'Ajouter un palier'}</span>
+            </button>
+          </div>
+
+          <!-- Résumé dynamique en direct des paliers saisis -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center font-mono-num text-xs">
+            <div class="p-2 rounded-lg bg-[#070b14] border border-slate-800">
+              <span class="block text-[9px] uppercase font-sans font-bold text-slate-400">Déploiement</span>
+              <span id="comm-summary-deploy" class="text-xs font-bold text-slate-100">$0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-[#070b14] border border-slate-800">
+              <span class="block text-[9px] uppercase font-sans font-bold text-slate-400">Coût Total</span>
+              <span id="comm-summary-total" class="text-xs font-bold text-sky-400">$0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-[#070b14] border border-slate-800">
+              <span class="block text-[9px] uppercase font-sans font-bold text-slate-400">Dégâts Max</span>
+              <span id="comm-summary-damage" class="text-xs font-bold text-emerald-400">0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-[#070b14] border border-slate-800">
+              <span class="block text-[9px] uppercase font-sans font-bold text-slate-400">Portée Max</span>
+              <span id="comm-summary-range" class="text-xs font-bold text-slate-200">0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-[#070b14] border border-slate-800">
+              <span class="block text-[9px] uppercase font-sans font-bold text-slate-400">SPA Min</span>
+              <span id="comm-summary-spa" class="text-xs font-bold text-slate-300">0s</span>
+            </div>
+            <div class="p-2 rounded-lg bg-[#070b14] border border-slate-800">
+              <span class="block text-[9px] uppercase font-sans font-bold text-amber-400">DPS Max (Auto)</span>
+              <span id="comm-summary-dps" class="text-xs font-bold text-amber-300">0</span>
+            </div>
+          </div>
+
+          <!-- Tableau interactif des paliers -->
+          <div class="overflow-x-auto rounded-xl border border-slate-800 bg-[#070b14] shadow-inner max-h-72 overflow-y-auto">
+            <table class="w-full text-left comm-upgrades-table">
+              <thead class="sticky top-0 z-10">
+                <tr>
+                  <th class="w-24">Palier</th>
+                  <th class="w-32">Coût ($)</th>
+                  <th class="w-32">Dégâts (DMG)</th>
+                  <th class="w-24">Portée</th>
+                  <th class="w-24">SPA (s)</th>
+                  <th class="w-28 text-center">DPS</th>
+                  <th>Effets / Aptitude</th>
+                  <th class="w-16 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="comm-upgrades-tbody">
+                <!-- Rendu dynamique par CommunityUI.renderUpgradeRows() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 3 : Description & Options -->
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-200 mb-1">
+              ${window.t ? window.t('comm_field_overview', 'Description / Remarque') : 'Description / Remarque'}
+            </label>
+            <textarea id="comm-unit-overview" rows="2"
+                      placeholder="Présentation de l'unité, capacités notables, obtention..."
+                      class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-sky-500 text-xs">${existing?.overview || ''}</textarea>
+          </div>
+
+          <div class="flex items-center gap-4 text-xs">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="comm-unit-tradeable" ${existing?.is_tradeable ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-600">
+              <span class="text-slate-300">Échangeable (Tradeable)</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="comm-unit-unobtainable" ${existing?.is_unobtainable ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-600">
+              <span class="text-slate-300">Retirée du jeu (Introuvable)</span>
+            </label>
+          </div>
         </div>
 
         <!-- Boutons d'action en bas -->
@@ -1175,17 +1435,16 @@ const CommunityUI = (function() {
           <button type="button" onclick="CommunityUI.closeModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs tap-scale">
             ${window.t ? window.t('cancel', 'Annuler') : 'Annuler'}
           </button>
-          <div class="flex items-center gap-2">
-            <button type="submit" id="comm-unit-submit-btn" onclick="event.preventDefault(); CommunityUI.submitUnitForm();" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 tap-scale shadow-md">
-              <i data-lucide="check" class="w-4 h-4"></i>
-              <span>${isEdit ? (window.t ? window.t('comm_btn_save_changes', 'Enregistrer les Modifications') : 'Enregistrer les Modifications') : (window.t ? window.t('comm_btn_create_unit', 'Créer & Ajouter l\'Unite') : 'Créer & Ajouter l\'Unite')}</span>
-            </button>
-          </div>
+          <button type="submit" id="comm-unit-submit-btn" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 tap-scale shadow-md">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>${isEdit ? (window.t ? window.t('comm_btn_save_changes', 'Enregistrer les Modifications') : 'Enregistrer les Modifications') : (window.t ? window.t('comm_btn_create_unit', 'Créer & Ajouter l\'Unite') : 'Créer & Ajouter l\'Unite')}</span>
+          </button>
         </div>
 
       </form>
     `;
 
+    renderUpgradeRows();
     updateLivePreview();
     if (window.lucide) lucide.createIcons();
   }
@@ -1196,15 +1455,12 @@ const CommunityUI = (function() {
     const anime = document.getElementById('comm-unit-anime')?.value?.trim() || 'All Star Tower Defense';
     const image = document.getElementById('comm-unit-image')?.value?.trim() || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
     const towerType = document.getElementById('comm-unit-tower-type')?.value || 'Ground';
-    const dmg = parseFloat(document.getElementById('comm-unit-damage')?.value) || 0;
-    const spa = parseFloat(document.getElementById('comm-unit-spa')?.value) || 1;
-    const range = parseInt(document.getElementById('comm-unit-range')?.value, 10) || 60;
-    const dps = spa > 0 ? (dmg / spa).toFixed(1) : dmg;
 
-    const dpsBadge = document.getElementById('comm-unit-dps-badge');
-    if (dpsBadge) {
-      dpsBadge.textContent = parseFloat(dps).toLocaleString();
-    }
+    const stats = computeTierStats();
+    const dps = stats.max_dps;
+    const dmg = stats.max_damage;
+    const range = stats.max_range;
+    const spa = stats.min_spa;
 
     const previewContainer = document.getElementById('live-preview-card');
     if (previewContainer) {
@@ -1236,21 +1492,26 @@ const CommunityUI = (function() {
 
           <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800 font-mono-num text-[11px]">
             <div class="bg-[#090e1c] px-2 py-1 rounded border border-slate-800/60">
-              <span class="text-slate-400 block text-[9px] font-sans uppercase">DMG</span>
+              <span class="text-slate-400 block text-[9px] font-sans uppercase">DMG Max</span>
               <span class="font-bold text-slate-100">${dmg.toLocaleString()}</span>
             </div>
             <div class="bg-[#090e1c] px-2 py-1 rounded border border-slate-800/60">
-              <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS</span>
-              <span class="font-bold text-amber-300">${parseFloat(dps).toLocaleString()}</span>
+              <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS Max</span>
+              <span class="font-bold text-amber-300">${Math.round(dps).toLocaleString()}</span>
             </div>
             <div class="bg-[#090e1c] px-2 py-1 rounded border border-slate-800/60">
-              <span class="text-slate-400 block text-[9px] font-sans uppercase">Portée</span>
+              <span class="text-slate-400 block text-[9px] font-sans uppercase">Portée Max</span>
               <span class="font-semibold text-slate-200">${range}</span>
             </div>
             <div class="bg-[#090e1c] px-2 py-1 rounded border border-slate-800/60">
-              <span class="text-slate-400 block text-[9px] font-sans uppercase">SPA</span>
+              <span class="text-slate-400 block text-[9px] font-sans uppercase">SPA Min</span>
               <span class="font-semibold text-slate-300">${spa}s</span>
             </div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400 font-mono-num">
+            <span>Dép: <strong class="text-slate-200">$${stats.deployment_cost.toLocaleString()}</strong></span>
+            <span>Total: <strong class="text-sky-300">$${stats.total_cost.toLocaleString()}</strong></span>
+            <span>Paliers: <strong class="text-amber-300">${currentUnitUpgrades.length}</strong></span>
           </div>
         </article>
       `;
@@ -1258,8 +1519,15 @@ const CommunityUI = (function() {
   }
 
   async function submitUnitForm() {
-    const name = document.getElementById('comm-unit-name').value.trim();
+    const name = document.getElementById('comm-unit-name')?.value?.trim();
     if (!name) return;
+
+    if (!currentUnitUpgrades || currentUnitUpgrades.length === 0) {
+      alert(window.t ? window.t('comm_tier_required', 'Veuillez renseigner au moins un palier d\'amélioration.') : 'Veuillez renseigner au moins un palier d\'amélioration.');
+      return;
+    }
+
+    const stats = computeTierStats();
 
     const unitData = {
       id: editingUnitId,
@@ -1270,11 +1538,13 @@ const CommunityUI = (function() {
       image: document.getElementById('comm-unit-image').value.trim(),
       tower_type: document.getElementById('comm-unit-tower-type').value,
       attack_type: document.getElementById('comm-unit-attack-type').value,
-      max_damage: parseFloat(document.getElementById('comm-unit-damage').value) || 0,
-      min_spa: parseFloat(document.getElementById('comm-unit-spa').value) || 1,
-      max_range: parseInt(document.getElementById('comm-unit-range').value, 10) || 60,
-      deployment_cost: parseInt(document.getElementById('comm-unit-deploy-cost').value, 10) || 500,
-      total_cost: parseInt(document.getElementById('comm-unit-total-cost').value, 10) || 5000,
+      deployment_cost: stats.deployment_cost,
+      total_cost: stats.total_cost,
+      max_damage: stats.max_damage,
+      max_range: stats.max_range,
+      min_spa: stats.min_spa,
+      max_dps: Math.round(stats.max_dps),
+      upgrades: currentUnitUpgrades,
       overview: document.getElementById('comm-unit-overview').value.trim(),
       is_tradeable: document.getElementById('comm-unit-tradeable').checked,
       is_unobtainable: document.getElementById('comm-unit-unobtainable').checked
@@ -1455,7 +1725,12 @@ const CommunityUI = (function() {
     updateLivePreview,
     submitUnitForm,
     submitCodeForm,
-    submitTipForm
+    submitTipForm,
+    addUpgradeRow,
+    removeUpgradeRow,
+    onUpgradeChange,
+    renderUpgradeRows,
+    getCurrentUnitUpgrades: () => currentUnitUpgrades
   };
 })();
 

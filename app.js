@@ -88,6 +88,13 @@ const I18N = {
     badge_modified: "Modifié",
     btn_mark_expired: "Signaler expiré",
     btn_mark_expired_title: "Signaler ce code comme expiré",
+    comm_upgrades_section_title: "Paliers d'Amélioration (Saisie Manuelle)",
+    comm_upgrades_section_desc: "Renseignez à la main le coût, les dégâts, la portée et le SPA de chaque palier. Aucun multiplicateur automatique n'est imposé.",
+    comm_btn_add_tier: "Ajouter un palier",
+    comm_tier_deploy: "0 (Déploiement)",
+    comm_del_tier: "Supprimer ce palier",
+    comm_tier_required: "Veuillez renseigner au moins un palier d'amélioration.",
+    comm_help_desc_upgrades: "Remplissez les informations générales et saisissez chaque palier d'amélioration manuellement. Le coût total et les statistiques maximales sont calculés directement à partir de vos paliers.",
 
     // Units Tab & Filters
     units_h1: "Base de Données des Tours & Unités ASTD",
@@ -420,6 +427,13 @@ const I18N = {
     badge_modified: "Modified",
     btn_mark_expired: "Report expired",
     btn_mark_expired_title: "Report this code as expired",
+    comm_upgrades_section_title: "Upgrade Tiers (Manual Input)",
+    comm_upgrades_section_desc: "Manually enter the cost, damage, range and SPA for each tier. No automatic multiplier is forced.",
+    comm_btn_add_tier: "Add upgrade tier",
+    comm_tier_deploy: "0 (Deployment)",
+    comm_del_tier: "Delete this tier",
+    comm_tier_required: "Please provide at least one upgrade tier.",
+    comm_help_desc_upgrades: "Fill in the general information and manually enter each upgrade tier. Total cost and max stats are derived directly from your tiers.",
 
     // Units Tab & Filters
     units_h1: "ASTD Towers & Units Database",
