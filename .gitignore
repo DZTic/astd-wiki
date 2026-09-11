@@ -1,1 +1,24 @@
+# Fichiers de secrets et régie publicitaire (Option A - géré via Secret GitHub)
+ads.txt
+
+# Variables d'environnement et clés privées
+.env
+.env.*
+*.key
+*.pem
+*.token
+*secret*
+*credential*
+
+# Fichiers de logs
+*.log
+
+# Caches
+__pycache__/
+
+# Fichiers système
 .DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/

@@ -336,6 +336,16 @@
 
       </div>
 
+      <!-- Encart Partenaire / Annonce non-intrusif (activé uniquement sur le domaine officiel dztic.github.io) -->
+      <div id="ad-banner-slot" class="hidden my-2 rounded-xl bg-[#0e1526]/80 border border-slate-800/80 p-2.5 text-center overflow-hidden transition-all duration-200" role="complementary" aria-label="Espace Partenaire">
+        <div class="text-[9px] uppercase tracking-wider text-slate-500 font-semibold mb-1">
+          <span>Partenaire / Annonce</span>
+        </div>
+        <div id="ad-banner-content" class="flex items-center justify-center min-h-[90px] w-full">
+          <!-- Injecté dynamiquement par app.js si domaine autorisé -->
+        </div>
+      </div>
+
       <!-- VIEW 1: Grid Mode -->
       <div id="units-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" role="region" aria-label="Liste des cartes d'unités">
         <!-- Dynamic Cards -->

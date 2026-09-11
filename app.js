@@ -114,10 +114,73 @@ function isNewUnit(unit) {
   return Date.now() - new Date(unit.created_at).getTime() < NEW_UNIT_WINDOW_MS;
 }
 
+// ==========================================
+// CONFIGURATION ET SÉCURITÉ PUBLICITAIRE (OPTION A)
+// ==========================================
+// Les annonces ne sont activées QUE sur le domaine de production officiel.
+// Sur localhost, forks GitHub ou tests locaux, aucun script externe n'est chargé
+// et l'emplacement publicitaire reste totalement masqué.
+const ADS_CONFIG = {
+  allowedHosts: ['dztic.github.io'],
+  // À remplacer par votre identifiant client Google AdSense ou régie partenaire
+  client: 'ca-pub-REPLACE_ME',
+  slot: 'REPLACE_ME'
+};
+
+function initSafeAds() {
+  const adBanner = document.getElementById('ad-banner-slot');
+  if (!adBanner) return;
+
+  const currentHost = window.location.hostname;
+  const isAuthorized = ADS_CONFIG.allowedHosts.includes(currentHost);
+
+  // Garde-fou 1 : domaine non autorisé (ex: localhost, ou fork tiers)
+  if (!isAuthorized) {
+    adBanner.classList.add('hidden');
+    return;
+  }
+
+  // Garde-fou 2 : identifiant non encore renseigné
+  if (!ADS_CONFIG.client || ADS_CONFIG.client.includes('REPLACE_ME')) {
+    adBanner.classList.add('hidden');
+    return;
+  }
+
+  // Domaine autorisé et compte configuré : affichage propre et injection du script
+  adBanner.classList.remove('hidden');
+  const adContent = document.getElementById('ad-banner-content');
+  if (adContent) {
+    adContent.innerHTML = `
+      <ins class="adsbygoogle"
+           style="display:block; min-width:300px; max-width:728px; width:100%; height:90px;"
+           data-ad-client="${ADS_CONFIG.client}"
+           data-ad-slot="${ADS_CONFIG.slot}"
+           data-ad-format="horizontal"
+           data-full-width-responsive="true"></ins>
+    `;
+
+    if (!document.getElementById('adsense-script')) {
+      const script = document.createElement('script');
+      script.id = 'adsense-script';
+      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADS_CONFIG.client}`;
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+    }
+
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (e) {
+      console.debug('AdSense init error', e);
+    }
+  }
+}
+
 // Initialize application
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
   setupEventListeners();
+  initSafeAds();
 });
 
 // Load all JSON datasets
@@ -2756,5 +2819,6 @@ if (typeof window !== 'undefined') {
   window.copyLatestCode = copyLatestCode;
   window.filterOrbs = filterOrbs;
   window.showToast = showToast;
+  window.initSafeAds = initSafeAds;
 }
 
