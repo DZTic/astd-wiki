@@ -10,6 +10,7 @@ let ORBS_DATA = [];
 let TIERLIST_DATA = {};
 let GAMEMODES_DATA = [];
 let META_DATA = {};
+let MATERIAL_IMAGES = {};
 
 let currentTab = 'units';
 let currentStarFilter = 'all';
@@ -123,13 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadData() {
   try {
     const dataPrefix = window.location.pathname.includes('/public/') ? '../data/' : './data/';
-    const [unitsRes, codesRes, orbsRes, tierRes, modesRes, metaRes] = await Promise.all([
+    const [unitsRes, codesRes, orbsRes, tierRes, modesRes, metaRes, matImagesRes] = await Promise.all([
       fetch(`${dataPrefix}units.json`).then(r => r.json()),
       fetch(`${dataPrefix}codes.json`).then(r => r.json()),
       fetch(`${dataPrefix}orbs.json`).then(r => r.json()),
       fetch(`${dataPrefix}tierlist.json`).then(r => r.json()),
       fetch(`${dataPrefix}gamemodes.json`).then(r => r.json()),
-      fetch(`${dataPrefix}meta.json`).then(r => r.json()).catch(() => ({}))
+      fetch(`${dataPrefix}meta.json`).then(r => r.json()).catch(() => ({})),
+      fetch(`${dataPrefix}material_images.json`).then(r => r.json()).catch(() => ({}))
     ]);
 
     ALL_UNITS = unitsRes;
@@ -142,6 +144,7 @@ async function loadData() {
     TIERLIST_DATA = tierRes;
     GAMEMODES_DATA = modesRes;
     META_DATA = metaRes;
+    MATERIAL_IMAGES = matImagesRes || {};
 
     // Header & Analytics metrics
     const unitsCountEl = document.getElementById('stat-units-count');
@@ -1083,20 +1086,99 @@ function openUnitModal(unitId) {
   const evoContent = document.getElementById('modal-evolution-content');
   if (unit.evolution && unit.evolution.evolves_into) {
     evoSection.classList.remove('hidden');
+    const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
+    const targetName = (unit.evolution.evolves_into || '').trim();
+    const targetLower = targetName.toLowerCase();
+    const evoTargetUnit = ALL_UNITS.find(u =>
+      u.name.toLowerCase() === targetLower ||
+      u.id.toLowerCase() === targetLower.replace(/\s+/g, '_')
+    );
+
+    let targetHTML = '';
+    if (evoTargetUnit) {
+      targetHTML = `
+        <div class="flex items-center gap-2 mb-2.5 flex-wrap">
+          <span class="text-xs text-slate-400">Évolue en :</span>
+          <button onclick="openUnitModal('${evoTargetUnit.id}')"
+                  title="Voir la fiche de ${evoTargetUnit.name}"
+                  class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-amber-500/40 hover:border-amber-400 hover:bg-slate-800 tap-scale transition-colors shadow-sm group">
+            <span class="w-7 h-7 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
+              <img src="${evoTargetUnit.image || fallbackImg}" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
+            </span>
+            <span class="text-xs font-bold text-amber-400 group-hover:text-amber-300 transition-colors">${evoTargetUnit.name}</span>
+            <span class="inline-block text-[10px] font-mono-num font-bold star-${evoTargetUnit.star}-badge px-1 rounded">${evoTargetUnit.star}★</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-amber-400/60 group-hover:text-amber-300 shrink-0" stroke-width="2"></i>
+          </button>
+        </div>
+      `;
+    } else {
+      targetHTML = `
+        <div class="text-xs mb-2">Évolue en : <strong class="text-amber-400 font-bold">${targetName}</strong></div>
+      `;
+    }
+
     let materialsHTML = '';
     if (unit.evolution.materials && unit.evolution.materials.length > 0) {
       materialsHTML = `
-        <div class="mt-2 flex flex-wrap gap-1.5">
-          ${unit.evolution.materials.map(m => `
-            <span class="px-2 py-1 rounded bg-slate-900 border border-slate-700 font-medium text-slate-200">
-              ${m.name} <strong class="text-sky-400 font-mono-num">${m.count}</strong>
-            </span>
-          `).join('')}
+        <div>
+          <div class="text-[11px] font-medium text-slate-400 mb-1.5">Matériaux requis :</div>
+          <div class="flex flex-wrap gap-2">
+            ${unit.evolution.materials.map(m => {
+              const mName = (m.name || '').trim().replace(/\u200e/g, '');
+              const mLower = mName.toLowerCase();
+              const matUnit = ALL_UNITS.find(u =>
+                u.name.toLowerCase() === mLower ||
+                u.id.toLowerCase() === mLower.replace(/\s+/g, '_')
+              );
+
+              let imgSrc = m.image || (matUnit ? matUnit.image : '') || (MATERIAL_IMAGES && MATERIAL_IMAGES[mName]) || fallbackImg;
+
+              let countDisplay = (m.count || '').trim();
+              if (countDisplay && !countDisplay.startsWith('x') && !countDisplay.startsWith('×') && !countDisplay.endsWith('x')) {
+                countDisplay = `x${countDisplay}`;
+              }
+
+              if (matUnit) {
+                return `
+                  <button onclick="openUnitModal('${matUnit.id}')"
+                          title="Voir la fiche de ${matUnit.name}"
+                          class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700/90 hover:border-sky-500/60 hover:bg-slate-800 tap-scale transition-colors shadow-sm group text-left">
+                    <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
+                      <img src="${imgSrc}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
+                    </span>
+                    <span class="min-w-0 pr-0.5">
+                      <span class="block text-xs font-semibold text-slate-200 group-hover:text-white truncate max-w-[130px] sm:max-w-[160px]">${mName}</span>
+                      <span class="flex items-center gap-1.5 mt-0.5">
+                        <span class="inline-block text-[9px] font-mono-num font-bold star-${matUnit.star}-badge px-1 rounded leading-none py-0.5">${matUnit.star}★</span>
+                        <strong class="text-xs font-bold text-sky-400 font-mono-num">${countDisplay}</strong>
+                      </span>
+                    </span>
+                  </button>
+                `;
+              } else {
+                const rarityLabel = m.rarity && m.rarity !== 'new' ? `${m.rarity}★` : 'Item';
+                return `
+                  <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-700/70 shadow-sm text-left">
+                    <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
+                      <img src="${imgSrc}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
+                    </span>
+                    <span class="min-w-0 pr-0.5">
+                      <span class="block text-xs font-semibold text-slate-200 truncate max-w-[130px] sm:max-w-[160px]">${mName}</span>
+                      <span class="flex items-center gap-1.5 mt-0.5">
+                        <span class="inline-block text-[9px] font-mono-num font-semibold text-slate-400 bg-slate-800 border border-slate-700/60 px-1 rounded leading-none py-0.5">${rarityLabel}</span>
+                        <strong class="text-xs font-bold text-sky-400 font-mono-num">${countDisplay}</strong>
+                      </span>
+                    </span>
+                  </div>
+                `;
+              }
+            }).join('')}
+          </div>
         </div>
       `;
     }
     evoContent.innerHTML = `
-      <div class="text-xs">Évolue en : <strong class="text-amber-400 font-bold">${unit.evolution.evolves_into}</strong></div>
+      ${targetHTML}
       ${materialsHTML}
     `;
   } else {
