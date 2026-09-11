@@ -1,0 +1,43 @@
+[
+  {
+    "name": "Mode Histoire (Story Mode)",
+    "type": "Campagne",
+    "description": "Le mode narratif principal d'ASTD à travers les mondes anime. 6 actes par monde, jouables en difficulté Normal et Extreme, offrant des gemmes et des unités servant à l'évolution.",
+    "worlds": [
+      "World 1",
+      "World 2",
+      "World 3"
+    ],
+    "rewards": "Gemmes de complétion, unités de craft, EXP"
+  },
+  {
+    "name": "Mode Infini (Infinite Mode)",
+    "type": "Survie",
+    "description": "Défiez des vagues infinies d'ennemis pour monter dans le classement mondial et accumuler gemmes et EXP. Difficultés : Normal, Air Only (uniquement des ennemis aériens) et Extreme.",
+    "difficulties": [
+      "Normal",
+      "Air Only",
+      "Extreme"
+    ],
+    "rewards": "Gemmes selon les vagues survécues, titre au Leaderboard"
+  },
+  {
+    "name": "Raids Monde 1 & Monde 2",
+    "type": "Raid Coop (8 joueurs)",
+    "description": "Missions coopératives à haute difficulté pour jusqu'à 8 joueurs. La rotation des raids actifs change régulièrement — consultez les pages « World 1 Raids » et « World 2 Raids » du wiki pour la liste du moment.",
+    "wiki_link": "https://allstartd.fandom.com/wiki/World_1_Raids",
+    "rewards": "Orbes rares, matériaux d'évolution 7★, capsules de raid"
+  },
+  {
+    "name": "Donjons & Gauntlet",
+    "type": "Défi Endgame",
+    "description": "Mode de progression par paliers d'étages avec modificateurs de difficulté et des boss redoutables dotés de résistances.",
+    "rewards": "Orbes spéciaux de Boss, Stardust, monnaie de boutique Dungeons"
+  },
+  {
+    "name": "Trials & Missions de Farm",
+    "type": "Craft & Orbes",
+    "description": "Zone dédiée au farm de matériaux pour fabriquer des Orbes dans la boutique de l'artisan. Inclut des variantes aériennes et terrestres avec des niveaux requis (ex. Trial Level REQ: 35/45/50).",
+    "rewards": "Matériaux de craft d'Orbes (Pierres, Fragments élémentaires)"
+  }
+]

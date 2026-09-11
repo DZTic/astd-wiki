@@ -1,0 +1,406 @@
+{
+  "META Support": [
+    "Jeff (CEO)",
+    "Octo The Greedy",
+    "Mysterious X (Final)",
+    "Spin Master",
+    "Mochi (Awakening)",
+    "Speedaholic (Enchanted)",
+    "Legendary Leader (Path)",
+    "Devil",
+    "Dr. Heart (Mystical)",
+    "Joe Kid",
+    "Lucci (Heaven)",
+    "Organs (Berserker)",
+    "Wrathdioas (Demon King)",
+    "Heavenly Duo",
+    "Witch Betrayer",
+    "The Strongest In History",
+    "Ruffy (5th Form)",
+    "Ultimate Patriot",
+    "The Fear (Volt)"
+  ],
+  "META (OVERALL/UTILITY)": [
+    "Legendary Leader (Path)",
+    "The Strongest In History",
+    "Mysterious X (Final)",
+    "Witch Betrayer",
+    "Heavenly Duo",
+    "Blood Queen (B-Kui)",
+    "Ruffy (5th Form)",
+    "Joe Kid",
+    "Buddha Chairman (Serious)",
+    "Ant King (Awakened)",
+    "Kosuke (SS)",
+    "Vegu (Ego Ascension)",
+    "Koku (Instinctive)",
+    "Super Siblings",
+    "Zyaya (Released)",
+    "Zaruto (SS)",
+    "Jujutsu Master",
+    "Star King"
+  ],
+  "META (DPS)": [
+    "Ant King (Awakened)",
+    "Buddha Chairman (Serious)",
+    "Blood Queen (B-Kui)",
+    "The Strongest In History",
+    "Kosuke (SS)",
+    "Vegu (Ego Ascension)",
+    "Joe Kid",
+    "Super Siblings",
+    "Zyaya (Released)",
+    "Zaruto (SS)",
+    "Jujutsu Master",
+    "Sorcerer Evil",
+    "Star King",
+    "Kogan Adult (BEAST)",
+    "Alien Boss (Final)",
+    "Heavenly Duo"
+  ],
+  "META (DoT)": [
+    "The Strongest In History",
+    "Kosuke (SS)",
+    "Chain Avenger (Enraged)"
+  ],
+  "NUKES": [
+    "Buddha Chairman (Serious)",
+    "The Strongest In History",
+    "Vegu (Ego Ascension)",
+    "Evil Shade (Final)",
+    "Koku (Instinctive)",
+    "Legendary Leader (Path)",
+    "Mysterious X (Final)"
+  ],
+  "Submeta Support": [
+    "Flare Lord (Serious)",
+    "Crimson Boar (True)",
+    "The Almighty",
+    "Ex-Captain (B-Kui)",
+    "Idol",
+    "Future T & Aqua Vegu",
+    "Chain Avenger (Enraged)",
+    "Zero",
+    "Eyezen (Final)",
+    "Nightmare",
+    "Falcon (Ascendance)",
+    "Mr. Wax",
+    "Humble-Swordman (Awoken)",
+    "Shaolin (B-Kui)",
+    "Tornado Girl (Serious)",
+    "Evil Shade (Final)",
+    "Fairy Tactician",
+    "Unhuman (Nullifier)"
+  ],
+  "Submeta (OVERALL/UTILITY)": [
+    "Evil Shade (Final)",
+    "Kogan Adult (BEAST)",
+    "Alien Boss (Final)",
+    "Chain Avenger (Enraged)",
+    "Future T & Aqua Vegu",
+    "Future Demon King (Unlocked)",
+    "Perfect Insect",
+    "Universe Justice 1 (Serious)",
+    "Tatsu (Rainbow Flames)",
+    "Sword (Alternative)",
+    "Fire Officer (Serious)",
+    "Sorcerer Evil",
+    "Falcon (Ascendance)"
+  ],
+  "Good/Viable": [
+    "Lucky Green (Dive)",
+    "Humble-Swordman (Awoken)",
+    "Organs (Berserker)",
+    "4-Eye Sorcerer (Timer)",
+    "Patchface (Transfigured)",
+    "Eyepatch (Serious)",
+    "Legendary Muge",
+    "Koro F III",
+    "The Path (Final)",
+    "Ultimate Patriot",
+    "Flimflam (Overheated)",
+    "Zaruto (Alternative)",
+    "Baby Vegu III",
+    "Divine Pride (PEAK)"
+  ],
+  "Good/Viable Support": [
+    "Boo (Kid)",
+    "Jokato Koju (ASCENDED)",
+    "Ms. Love TS",
+    "Mysterious X (VOID)",
+    "Gex D. Gecko",
+    "Lucky Green (Dive)",
+    "Tornado Girl (Serious)",
+    "Black Stache (Timeskip)",
+    "Skeleton (Artist)",
+    "The Death Dealer",
+    "Julian (King of Wizards)",
+    "The Path (Final)",
+    "DemonLord Waifu",
+    "Princess Appala"
+  ],
+  "Rupture": [
+    "The Strongest In History",
+    "Organs (Berserker)",
+    "Ryugo (Kisaragi)"
+  ],
+  "Bleed": [
+    "Chain Avenger (Enraged)",
+    "Koro F III",
+    "Sorcerer Killer",
+    "Death Painting (Supressed)",
+    "Ombre"
+  ],
+  "Burn": [
+    "Tatsu (Rainbow Flames)",
+    "Fire Officer (Serious)",
+    "Old Will (B-Kui)",
+    "Organs (Berserker)",
+    "Jenos (Serious)",
+    "Magma Marine6",
+    "Flaming Tiger (JUSTICE)"
+  ],
+  "Black Flames": [
+    "Kosuke (SS)",
+    "Evil Shade (Final)",
+    "Dark",
+    "Red Eye Warrior Path",
+    "Crow (After)"
+  ],
+  "Poison": [
+    "Venom (Demon)",
+    "The Strongest Curse"
+  ],
+  "NormalTime Stoppers": [
+    "Mysterious X (Final)",
+    "Flare Lord (Serious)",
+    "Nightmare",
+    "Boo (Kid)",
+    "Jokato Koju (ASCENDED)",
+    "Mysterious X (VOID)"
+  ],
+  "UltimateTime Stoppers": [
+    "Mysterious X (Final)",
+    "Crimson Boar (True)",
+    "Legendary Leader (Path)",
+    "Ms. Love TS",
+    "The Founder",
+    "Jokato Koju (ASCENDED)",
+    "Devil"
+  ],
+  "Slows": [
+    "Black Stache (Timeskip)",
+    "Mochi (Awakening)",
+    "Mr. Wax"
+  ],
+  "Buffs": [
+    "Speedaholic (Enchanted)",
+    "The Almighty",
+    "Crimson Boar (True)",
+    "Idol",
+    "Ex-Captain (B-Kui)"
+  ],
+  "Knockback": [
+    "Devil",
+    "Dr. Heart (Mystical)",
+    "Tyrant (Furious)"
+  ],
+  "Rewind": [
+    "Legendary Leader (Path)",
+    "Zero",
+    "Eyezen (Final)",
+    "The Founder",
+    "Julian (King of Wizards)"
+  ],
+  "GaleSlow": [
+    "Shaolin (B-Kui)",
+    "Lucky Green (Dive)",
+    "Tornado Girl (Serious)"
+  ],
+  "WaxSlow": [
+    "Mochi (Awakening)",
+    "Mr. Wax"
+  ],
+  "META Overall": [
+    "The Path (Final)",
+    "Evil Shade (Final)",
+    "Buddha Chairman (Serious)",
+    "Tatsu (Rainbow Flames)",
+    "Legendary Leader (Path)",
+    "Ant King (Awakened)",
+    "The Strongest In History",
+    "Kosuke (SS)",
+    "Blood Queen (B-Kui)",
+    "Anti Magician (Demon Arm)",
+    "Worm Assassin",
+    "The Fear (Volt)",
+    "Joe Kid",
+    "Zyaya (Released)",
+    "Zorro (Mystical)",
+    "Humble-Swordman (Awoken)"
+  ],
+  "Boss Killers": [
+    "Eyezen (Final)",
+    "Stampede (???%)",
+    "Evil Shade (Final)",
+    "Legendary Leader (Path)",
+    "Buddha Chairman (Serious)",
+    "The Path (Final)",
+    "Tatsu (Rainbow Flames)",
+    "The Strongest In History",
+    "Blood Queen (B-Kui)",
+    "Kosuke (SS)",
+    "Ant King (Awakened)",
+    "Zyaya (Released)",
+    "Unhuman (Nullifier)",
+    "Joe Kid"
+  ],
+  "Leaders (NOT DPS)": [
+    "Legendary Leader (Path)",
+    "Humble-Swordman (Awoken)",
+    "Evil Shade (Final)",
+    "Buddha Chairman (Serious)",
+    "The Strongest In History",
+    "Tatsu (Rainbow Flames)",
+    "Blood Queen (B-Kui)",
+    "Unhuman (Nullifier)",
+    "Heavenly Duo",
+    "Ombre"
+  ],
+  "Buffers": [
+    "Speedaholic (Enchanted)",
+    "Idol",
+    "Worl (Vigilante)",
+    "Skeleton (Artist)",
+    "Ex-Captain (B-Kui)"
+  ],
+  "Farms": [
+    "Pizza Girl",
+    "Jeff (CEO)",
+    "Idol",
+    "The Nautical Gemfinder",
+    "Bellma (SUPER Money Corp)"
+  ],
+  "Movement Stoppers": [
+    "Mysterious X (Final)",
+    "Flare Lord (Serious)",
+    "Nightmare",
+    "Renitsu (District)",
+    "Boo (Kid)",
+    "Mysterious X (VOID)"
+  ],
+  "Enchant Manipulators": [
+    "The Path (Final)",
+    "Anti Magician (Demon Arm)",
+    "God Black Fusion (Alternative)",
+    "God Black Fusion"
+  ],
+  "Early Game": [
+    "Worm Assassin",
+    "Anti Magician (Demon Arm)",
+    "Evil Shade (Final)",
+    "Tatsu (Rainbow Flames)",
+    "The Path (Final)",
+    "The Fear (Volt)",
+    "Zorro (Mystical)",
+    "Military Princess",
+    "Koku (Instinctive)"
+  ],
+  "BEST Support": [
+    "Black Stache (Timeskip)",
+    "Jokato Koju (ASCENDED)",
+    "Mysterious X (VOID)"
+  ],
+  "Girls": [
+    "Blood Queen (B-Kui)",
+    "The Founder",
+    "Super Siblings",
+    "Crimson Boar (True)",
+    "Akasa (TS)",
+    "Nezichi (Awakened)",
+    "JJ-Siwa (Furious)"
+  ],
+  "Pure Hearted": [
+    "Tatsu (Rainbow Flames)",
+    "Koku (Instinctive)",
+    "Ruffy (5th Form)",
+    "Blazing Prince (Djinn)",
+    "Jujutsu Master",
+    "Limilia (Ultimate)"
+  ],
+  "Brutes": [
+    "Dark",
+    "Organs (Berserker)",
+    "Universe Justice 1 (Serious)",
+    "Borul (SUPA III)",
+    "Illumination (Coaster)",
+    "Universe Justice 1",
+    "Sky God"
+  ],
+  "Siblings": [
+    "Humble-Swordman (Awoken)",
+    "Super Siblings",
+    "Kogan Adult (BEAST)",
+    "Flare Lord (Serious)",
+    "Crimson Boar (True)",
+    "Kosuke (Full Samurai)",
+    "Fiend Siblings"
+  ],
+  "Spirit Warriors": [
+    "Buddha Chairman (Serious)",
+    "Blood Queen (B-Kui)",
+    "Future T & Aqua Vegu",
+    "Flare Lord (Serious)",
+    "Lucky Green (Dive)",
+    "Uru (MASTER)",
+    "Springy"
+  ],
+  "Unworldly Beings": [
+    "Boo (Kid)",
+    "Universe Justice 1 (Serious)",
+    "Koku (Instinctive)",
+    "Borul (SUPA III)",
+    "Vegu Blue Evolved"
+  ],
+  "Youth": [
+    "Idol",
+    "Star King",
+    "Future T & Aqua Vegu",
+    "Eyepatch (Serious)",
+    "Wrathdioas (Demon King)",
+    "Patchface (Transfigured)",
+    "Lucky Green (Dive)"
+  ],
+  "Prodigy": [
+    "Idol",
+    "Buddha Chairman (Serious)",
+    "Star King",
+    "Legendary Leader (Path)",
+    "Humble-Swordman (Awoken)",
+    "Ikki Potent (Awaken)",
+    "Alien Boss (Final)",
+    "4-Eye Sorcerer (Timer)",
+    "Kogan Supa (Alternative)"
+  ],
+  "Legendary Lineage": [
+    "Blood Queen (B-Kui)",
+    "Mysterious X (Final)",
+    "The Path (Final)",
+    "Humble-Swordman (Awoken)",
+    "Worm Assassin",
+    "Lucky Green (Dive)",
+    "Shaolin (B-Kui)",
+    "The Fear (Volt)"
+  ],
+  "Captains": [
+    "Buddha Chairman (Serious)",
+    "Blood Queen (B-Kui)",
+    "Falcon (Ascendance)",
+    "Fire Officer (Serious)",
+    "Dark",
+    "Alien Boss (Final)",
+    "The Path (Final)",
+    "Research Captain",
+    "Wrathdioas (Demon King)"
+  ]
+}

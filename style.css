@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-main: #0b0f19;
+  --bg-surface: #111827;
+  --bg-surface-hover: #1f293d;
+  --bg-card: rgba(17, 24, 39, 0.85);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-focus: #38bdf8;
+  --cyan-accent: #06b6d4;
+  --cyan-glow: rgba(6, 182, 212, 0.25);
+  --emerald-accent: #10b981;
+  --amber-accent: #f59e0b;
+  --rose-accent: #f43f5e;
+  --purple-accent: #8b5cf6;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-main);
+  color: #f1f5f9;
+  overflow-x: hidden;
+  letter-spacing: -0.01em;
+}
+
+.font-mono-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum' on, 'zero' on;
+}
+
+/* Custom Tactical Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080c14;
+}
+::-webkit-scrollbar-thumb {
+  background: #243046;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b4c68;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Tactical Cards */
+.tactical-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tactical-card:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(6, 182, 212, 0.15);
+}
+
+/* Star Rarity Indicators (Sleek Tactical Borders & Badges) */
+.star-7-card {
+  border-color: rgba(244, 63, 94, 0.35);
+}
+.star-7-card:hover {
+  border-color: rgba(244, 63, 94, 0.7);
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.15);
+}
+.star-7-badge {
+  background: linear-gradient(135deg, #e11d48, #9f1239);
+  color: #ffffff;
+}
+
+.star-6-card {
+  border-color: rgba(245, 158, 11, 0.35);
+}
+.star-6-card:hover {
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+}
+.star-6-badge {
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  color: #ffffff;
+}
+
+.star-5-card {
+  border-color: rgba(139, 92, 246, 0.35);
+}
+.star-5-card:hover {
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+}
+.star-5-badge {
+  background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+  color: #ffffff;
+}
+
+.star-4-card { border-color: rgba(59, 130, 246, 0.3); }
+.star-4-badge { background: #2563eb; color: #ffffff; }
+
+.star-3-card { border-color: rgba(16, 185, 129, 0.25); }
+.star-3-badge { background: #059669; color: #ffffff; }
+
+.star-2-card { border-color: rgba(100, 116, 139, 0.25); }
+.star-2-badge { background: #475569; color: #ffffff; }
+
+/* Tactical Data Table styling */
+.tactical-table th {
+  user-select: none;
+}
+.tactical-table th:hover {
+  color: #38bdf8;
+}
+.tactical-table tr:hover td {
+  background-color: rgba(30, 41, 59, 0.7);
+}
+
+/* Modal animation */
+@keyframes modal-enter {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal-enter {
+  animation: modal-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tactical Pill Button */
+.btn-pill {
+  transition: all 0.15s ease;
+}
+.btn-pill:hover {
+  background-color: #1e293b;
+  border-color: #475569;
+}
+.btn-pill.active {
+  background-color: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+/* Pulse animation for active verification */
+@keyframes tactical-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.pulse-beacon {
+  animation: tactical-pulse 2s infinite ease-in-out;
+}
+
+/* Tier list : silhouette en repli si l'image Fandom ne charge pas */
+.tier-img-fallback::before {
+  content: '';
+  display: block;
+  width: 34px;
+  height: 48px;
+  background: var(--border-subtle);
+  clip-path: polygon(50% 0%, 90% 12%, 100% 38%, 88% 52%, 84% 100%, 16% 100%, 12% 52%, 0% 38%, 10% 12%);
+  opacity: 0.5;
+}

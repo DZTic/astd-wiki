@@ -1,0 +1,345 @@
+[
+  {
+    "name": "Azure Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/1/13/Azure_Orb.png/revision/latest/scale-to-width-down/80?cb=20240823003905",
+    "effect": "Initial-RNG -10% Overall DMG Buff 15%",
+    "obtain": "En vainquant : Sijin Raid on Extreme Mode",
+    "require": "All Units"
+  },
+  {
+    "name": "Beast-M Scaling Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/e/e4/Beast-M_Scaling_Orb.png/revision/latest/scale-to-width-down/80?cb=20210706204808",
+    "effect": "Initial-DMG 200% Upgrade-DMG 250%",
+    "obtain": "En vainquant : Trial Level REQ: 50 on Extreme Mode",
+    "require": "Mikato (Beast Cloak)"
+  },
+  {
+    "name": "Black Hole Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/b/b3/Black_Hole_Orb.png/revision/latest/scale-to-width-down/80?cb=20220926081403",
+    "effect": "Initial-RNG 20% Initial-SPA -2",
+    "obtain": "En vainquant : Random Boss Rush Raid",
+    "require": "Black Stache (Timeskip)"
+  },
+  {
+    "name": "Blood Queen Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/8/81/Blood_Queen_Orb.png/revision/latest/scale-to-width-down/78?cb=20240522105350",
+    "effect": "Unlocks special upgrade",
+    "obtain": "En vainquant : Captains on Any Mode (15% Drop Rate)",
+    "require": "Blood Queen (B-Kui)"
+  },
+  {
+    "name": "Blooming Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/9/9b/Blooming_Orb.png/revision/latest/scale-to-width-down/80?cb=20211014042443",
+    "effect": "Initial-DMG 800% Upgrade-DMG 2000%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : GodFlowers ×3 000, Fluorite ×3 000, ColorMineral ×3 000",
+    "require": "Zyaya"
+  },
+  {
+    "name": "Blueeye Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/1/11/Blueeye_Orb.png/revision/latest/scale-to-width-down/80?cb=20210706204306",
+    "effect": "Initial-RNG 30%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Fluorite ×1 500, Icey ×1 075, ColorMineral ×1 850",
+    "require": "All units"
+  },
+  {
+    "name": "Bomba Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/d/d1/Bomba_Orb.png/revision/latest/scale-to-width-down/80?cb=20210605165241",
+    "effect": "Initial-DMG 30% (King Of Heroes Gilgamesh by only 6%)",
+    "obtain": "En vainquant : Trial Level REQ: 35 on Extreme Mode",
+    "require": "All units"
+  },
+  {
+    "name": "Cost Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/9/95/Cost_Orb.png/revision/latest/scale-to-width-down/80?cb=20210706205049",
+    "effect": "Lowers the deployment cost of a unit by $100.",
+    "obtain": "En vainquant : Trial Level REQ: 45 on Extreme Mode",
+    "require": "All units"
+  },
+  {
+    "name": "Crywolf Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/d/d1/Crywolf_Orb.png/revision/latest/scale-to-width-down/80?cb=20211014042338",
+    "effect": "DMG 1700%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Fluorite ×2 750, Icey ×2 800, ElectricMineral ×2 750",
+    "require": "Tony Stark"
+  },
+  {
+    "name": "Dark Spiritual Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/3/35/Dark_Spiritual_Orb.png/revision/latest/scale-to-width-down/80?cb=20210904235827",
+    "effect": "Initial-DMG 200% Upgrade-DMG 15% Slow Effects Final Upgrade Hit Air Final Upgrade",
+    "obtain": "En vainquant : Trial Level REQ: 100",
+    "require": "Ikki (Dark)"
+  },
+  {
+    "name": "Death Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/3/3d/Death_Orb.png/revision/latest/scale-to-width-down/80?cb=20210706203547",
+    "effect": "DMG 500%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : GodTear ×5 555, Chain ×6 666, GoldParticle ×5 555",
+    "require": "Kura, Kura (Darkness), Kura (Origami), Death"
+  },
+  {
+    "name": "Demon M Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/7/70/Demon_M_Orb.png/revision/latest/scale-to-width-down/80?cb=20210725212953",
+    "effect": "Initial-DMG 500% Upgrade-DMG 1000%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : UnknownDNA ×1 250, Chain ×1 250, Leafs ×1 400",
+    "require": "Super Boo (Tokens)"
+  },
+  {
+    "name": "Demonic Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/2/2b/Demonic_Orb.png/revision/latest/scale-to-width-down/80?cb=20220130040508",
+    "effect": "Initial-DMG 100% Upgrade DMG 225%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : GodTear ×2 500, Chain ×3 250, DualTooth ×2 750",
+    "require": "Demon Spirit Detective"
+  },
+  {
+    "name": "Divine Judgement Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/1/19/Divine_Judgement_Orb.png/revision/latest/scale-to-width-down/80?cb=20240525114111",
+    "effect": "Initial-DMG 100% Initial-RNG 30% Hybrid on placement Changes enemy enchant to dark starting from placement",
+    "obtain": "En vainquant : Tier 3 & 4 Portals with a 70% drop chance.",
+    "require": "God Black Fusion"
+  },
+  {
+    "name": "Emotions Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/0/0c/Emotions_Orb.png/revision/latest/scale-to-width-down/80?cb=20230718031934",
+    "effect": "Special Ability (Unlocks more dragons and unlocks a new ability)",
+    "obtain": "En vainquant : Hunt on the Blacksmith Village raid (10% Drop Rate)",
+    "require": "Demon Of Emotion"
+  },
+  {
+    "name": "Envy Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/c/c6/Envy_Orb.png/revision/latest/scale-to-width-down/80?cb=20240823003832",
+    "effect": "Initial-RNG 30% Initial-DMG 100%",
+    "obtain": "Buying from Gauntlet Shop for 50G",
+    "require": "Zero, Zero (Daniel)"
+  },
+  {
+    "name": "Fire Rage Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/1/1f/Fire_Rage_Orb.png/revision/latest/scale-to-width-down/80?cb=20210603155810",
+    "effect": "Initial-DMG 100% (King of Heroes & Tony Stark [Beyond] by only 20%)",
+    "obtain": "En vainquant : Trial Level REQ: 75 .",
+    "require": "All units"
+  },
+  {
+    "name": "Froozen Giant Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/6/6a/Froozen_Giant_Orb.png/revision/latest/scale-to-width-down/80?cb=20221021104230",
+    "effect": "Initial-DMG 200% Upgrade-DMG 500% Add special Ability",
+    "obtain": "En vainquant : Trial Level REQ: 60 on Extreme Mode (20% Drop Rate)",
+    "require": "Nominated Female Giant"
+  },
+  {
+    "name": "Gen (RAGE) Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/6/64/Gen_%28RAGE%29_Orb.png/revision/latest/scale-to-width-down/80?cb=20230611121432",
+    "effect": "Upgrade-DMG 300% Initial-RNG 40% Hidden-Cost $1049%",
+    "obtain": "En vainquant : Trial Level REQ: 150 on Extreme Mode (10% Drop Rate)",
+    "require": "Gen (Final)"
+  },
+  {
+    "name": "God Earring LEFT Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/e/e2/God_Earring_LEFT_Orb.png/revision/latest/scale-to-width-down/80?cb=20210726180501",
+    "effect": "Potara Fusion",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : GodFlowers ×5 000, Silver ×5 000, DualTooth ×4 500, Gold ×5 000",
+    "require": "Koku, Winter Vegu, Super Koku, Ultra Koku, Koku (Supa), Super God Koku, Aqua Koku, Ganyu (July)"
+  },
+  {
+    "name": "God Earring RIGHT Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/3/3b/God_Earring_RIGHT_Orb.png/revision/latest/scale-to-width-down/80?cb=20210726183126",
+    "effect": "Potara Fusion",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Silver ×5 000, GodTear ×5 000, MonsterEgg ×4 500, Gold ×5 000",
+    "require": "Vegu, Vampire Vegu, Winter Vegu, Vegu (Mind), Vegu (Supa), Vegu II, Vegu (Mind II), Vegu Blue Evolved"
+  },
+  {
+    "name": "God Heart Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/f/fb/God_Heart_Orb.png/revision/latest/scale-to-width-down/80?cb=20211114044719",
+    "effect": "Initial-DMG 800% Upgrade-DMG 900%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : GodFlowers ×3 000, GodTear ×3 000, GoldParticle ×3 000",
+    "require": "Buddha Chairman"
+  },
+  {
+    "name": "Golden-F Scaling Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/e/ed/Golden-F_Scaling_Orb.png/revision/latest/scale-to-width-down/80?cb=20210706205348",
+    "effect": "Initial-DMG 200% Upgrade-DMG 100%",
+    "obtain": "En vainquant : Trial Level REQ: 25 on Extreme Mode.",
+    "require": "Golden Supreme-Leader"
+  },
+  {
+    "name": "Gravity Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/6/60/Gravity_Orb.png/revision/latest/scale-to-width-down/80?cb=20211114044742",
+    "effect": "Initial-DMG 2000% Upgrade-DMG 2500%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : GodFlowers ×3 888, DualTooth ×2 850, Calcite ×2 900",
+    "require": "Blinding Lights"
+  },
+  {
+    "name": "Green Natural Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/3/34/Green_Natural_Orb.png/revision/latest/scale-to-width-down/80?cb=20210926103507",
+    "effect": "DMG 2350%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : GodFlowers ×3 400, Fluorite ×3 000, DualTooth ×2 800, GodTear ×3 000",
+    "require": "Legendary Borul"
+  },
+  {
+    "name": "Knight Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/5/5e/Knight_Orb.png/revision/latest/scale-to-width-down/80?cb=20240325102231",
+    "effect": "Critical Mechanic, Yellow Enchant. +100% to All Damage",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Fluorite ×1 750, Icey ×1 250, ColorMineral ×2 000",
+    "require": "Meta-Knight"
+  },
+  {
+    "name": "Lightning Breath Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/e/e7/Lightning_Breath_Orb.png/revision/latest/scale-to-width-down/80?cb=20210712110415",
+    "effect": "Initial-DMG 900% Upgrade-DMG 2,500%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : StarDust ×2 000, ElectricMineral ×2 000, Gold ×2 050",
+    "require": "Renitsu"
+  },
+  {
+    "name": "Limitation Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/f/fd/Limitation_Orb.png/revision/latest/scale-to-width-down/80?cb=20210904235734",
+    "effect": "Initial-DMG 700% Upgrade-DMG 1600%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Icey ×3 400, Veggies ×2 800, GodTear ×3 100, GoldParticle ×3 000",
+    "require": "Gen (Grown)"
+  },
+  {
+    "name": "Mera Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/2/25/Mera_Orb.png/revision/latest/scale-to-width-down/80?cb=20210712110352",
+    "effect": "Initial-DMG 600% Upgrade-DMG 1,000%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Gold ×750, Veggies ×300, Corundum ×750, Leafs ×300",
+    "require": "Spade"
+  },
+  {
+    "name": "Moon Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/6/6e/Moon_Orb.png/revision/latest/scale-to-width-down/80?cb=20210904235907",
+    "effect": "Moon Transformation",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : DragonBone ×9 000, Calcite ×9 000, Chain ×13 250, ColorMineral ×13 000",
+    "require": "Koku (Alternative)"
+  },
+  {
+    "name": "Operator Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/4/48/Operator_Orb.png/revision/latest/scale-to-width-down/80?cb=20211014042403",
+    "effect": "Replacement-Skill can teleport 8 more enemies",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Calcite ×3 000, ElectricMineral ×3 000, ColorMineral ×3 000",
+    "require": "Dr. Heart"
+  },
+  {
+    "name": "Path Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/e/ee/Path_Orb.png/revision/latest/scale-to-width-down/80?cb=20211124022620",
+    "effect": "Initial-DMG 100% Upgrade-DMG 100%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : UnknownDNA ×850, GodTear ×1 000, Veggies ×800",
+    "require": "The Path, The Path (Final)"
+  },
+  {
+    "name": "Paw Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/e/ee/Paw_Orb.png/revision/latest/scale-to-width-down/80?cb=20220619032945",
+    "effect": "Initial-DMG 1250% Upgrade-DMG 600%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : StarDust ×3 000, GodTear ×3 000, Calcite ×3 000",
+    "require": "Tyrant, Tyrant (Furious)"
+  },
+  {
+    "name": "PinkStar Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/d/dc/PinkStar_Orb.png/revision/latest/scale-to-width-down/80?cb=20211124033244",
+    "effect": "DMG 200%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : UnknownDNA ×3 250, Silver ×3 111, ElectricMineral ×2 750, GodFlowers ×2 500",
+    "require": "Star Boy (Requiem)"
+  },
+  {
+    "name": "Prey eye Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/c/c7/Prey_eye_Orb.png/revision/latest/scale-to-width-down/80?cb=20220619032934",
+    "effect": "Initial-RNG 10% COST -50 Initial-DMG 15%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : UnknownDNA ×6 500, Calcite ×6 500, ColorMineral ×5 000",
+    "require": "All units"
+  },
+  {
+    "name": "Quake Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/1/1d/Quake_Orb.png/revision/latest/scale-to-width-down/80?cb=20210706203909",
+    "effect": "Initial-DMG 180% Upgrade-DMG 1,500%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : GodFlowers ×805, GodTear ×800, UnknownDNA ×850",
+    "require": "Whitestache (Final)"
+  },
+  {
+    "name": "Rainbow Magic Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/e/e3/Rainbow_Magic_Orb.png/revision/latest/scale-to-width-down/80?cb=20210712110317",
+    "effect": "DMG 2,000%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : GodFlowers ×1 750, Veggies ×200, DualTooth ×1 115, ColorMineral ×2 000",
+    "require": "Kovegu (Alternative)"
+  },
+  {
+    "name": "Reset Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/1/10/Reset_Orb.png/revision/latest/scale-to-width-down/80?cb=20220926083524",
+    "effect": "Add an additional upgrade to Yoshaga Kiryu (Eat The Dirt)",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Chain ×42 250, ColorMineral ×35 000, DragonBone ×35 000, Calcite ×32 000",
+    "require": "Yoshaga Kiryu (Eat the dirt)"
+  },
+  {
+    "name": "Rose Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/2/22/Rose_Orb.png/revision/latest/scale-to-width-down/80?cb=20210904235640",
+    "effect": "Initial-DMG 500% Upgrade-DMG 2000%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Leafs ×3 500, StarDust ×2 950, Corundum ×3 200, Gold ×3 000",
+    "require": "Koku Black Pink"
+  },
+  {
+    "name": "Snake Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/c/c1/Snake_Orb.png/revision/latest/scale-to-width-down/80?cb=20210816024551",
+    "effect": "Initial-DMG 100% Upgrade-DMG 100%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : UnknownDNA ×1 350, DualTooth ×1 350, Leafs ×1 350",
+    "require": "Ruffy (Snake SSS)"
+  },
+  {
+    "name": "Snow Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/7/73/Snow_Orb.png/revision/latest/scale-to-width-down/80?cb=20210706204418",
+    "effect": "Initial-DMG 200% Upgrade-DMG 1,000%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Veggies ×875, Icey ×800, Leafs ×875",
+    "require": "Ice Queen (B), Ice Queen (D)"
+  },
+  {
+    "name": "Supa Future Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/b/b8/Supa_Future_Orb.png/revision/latest/scale-to-width-down/80?cb=20210816024033",
+    "effect": "DMG 350%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Gold ×1 337, Icey ×1 000, ColorMineral ×1 250",
+    "require": "Supa Future T"
+  },
+  {
+    "name": "Super Blueeye Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/c/cd/Super_Blueeye_Orb.png/revision/latest/scale-to-width-down/80?cb=20230329194249",
+    "effect": "Initial-RNG 40%",
+    "obtain": "",
+    "require": "All Units"
+  },
+  {
+    "name": "The Hawk Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/8/82/The_Hawk_Orb.png/revision/latest/scale-to-width-down/80?cb=20210706204705",
+    "effect": "DMG 1,300%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : DragonBone ×805, DualTooth ×805, Leafs ×675",
+    "require": "Zorro"
+  },
+  {
+    "name": "Titanic Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/9/9b/Titanic_Orb.png/revision/latest/scale-to-width-down/80?cb=20220130040522",
+    "effect": "Initial-DMG 500% Upgrade DMG 1000%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : UnknownDNA ×3 250, Corundum ×3 100, Calcite ×3 000",
+    "require": "Amen"
+  },
+  {
+    "name": "Ultra Magic Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/5/5e/Ultra_Magic_Orb.png/revision/latest/scale-to-width-down/80?cb=20230520024838",
+    "effect": "Initial-RNG 20% Overall DMG Buff 5% Overall Cost Reduction 7%",
+    "obtain": "En vainquant : Random Boss Rush 2 Raid",
+    "require": "All Units"
+  },
+  {
+    "name": "Universal Reduction Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/2/22/Universal_Reduction_Orb.png/revision/latest/scale-to-width-down/80?cb=20221109063929",
+    "effect": "Reduce total cost by 15%",
+    "obtain": "En vainquant : Trial Level REQ: 70 on Extreme Mode (20% Drop Rate)",
+    "require": "All Units"
+  },
+  {
+    "name": "Venomous Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/1/16/Venomous_Orb.png/revision/latest/scale-to-width-down/80?cb=20210816024341",
+    "effect": "DMG 500%",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Silver ×1 250, MonsterEgg ×1 255, Leafs ×1 250",
+    "require": "Venom,Venom (Demon)"
+  },
+  {
+    "name": "Water Orb",
+    "image": "https://static.wikia.nocookie.net/allstartd/images/4/42/Water_Orb.png/revision/latest/scale-to-width-down/46?cb=20230205121204",
+    "effect": "Adds Water Damage to a Unit, which scales with Upgrades (Disabled in Infinite Mode)",
+    "obtain": "Fabrication dans la Boutique d'Orbes avec : Water Shard ×16",
+    "require": "Toutes les unités"
+  }
+]
