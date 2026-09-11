@@ -73,6 +73,7 @@ const I18N = {
     units_h1: "Base de Données des Tours & Unités ASTD",
     units_filter_aria: "Filtres de recherche des unités",
     filter_search_sr: "Rechercher une unité par nom",
+    filter_search_aria: "Rechercher par nom d'unité ou franchise anime",
     filter_search_placeholder: "Nom ou franchise de l'unité...",
     clear_search_aria: "Effacer la recherche",
     filter_sort_sr: "Trier les unités",
@@ -388,6 +389,7 @@ const I18N = {
     units_h1: "ASTD Towers & Units Database",
     units_filter_aria: "Unit search filters",
     filter_search_sr: "Search unit by name",
+    filter_search_aria: "Search by unit name or anime franchise",
     filter_search_placeholder: "Unit name or franchise...",
     clear_search_aria: "Clear search",
     filter_sort_sr: "Sort units",
@@ -677,7 +679,9 @@ function setLanguage(lang) {
     localStorage.setItem('astd_lang', currentLang);
   } catch (e) {}
 
-  document.documentElement.lang = currentLang;
+  if (document.documentElement) {
+    document.documentElement.lang = currentLang;
+  }
 
   // Active state on language switcher buttons
   const btnFr = document.getElementById('lang-btn-fr');
@@ -2468,7 +2472,7 @@ function toggleUpgradeAbility(idx) {
   if (window.lucide) lucide.createIcons();
 }
 
-// Toggle the pre-evolutions block on the unit modal
+// // Toggle the pre-evolutions block on the unit modal
 function togglePreEvos() {
   const section = document.getElementById('modal-preevo-section');
   const content = document.getElementById('modal-preevo-content');
@@ -2478,7 +2482,7 @@ function togglePreEvos() {
   const nowHidden = content.classList.toggle('hidden');
   const btn = section ? section.querySelector('button') : null;
   if (btn) btn.setAttribute('aria-expanded', String(!nowHidden));
-  if (label) label.textContent = nowHidden ? 'Afficher' : 'Masquer';
+  if (label) label.textContent = nowHidden ? t('btn_show', 'Afficher') : t('btn_hide', 'Masquer');
   if (chevron) chevron.classList.toggle('rotate-180', !nowHidden);
 }
 
@@ -2506,12 +2510,13 @@ function renderTierList() {
 
   const categories = Object.keys(TIERLIST_DATA);
   if (categories.length === 0) {
-    container.innerHTML = `<div class="text-slate-400 text-xs">Tier list en cours de chargement...</div>`;
+    container.innerHTML = `<div class="text-slate-400 text-xs">${t('tierlist_loading', 'Tier list en cours de chargement...')}</div>`;
     return;
   }
 
   container.innerHTML = categories.map(catName => {
     const unitNames = TIERLIST_DATA[catName] || [];
+    const unitWord = currentLang === 'en' ? (unitNames.length > 1 ? 'units' : 'unit') : (unitNames.length > 1 ? 'unités' : 'unité');
 
     return `
       <div class="tactical-card rounded-xl p-4 border border-slate-800/80 bg-[#0f1629]/95 space-y-3">
@@ -2520,7 +2525,7 @@ function renderTierList() {
             <span class="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border bg-sky-950/40 border-sky-500/40 text-sky-300">
               ${catName}
             </span>
-            <span class="text-xs text-slate-500 font-mono-num font-semibold">${unitNames.length} unité${unitNames.length > 1 ? 's' : ''}</span>
+            <span class="text-xs text-slate-500 font-mono-num font-semibold">${unitNames.length} ${unitWord}</span>
           </div>
         </div>
 
@@ -2574,7 +2579,7 @@ function openUnitByName(name) {
   if (unit) {
     openUnitModal(unit.id);
   } else {
-    showToast(`Unité ${name} consultée`);
+    showToast(currentLang === 'en' ? `Unit ${name} opened` : `Unité ${name} consultée`);
     window.open(`https://allstartd.fandom.com/wiki/${encodeURIComponent(name)}`, '_blank');
   }
 }
@@ -2602,20 +2607,20 @@ function renderCodes() {
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-sky-500/15 text-sky-400 border border-sky-500/30">
-              Vérifié & Actif
+              ${t('code_verified_active', 'Vérifié & Actif')}
             </span>
-            <span class="text-[11px] text-slate-400 font-mono-num">${c.date || 'Récent'}</span>
+            <span class="text-[11px] text-slate-400 font-mono-num">${c.date || t('code_recent', 'Récent')}</span>
           </div>
           <div class="font-mono-num text-base font-bold text-white tracking-wide my-2 select-all bg-[#090e1c] px-3 py-2 rounded-lg border border-slate-800">
             ${c.code}
           </div>
           <div class="text-xs text-slate-300 bg-[#090e1c]/70 p-2.5 rounded-lg border border-slate-800/80">
-            <strong class="text-amber-300 font-sans">Récompenses :</strong> ${c.reward}
+            <strong class="text-amber-300 font-sans">${t('code_rewards_label', 'Récompenses :')}</strong> ${translateReward(c.reward)}
           </div>
         </div>
-        <button onclick="copyCodeText('${c.code}', this)" aria-label="Copier le code ${c.code}" class="w-full ps-3 pe-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs tracking-wide tap-scale flex items-center justify-center space-x-1.5 shadow-sm transition-colors">
+        <button onclick="copyCodeText('${c.code}', this)" aria-label="${t('btn_copy_code', 'Copier le code')} ${c.code}" class="w-full ps-3 pe-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs tracking-wide tap-scale flex items-center justify-center space-x-1.5 shadow-sm transition-colors">
           <i data-lucide="copy" class="w-3.5 h-3.5 text-white" stroke-width="2.5"></i>
-          <span>Copier le code</span>
+          <span>${t('btn_copy_code', 'Copier le code')}</span>
         </button>
       </div>
     `).join('');
@@ -2632,7 +2637,7 @@ function renderExpiredCodesList(list) {
   const expiredList = document.getElementById('expired-codes-list');
   if (!expiredList) return;
   if (list.length === 0) {
-    expiredList.innerHTML = `<span class="text-xs text-slate-400 italic py-1">Aucun code expiré ne correspond à cette recherche.</span>`;
+    expiredList.innerHTML = `<span class="text-xs text-slate-400 italic py-1">${t('no_expired_codes', 'Aucun code expiré ne correspond à cette recherche.')}</span>`;
     return;
   }
   expiredList.innerHTML = list.slice(0, 100).map(c => `
@@ -2667,10 +2672,10 @@ function copyLatestCode() {
 function copyCodeText(text, btnElement) {
   const btn = btnElement || (window.event && window.event.currentTarget);
   const doFeedback = () => {
-    showToast(`Code "${text}" copié !`);
+    showToast(t('toast_code_copied', 'Code "{code}" copié !').replace('{code}', text));
     if (btn) {
       const origHTML = btn.innerHTML;
-      btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i><span>Copié !</span>`;
+      btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i><span>${t('copied', 'Copié !')}</span>`;
       if (window.lucide) lucide.createIcons();
       setTimeout(() => {
         btn.innerHTML = origHTML;
@@ -2706,6 +2711,9 @@ function fallbackCopyText(text) {
 function renderOrbCard(o) {
   const fallback = 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
   const isUniversal = /toutes les unit|all units/i.test(o.require || '');
+  const requireText = isUniversal ? t('all_units_badge', '★ Toutes les unités') : o.require;
+  const requireTitle = isUniversal ? t('universal_orb_title', 'Équipable par toutes les unités') : t('restricted_orb_title', 'Réservé à cette unité (ou sa famille)');
+
   return `
     <div class="tactical-card rounded-xl p-4 border border-slate-800/80 bg-[#0f1629]/95 flex flex-col justify-between space-y-3 hover:border-sky-500/40 tap-scale-subtle transition-colors">
       <div>
@@ -2717,23 +2725,23 @@ function renderOrbCard(o) {
           <div class="min-w-0">
             <h4 class="font-bold text-xs text-white truncate">${o.name}</h4>
             <span class="text-[10px] font-semibold ${isUniversal ? 'text-sky-300' : 'text-slate-400'}"
-                  title="${isUniversal ? 'Équipable par toutes les unités' : 'Réservé à cette unité (ou sa famille)'}">
-              ${isUniversal ? '★ Toutes les unités' : o.require}
+                  title="${requireTitle}">
+              ${requireText}
             </span>
           </div>
         </div>
 
         <div class="space-y-1.5 text-xs">
           <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/80">
-            <strong class="text-amber-300 block text-[10px] uppercase font-sans">Bonus statistique :</strong>
-            <span class="text-slate-100 font-medium font-mono-num text-[11px]">${o.effect || 'Bonus spécial'}</span>
+            <strong class="text-amber-300 block text-[10px] uppercase font-sans">${t('stat_bonus_label', 'Bonus statistique :')}</strong>
+            <span class="text-slate-100 font-medium font-mono-num text-[11px]">${translateOrbEffect(o.effect) || t('special_bonus', 'Bonus spécial')}</span>
           </div>
           <div class="text-[11px] text-slate-400">
-            <strong class="text-slate-300 font-sans">Obtention :</strong> ${o.obtain || 'Trial / Raid'}
+            <strong class="text-slate-300 font-sans">${t('obtain_label', 'Obtention :')}</strong> ${translateObtain(o.obtain) || 'Trial / Raid'}
           </div>
           ${!isUniversal ? `
           <div class="text-[11px] text-slate-400">
-            <strong class="text-slate-300 font-sans">Compatible :</strong> <span class="text-sky-300">${o.require}</span>
+            <strong class="text-slate-300 font-sans">${t('compatible_label', 'Compatible :')}</strong> <span class="text-sky-300">${o.require}</span>
           </div>` : ''}
         </div>
       </div>
@@ -2765,13 +2773,13 @@ function filterOrbs() {
         <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto mb-3 text-cyan-400">
           <i data-lucide="search-x" class="w-6 h-6" stroke-width="2"></i>
         </div>
-        <h3 class="text-sm font-bold text-white text-balance">Aucun orbe trouvé</h3>
+        <h3 class="text-sm font-bold text-white text-balance">${t('no_orbs_found', 'Aucun orbe trouvé')}</h3>
         <p class="text-xs text-slate-400 mt-1 text-pretty">
-          Aucun orbe ne correspond à la recherche « <strong class="text-white">${query}</strong> ».
+          ${t('no_orbs_query', 'Aucun orbe ne correspond à la recherche « {q} ».').replace('{q}', `<strong class="text-white">${query}</strong>`)}
         </p>
         <button onclick="const el=document.getElementById('search-orbs'); if(el){el.value=''; filterOrbs();}" class="mt-4 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tap-scale inline-flex items-center gap-1.5 shadow-md">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5" stroke-width="2"></i>
-          <span>Effacer la recherche</span>
+          <span>${t('clear_search', 'Effacer la recherche')}</span>
         </button>
       </div>
     `;
@@ -2789,27 +2797,34 @@ function renderGameModes() {
   const grid = document.getElementById('gamemodes-grid');
   if (!grid) return;
 
-  grid.innerHTML = GAMEMODES_DATA.map(mode => `
-    <div class="tactical-card rounded-xl p-5 border border-slate-800/80 bg-[#0f1629]/95 space-y-3 hover:border-sky-500/40 transition-colors tap-scale-subtle">
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i data-lucide="swords" class="w-4 h-4 text-sky-400" stroke-width="2"></i>
-          <span>${mode.name}</span>
-        </h3>
-        <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-800 text-slate-300 border border-slate-700">
-          ${mode.type}
-        </span>
-      </div>
+  grid.innerHTML = GAMEMODES_DATA.map(mode => {
+    const name = currentLang === 'en' ? (mode.name_en || mode.name) : (mode.name_fr || mode.name);
+    const type = currentLang === 'en' ? (mode.type_en || mode.type) : (mode.type_fr || mode.type);
+    const desc = currentLang === 'en' ? (mode.description_en || mode.description) : (mode.description_fr || mode.description);
+    const rewards = translateReward(currentLang === 'en' ? (mode.rewards_en || mode.rewards) : (mode.rewards_fr || mode.rewards));
 
-      <p class="text-xs text-slate-300 leading-relaxed">
-        ${mode.description}
-      </p>
+    return `
+      <div class="tactical-card rounded-xl p-5 border border-slate-800/80 bg-[#0f1629]/95 space-y-3 hover:border-sky-500/40 transition-colors tap-scale-subtle">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="swords" class="w-4 h-4 text-sky-400" stroke-width="2"></i>
+            <span>${name}</span>
+          </h3>
+          <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+            ${type}
+          </span>
+        </div>
 
-      <div class="bg-[#090e1c] p-3 rounded-lg border border-slate-800/80 text-[11px]">
-        <strong class="text-amber-300 font-semibold">Récompenses :</strong> ${mode.rewards}
+        <p class="text-xs text-slate-300 leading-relaxed">
+          ${desc}
+        </p>
+
+        <div class="bg-[#090e1c] p-3 rounded-lg border border-slate-800/80 text-[11px]">
+          <strong class="text-amber-300 font-semibold">${t('mode_rewards_label', 'Récompenses :')}</strong> ${rewards}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   if (window.lucide) lucide.createIcons();
 }
@@ -2822,11 +2837,18 @@ function renderTeamBuilder() {
   const slotsContainer = document.getElementById('team-slots-container');
   if (!slotsContainer) return;
 
+  const removeLabelTpl = t('remove_from_deck');
+  const depLabel = t('dep_short');
+  const slotEmptySrTpl = t('slot_empty_sr');
+  const slotLabelTpl = t('slot_label');
+  const addTowerLabel = t('add_a_tower');
+
   slotsContainer.innerHTML = teamSlots.map((unit, idx) => {
     if (unit) {
+      const removeTitle = removeLabelTpl.replace('{name}', unit.name);
       return `
         <div class="tactical-card rounded-xl p-3 border border-slate-800/80 bg-[#0f1629]/95 relative flex flex-col items-center text-center group tap-scale-subtle">
-          <button onclick="removeUnitFromTeam(${idx})" aria-label="Retirer ${unit.name} du deck" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-600/90 hover:bg-rose-500 text-white flex items-center justify-center tap-scale transition-colors shadow-sm" title="Retirer ${unit.name} du deck">
+          <button onclick="removeUnitFromTeam(${idx})" aria-label="${removeTitle}" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-600/90 hover:bg-rose-500 text-white flex items-center justify-center tap-scale transition-colors shadow-sm" title="${removeTitle}">
             <i data-lucide="x" class="w-3.5 h-3.5" stroke-width="2.5"></i>
           </button>
           <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
@@ -2835,18 +2857,20 @@ function renderTeamBuilder() {
           <div class="font-bold text-xs text-white truncate w-full" title="${unit.name}">
             ${unit.name}
           </div>
-          <span class="text-[10px] text-amber-300 font-mono-num font-bold">${unit.star}★ • ${unit.tower_type || 'Ground'}</span>
+          <span class="text-[10px] text-amber-300 font-mono-num font-bold">${unit.star}★ • ${translateTowerType(unit.tower_type || 'Ground')}</span>
           <div class="text-[10px] text-slate-300 font-mono-num font-semibold mt-0.5">
-            Dép: $${(unit.deployment_cost || 0).toLocaleString()}
+            ${depLabel}: $${(unit.deployment_cost || 0).toLocaleString()}
           </div>
         </div>
       `;
     } else {
+      const slotEmptyAria = slotEmptySrTpl.replace('{n}', idx + 1);
+      const slotText = slotLabelTpl.replace('{n}', idx + 1);
       return `
-        <button type="button" onclick="focusTeamSearch()" aria-label="Slot ${idx + 1} vide. Cliquer pour rechercher une tour." class="border border-dashed border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center text-slate-400 h-36 hover:border-sky-500/50 hover:text-sky-400 tap-scale transition-colors cursor-pointer group w-full text-center bg-[#090e1c]/40">
+        <button type="button" onclick="focusTeamSearch()" aria-label="${slotEmptyAria}" class="border border-dashed border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center text-slate-400 h-36 hover:border-sky-500/50 hover:text-sky-400 tap-scale transition-colors cursor-pointer group w-full text-center bg-[#090e1c]/40">
           <i data-lucide="plus-circle" class="w-6 h-6 mb-1.5 text-slate-500 group-hover:text-sky-400 transition-colors" stroke-width="2"></i>
-          <span class="text-[11px] font-bold text-slate-300 group-hover:text-white transition-colors">SLOT ${idx + 1}</span>
-          <span class="text-[9px] text-slate-500 group-hover:text-slate-400 transition-colors">Ajouter une tour</span>
+          <span class="text-[11px] font-bold text-slate-300 group-hover:text-white transition-colors">${slotText}</span>
+          <span class="text-[9px] text-slate-500 group-hover:text-slate-400 transition-colors">${addTowerLabel}</span>
         </button>
       `;
     }
@@ -2888,19 +2912,19 @@ function updateTeamStats() {
     checklistEl.innerHTML = `
       <div class="p-2.5 rounded-xl ${hasGround ? 'bg-sky-950/40 border border-sky-500/40 text-sky-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
         <i data-lucide="${hasGround ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span class="font-medium">Anti-Sol (Ground)</span>
+        <span class="font-medium">${t('team_anti_ground')}</span>
       </div>
       <div class="p-2.5 rounded-xl ${hasAir ? 'bg-sky-950/40 border border-sky-500/40 text-sky-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
         <i data-lucide="${hasAir ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span class="font-medium">Anti-Aérien (Air)</span>
+        <span class="font-medium">${t('team_anti_air')}</span>
       </div>
       <div class="p-2.5 rounded-xl ${hasMoney ? 'bg-sky-950/40 border border-sky-500/40 text-sky-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
         <i data-lucide="${hasMoney ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span class="font-medium">Économie / Farm</span>
+        <span class="font-medium">${t('team_economy')}</span>
       </div>
       <div class="p-2.5 rounded-xl ${hasSlowOrSupport ? 'bg-sky-950/40 border border-sky-500/40 text-sky-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
         <i data-lucide="${hasSlowOrSupport ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span class="font-medium">Support / Contrôle</span>
+        <span class="font-medium">${t('team_support')}</span>
       </div>
     `;
   }
@@ -2916,6 +2940,7 @@ function renderTeamPicker() {
     return u.name.toLowerCase().includes(query) || (u.anime_origin || '').toLowerCase().includes(query);
   }).slice(0, 18);
 
+  const btnAddLabel = t('btn_add');
   pickerGrid.innerHTML = filtered.map(u => `
     <div class="tactical-card p-2.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 text-center flex flex-col items-center justify-between group">
       <div class="w-12 h-12 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
@@ -2923,8 +2948,8 @@ function renderTeamPicker() {
       </div>
       <div class="text-[11px] font-bold text-white truncate w-full" title="${u.name}">${u.name}</div>
       <span class="text-[10px] star-${u.star}-badge px-1.5 py-0.5 rounded my-1 font-mono-num font-bold">${u.star}★</span>
-      <button onclick="addUnitToTeam('${u.id}')" aria-label="Ajouter ${u.name} au deck" class="w-full py-1 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-[10px] font-bold tap-scale transition-colors shadow-sm">
-        + Ajouter
+      <button onclick="addUnitToTeam('${u.id}')" aria-label="${t('modal_btn_deck_aria')} (${u.name})" class="w-full py-1 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-[10px] font-bold tap-scale transition-colors shadow-sm">
+        ${btnAddLabel}
       </button>
     </div>
   `).join('');
@@ -2940,17 +2965,17 @@ function addUnitToTeam(unitId) {
 
   const emptyIndex = teamSlots.findIndex(s => s === null);
   if (emptyIndex === -1) {
-    showToast("Votre deck de 6 unités est plein !");
+    showToast(t('toast_team_full'));
     return;
   }
 
   if (teamSlots.some(s => s && s.id === unit.id)) {
-    showToast(`${unit.name} est déjà dans le deck !`);
+    showToast(t('toast_already_in_team').replace('{name}', unit.name));
     return;
   }
 
   teamSlots[emptyIndex] = unit;
-  showToast(`${unit.name} ajouté au slot ${emptyIndex + 1}`);
+  showToast(t('toast_added_to_team').replace('{name}', unit.name).replace('{slot}', emptyIndex + 1));
   renderTeamBuilder();
 }
 
@@ -2964,14 +2989,14 @@ function removeUnitFromTeam(index) {
   if (teamSlots[index]) {
     const name = teamSlots[index].name;
     teamSlots[index] = null;
-    showToast(`${name} retiré du deck`);
+    showToast(t('toast_removed_from_team').replace('{name}', name));
     renderTeamBuilder();
   }
 }
 
 function clearTeam() {
   teamSlots = [null, null, null, null, null, null];
-  showToast("Le deck a été vidé");
+  showToast(t('toast_team_cleared'));
   renderTeamBuilder();
 }
 
@@ -3128,7 +3153,7 @@ function startCompareWith(unitId) {
   }
 
   switchTab('compare');
-  showToast(`« ${unit.name} » ajouté au comparateur`);
+  showToast(t('toast_added_to_compare').replace('{name}', unit.name));
 }
 
 function startCompareWithModalUnit() {
@@ -3145,7 +3170,7 @@ function handleCompareSearch(slot) {
   if (!input || !dropdown) return;
 
   if (!ALL_UNITS || ALL_UNITS.length === 0) {
-    dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center italic">Chargement des unités en cours...</div>`;
+    dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center italic">${t('loading_units')}</div>`;
     dropdown.classList.remove('hidden');
     return;
   }
@@ -3160,7 +3185,7 @@ function handleCompareSearch(slot) {
   }).slice(0, 10);
 
   if (matches.length === 0) {
-    dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center italic">Aucune unité trouvée</div>`;
+    dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center italic">${t('no_units_found')}</div>`;
     dropdown.classList.remove('hidden');
     return;
   }
@@ -3176,12 +3201,12 @@ function handleCompareSearch(slot) {
         </div>
         <div class="min-w-0">
           <div class="text-xs font-bold text-white truncate">${u.name}</div>
-          <div class="text-[10px] text-slate-400 truncate">${u.anime_origin || 'All Star'}</div>
+          <div class="text-[10px] text-slate-400 truncate">${u.anime_origin || (currentLang === 'fr' ? 'Personnage All Star' : 'All Star Character')}</div>
         </div>
       </div>
       <div class="flex items-center space-x-1.5 shrink-0">
         <span class="text-[10px] font-mono-num font-bold px-1.5 py-0.5 rounded star-${u.star}-badge">${u.star}★</span>
-        <span class="text-[10px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-1 rounded">${u.tower_type || 'Ground'}</span>
+        <span class="text-[10px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-1 rounded">${translateTowerType(u.tower_type || 'Ground')}</span>
       </div>
     </div>
   `).join('');
@@ -3237,7 +3262,7 @@ function getUnitCompareStats(unit, at175, withIdol) {
 
 function evalMetric(valA, valB, higherIsBetter) {
   if (valA === valB) {
-    return { winner: 'tie', diffText: 'Égalité', pctA: 50, pctB: 50, pctDiffText: '0%' };
+    return { winner: 'tie', diffText: t('tie'), pctA: 50, pctB: 50, pctDiffText: '0%' };
   }
   const aWins = higherIsBetter ? valA > valB : valA < valB;
   const winner = aWins ? 'a' : 'b';
@@ -3282,24 +3307,41 @@ function generateTacticalVerdict(sA, sB) {
   const rangeEval = evalMetric(sA.maxRange, sB.maxRange, true);
   const costEval = evalMetric(sA.costPerDps, sB.costPerDps, false);
 
-  let dpsLeader = dpsEval.winner === 'a' ? uA.name : (dpsEval.winner === 'b' ? uB.name : "Égalité");
-  let spaLeader = spaEval.winner === 'a' ? uA.name : (spaEval.winner === 'b' ? uB.name : "Égalité");
-  let rangeLeader = rangeEval.winner === 'a' ? uA.name : (rangeEval.winner === 'b' ? uB.name : "Égalité");
-  let costLeader = costEval.winner === 'a' ? uA.name : (costEval.winner === 'b' ? uB.name : "Égalité");
+  const tieText = t('tie');
+  let dpsLeader = dpsEval.winner === 'a' ? uA.name : (dpsEval.winner === 'b' ? uB.name : tieText);
+  let spaLeader = spaEval.winner === 'a' ? uA.name : (spaEval.winner === 'b' ? uB.name : tieText);
+  let rangeLeader = rangeEval.winner === 'a' ? uA.name : (rangeEval.winner === 'b' ? uB.name : tieText);
+  let costLeader = costEval.winner === 'a' ? uA.name : (costEval.winner === 'b' ? uB.name : tieText);
 
   let recommendation = "";
-  if (dpsEval.winner === 'a') {
-    recommendation = `<strong>${uA.name}</strong> s'impose comme le choix prioritaire pour les vagues avancées et le <em>Mode Infini</em> grâce à son avantage massif de DPS (+${dpsEval.pctDiffText}).`;
-    if (spaEval.winner === 'b' || costEval.winner === 'b') {
-      recommendation += ` Cependant, <strong>${uB.name}</strong> reste redoutable en <em>Histoire / Début de partie</em> grâce à une cadence supérieure ou un investissement initial plus accessible.`;
-    }
-  } else if (dpsEval.winner === 'b') {
-    recommendation = `<strong>${uB.name}</strong> domine largement le duel en puissance brute (+${dpsEval.pctDiffText} DPS), idéale pour le <em>Mode Infini</em>.`;
-    if (spaEval.winner === 'a' || costEval.winner === 'a') {
-      recommendation += ` <strong>${uA.name}</strong> compense avec une meilleure rentabilité ou cadence d'attaque en soutien.`;
+  if (currentLang === 'en') {
+    if (dpsEval.winner === 'a') {
+      recommendation = `<strong>${uA.name}</strong> stands out as the primary choice for late waves and <em>Infinite Mode</em> thanks to its massive DPS advantage (+${dpsEval.pctDiffText}).`;
+      if (spaEval.winner === 'b' || costEval.winner === 'b') {
+        recommendation += ` However, <strong>${uB.name}</strong> remains formidable in <em>Story / Early Game</em> thanks to higher attack rate or a more accessible initial cost.`;
+      }
+    } else if (dpsEval.winner === 'b') {
+      recommendation = `<strong>${uB.name}</strong> widely dominates the matchup in raw damage (+${dpsEval.pctDiffText} DPS), ideal for <em>Infinite Mode</em>.`;
+      if (spaEval.winner === 'a' || costEval.winner === 'a') {
+        recommendation += ` <strong>${uA.name}</strong> compensates with better cost efficiency or faster attack rate in support.`;
+      }
+    } else {
+      recommendation = `Both units feature equivalent DPS. The choice will come down to range (${rangeLeader}), placement type (${translateTowerType(uA.tower_type)} vs ${translateTowerType(uB.tower_type)}), and passive abilities.`;
     }
   } else {
-    recommendation = `Les deux unités affichent un DPS équivalent. Le choix se fera sur la portée (${rangeLeader}), le type de placement (${uA.tower_type} vs ${uB.tower_type}) et leurs aptitudes passives.`;
+    if (dpsEval.winner === 'a') {
+      recommendation = `<strong>${uA.name}</strong> s'impose comme le choix prioritaire pour les vagues avancées et le <em>Mode Infini</em> grâce à son avantage massif de DPS (+${dpsEval.pctDiffText}).`;
+      if (spaEval.winner === 'b' || costEval.winner === 'b') {
+        recommendation += ` Cependant, <strong>${uB.name}</strong> reste redoutable en <em>Histoire / Début de partie</em> grâce à une cadence supérieure ou un investissement initial plus accessible.`;
+      }
+    } else if (dpsEval.winner === 'b') {
+      recommendation = `<strong>${uB.name}</strong> domine largement le duel en puissance brute (+${dpsEval.pctDiffText} DPS), idéale pour le <em>Mode Infini</em>.`;
+      if (spaEval.winner === 'a' || costEval.winner === 'a') {
+        recommendation += ` <strong>${uA.name}</strong> compense avec une meilleure rentabilité ou cadence d'attaque en soutien.`;
+      }
+    } else {
+      recommendation = `Les deux unités affichent un DPS équivalent. Le choix se fera sur la portée (${rangeLeader}), le type de placement (${translateTowerType(uA.tower_type)} vs ${translateTowerType(uB.tower_type)}) et leurs aptitudes passives.`;
+    }
   }
 
   return `
@@ -3307,32 +3349,32 @@ function generateTacticalVerdict(sA, sB) {
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <div class="flex items-center gap-2">
           <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
-          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Verdict & Synthèse Tactique</h3>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider">${t('verdict_title')}</h3>
         </div>
-        <span class="text-[10px] text-slate-400 font-medium">Analyse comparative automatisée</span>
+        <span class="text-[10px] text-slate-400 font-medium">${t('verdict_subtitle')}</span>
       </div>
 
       <!-- 4 pillars summary grid -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
         <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
-          <span class="text-[10px] text-slate-400 block font-semibold uppercase">💥 DPS Brut</span>
+          <span class="text-[10px] text-slate-400 block font-semibold uppercase">${t('pillar_dps')}</span>
           <span class="font-bold ${dpsEval.winner === 'a' ? 'text-sky-300' : (dpsEval.winner === 'b' ? 'text-amber-300' : 'text-slate-200')} truncate block mt-0.5" title="${dpsLeader}">${dpsLeader}</span>
-          <span class="text-[9px] text-slate-400">${dpsEval.pctDiffText} d'écart</span>
+          <span class="text-[9px] text-slate-400">${dpsEval.pctDiffText} ${t('verdict_diff')}</span>
         </div>
         <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
-          <span class="text-[10px] text-slate-400 block font-semibold uppercase">⚡ Cadence (SPA)</span>
+          <span class="text-[10px] text-slate-400 block font-semibold uppercase">${t('pillar_spa')}</span>
           <span class="font-bold ${spaEval.winner === 'a' ? 'text-sky-300' : (spaEval.winner === 'b' ? 'text-amber-300' : 'text-slate-200')} truncate block mt-0.5" title="${spaLeader}">${spaLeader}</span>
-          <span class="text-[9px] text-slate-400">${spaEval.pctDiffText} plus rapide</span>
+          <span class="text-[9px] text-slate-400">${spaEval.pctDiffText} ${t('verdict_faster')}</span>
         </div>
         <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
-          <span class="text-[10px] text-slate-400 block font-semibold uppercase">🎯 Portée</span>
+          <span class="text-[10px] text-slate-400 block font-semibold uppercase">${t('pillar_range')}</span>
           <span class="font-bold ${rangeEval.winner === 'a' ? 'text-sky-300' : (rangeEval.winner === 'b' ? 'text-amber-300' : 'text-slate-200')} truncate block mt-0.5" title="${rangeLeader}">${rangeLeader}</span>
-          <span class="text-[9px] text-slate-400">${rangeEval.pctDiffText} de rayon</span>
+          <span class="text-[9px] text-slate-400">${rangeEval.pctDiffText} ${t('verdict_radius')}</span>
         </div>
         <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
-          <span class="text-[10px] text-slate-400 block font-semibold uppercase">💰 Rentabilité ($/DPS)</span>
+          <span class="text-[10px] text-slate-400 block font-semibold uppercase">${t('pillar_cost')}</span>
           <span class="font-bold ${costEval.winner === 'a' ? 'text-sky-300' : (costEval.winner === 'b' ? 'text-amber-300' : 'text-slate-200')} truncate block mt-0.5" title="${costLeader}">${costLeader}</span>
-          <span class="text-[9px] text-slate-400">meilleur ratio</span>
+          <span class="text-[9px] text-slate-400">${t('verdict_ratio')}</span>
         </div>
       </div>
 
@@ -3360,9 +3402,9 @@ function renderCompareView() {
           <i data-lucide="arrow-left-right" class="w-7 h-7" stroke-width="2"></i>
         </div>
         <div>
-          <h3 class="text-base font-bold text-white">Sélectionnez 2 personnages pour comparer</h3>
+          <h3 class="text-base font-bold text-white">${t('compare_empty_title')}</h3>
           <p class="text-xs text-slate-400 mt-1 leading-relaxed text-pretty">
-            Utilisez les champs de recherche ci-dessus pour désigner les deux unités à confronter, ou lancez un duel populaire en un clic.
+            ${t('compare_empty_desc')}
           </p>
         </div>
 
@@ -3372,10 +3414,10 @@ function renderCompareView() {
               <span class="w-2 h-2 rounded-full bg-sky-400"></span>
               <span class="text-white font-bold">${compareUnitA.name}</span>
               <span class="text-sky-300 font-mono-num font-bold text-[10px]">${compareUnitA.star}★</span>
-              <span class="text-slate-400 italic text-[11px]">— choisissez la 2nde unité</span>
+              <span class="text-slate-400 italic text-[11px]">${t('compare_choose_second')}</span>
             </div>
           ` : `
-            <span class="text-xs text-slate-500 italic">Aucune unité sélectionnée pour le moment.</span>
+            <span class="text-xs text-slate-500 italic">${t('compare_no_unit')}</span>
           `}
         </div>
       </div>
@@ -3390,14 +3432,14 @@ function renderCompareView() {
 
   // Stats evaluation
   const metrics = [
-    { label: "Dégâts Max", key: 'maxDmg', valA: sA.maxDmg, valB: sB.maxDmg, higherBetter: true, format: v => v.toLocaleString(), isDps: false },
-    { label: "DPS Max Estimé", key: 'maxDps', valA: sA.maxDps, valB: sB.maxDps, higherBetter: true, format: v => v.toLocaleString(), isDps: true },
-    { label: "Portée d'Attaque (Range)", key: 'maxRange', valA: sA.maxRange, valB: sB.maxRange, higherBetter: true, format: v => v, isDps: false },
-    { label: "SPA (Cadence d'attaque)", key: 'minSpa', valA: sA.minSpa, valB: sB.minSpa, higherBetter: false, format: v => v + 's', isDps: false, note: "Plus bas = plus rapide" },
-    { label: "Coût de Déploiement", key: 'deployCost', valA: sA.deployCost, valB: sB.deployCost, higherBetter: false, format: v => '$' + v.toLocaleString(), isDps: false, note: "Plus bas = plus facile à poser" },
-    { label: "Coût Total d'Amélioration", key: 'totalCost', valA: sA.totalCost, valB: sB.totalCost, higherBetter: false, format: v => '$' + v.toLocaleString(), isDps: false, note: "Plus bas = maxé plus tôt" },
-    { label: "Coût par point de DPS ($/DPS)", key: 'costPerDps', valA: sA.costPerDps, valB: sB.costPerDps, higherBetter: false, format: v => '$' + v, isDps: false, note: "Plus bas = plus rentable" },
-    { label: "Paliers d'Amélioration", key: 'upgradeCount', valA: sA.upgradeCount, valB: sB.upgradeCount, higherBetter: false, format: v => v + ' paliers', isDps: false, note: "Moins de paliers = maxé plus rapidement" }
+    { label: t('metric_dmg_max'), key: 'maxDmg', valA: sA.maxDmg, valB: sB.maxDmg, higherBetter: true, format: v => v.toLocaleString(), isDps: false },
+    { label: t('metric_dps_max'), key: 'maxDps', valA: sA.maxDps, valB: sB.maxDps, higherBetter: true, format: v => v.toLocaleString(), isDps: true },
+    { label: t('metric_range'), key: 'maxRange', valA: sA.maxRange, valB: sB.maxRange, higherBetter: true, format: v => v, isDps: false },
+    { label: t('metric_spa'), key: 'minSpa', valA: sA.minSpa, valB: sB.minSpa, higherBetter: false, format: v => v + 's', isDps: false, note: t('note_spa') },
+    { label: t('metric_deploy_cost'), key: 'deployCost', valA: sA.deployCost, valB: sB.deployCost, higherBetter: false, format: v => '$' + v.toLocaleString(), isDps: false, note: t('note_deploy') },
+    { label: t('metric_total_cost'), key: 'totalCost', valA: sA.totalCost, valB: sB.totalCost, higherBetter: false, format: v => '$' + v.toLocaleString(), isDps: false, note: t('note_total') },
+    { label: t('metric_cost_per_dps'), key: 'costPerDps', valA: sA.costPerDps, valB: sB.costPerDps, higherBetter: false, format: v => '$' + v, isDps: false, note: t('note_efficiency') },
+    { label: t('metric_upgrades_count'), key: 'upgradeCount', valA: sA.upgradeCount, valB: sB.upgradeCount, higherBetter: false, format: v => `${v} ${t('tiers_word')}`, isDps: false, note: t('note_upgrades') }
   ];
 
   container.innerHTML = `
@@ -3414,28 +3456,28 @@ function renderCompareView() {
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="px-2 py-0.5 rounded text-[10px] font-mono-num font-bold star-${compareUnitA.star}-badge shadow-sm">${compareUnitA.star}★</span>
-                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded">${compareUnitA.tower_type || 'Ground'}</span>
-                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 rounded">${compareUnitA.attack_type || 'AoE'}</span>
+                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded">${translateTowerType(compareUnitA.tower_type || 'Ground')}</span>
+                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 rounded">${translateAttackType(compareUnitA.attack_type || 'AoE')}</span>
               </div>
               <h3 class="font-bold text-sm sm:text-base text-white truncate mt-1 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span>
                 <span>${compareUnitA.name}</span>
               </h3>
-              <p class="text-[11px] text-slate-400 truncate">${compareUnitA.anime_origin || 'All Star'}</p>
+              <p class="text-[11px] text-slate-400 truncate">${compareUnitA.anime_origin || (currentLang === 'fr' ? 'Personnage All Star' : 'All Star Character')}</p>
             </div>
           </div>
-          <button onclick="openUnitModal('${compareUnitA.id}')" aria-label="Consulter la fiche complète de ${compareUnitA.name}" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale transition-colors shrink-0">
-            Fiche
+          <button onclick="openUnitModal('${compareUnitA.id}')" aria-label="${t('modal_btn_compare_aria')} (${compareUnitA.name})" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale transition-colors shrink-0">
+            ${t('btn_card')}
           </button>
         </div>
 
         <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800 font-mono-num text-[11px]">
           <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
-            <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS Max (A)</span>
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">${t('dps_max_a')}</span>
             <span class="font-bold text-sky-300 text-xs">${sA.maxDps.toLocaleString()}</span>
           </div>
           <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
-            <span class="text-slate-400 block text-[9px] font-sans uppercase">Dégâts Max (A)</span>
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">${t('dmg_max_a')}</span>
             <span class="font-bold text-slate-100 text-xs">${sA.maxDmg.toLocaleString()}</span>
           </div>
         </div>
@@ -3451,28 +3493,28 @@ function renderCompareView() {
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="px-2 py-0.5 rounded text-[10px] font-mono-num font-bold star-${compareUnitB.star}-badge shadow-sm">${compareUnitB.star}★</span>
-                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded">${compareUnitB.tower_type || 'Ground'}</span>
-                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 rounded">${compareUnitB.attack_type || 'AoE'}</span>
+                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded">${translateTowerType(compareUnitB.tower_type || 'Ground')}</span>
+                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 rounded">${translateAttackType(compareUnitB.attack_type || 'AoE')}</span>
               </div>
               <h3 class="font-bold text-sm sm:text-base text-white truncate mt-1 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
                 <span>${compareUnitB.name}</span>
               </h3>
-              <p class="text-[11px] text-slate-400 truncate">${compareUnitB.anime_origin || 'All Star'}</p>
+              <p class="text-[11px] text-slate-400 truncate">${compareUnitB.anime_origin || (currentLang === 'fr' ? 'Personnage All Star' : 'All Star Character')}</p>
             </div>
           </div>
-          <button onclick="openUnitModal('${compareUnitB.id}')" aria-label="Consulter la fiche complète de ${compareUnitB.name}" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-amber-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale transition-colors shrink-0">
-            Fiche
+          <button onclick="openUnitModal('${compareUnitB.id}')" aria-label="${t('modal_btn_compare_aria')} (${compareUnitB.name})" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-amber-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale transition-colors shrink-0">
+            ${t('btn_card')}
           </button>
         </div>
 
         <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800 font-mono-num text-[11px]">
           <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
-            <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS Max (B)</span>
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">${t('dps_max_b')}</span>
             <span class="font-bold text-amber-300 text-xs">${sB.maxDps.toLocaleString()}</span>
           </div>
           <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
-            <span class="text-slate-400 block text-[9px] font-sans uppercase">Dégâts Max (B)</span>
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">${t('dmg_max_b')}</span>
             <span class="font-bold text-slate-100 text-xs">${sB.maxDmg.toLocaleString()}</span>
           </div>
         </div>
@@ -3488,7 +3530,7 @@ function renderCompareView() {
       <div class="p-3.5 bg-[#141d33] border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div class="flex items-center gap-2">
           <i data-lucide="sliders-horizontal" class="w-4 h-4 text-sky-400"></i>
-          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Tableau Comparatif des Statistiques (Palier Max)</h3>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider">${t('compare_table_title')}</h3>
         </div>
         <div class="flex items-center gap-2 text-[11px] font-mono-num flex-wrap">
           <span class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-sky-950/60 border border-sky-500/40 text-sky-300 font-bold">
@@ -3531,7 +3573,7 @@ function renderCompareView() {
                     </span>
                   ` : `
                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
-                      Égalité
+                      ${t('tie')}
                     </span>
                   `}
                 </div>
@@ -3559,7 +3601,7 @@ function renderCompareView() {
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
           <i data-lucide="zap" class="w-4 h-4 text-amber-300"></i>
-          <span>Capacités Spéciales, Passifs & Leader</span>
+          <span>${t('compare_abilities_title')}</span>
         </h3>
       </div>
 
@@ -3570,23 +3612,23 @@ function renderCompareView() {
           <div class="text-xs font-bold text-sky-300 flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-sky-400"></span>
             <span>${compareUnitA.name}</span>
-            <span class="text-slate-500 font-normal">(${(compareUnitA.abilities || []).length} capacité${(compareUnitA.abilities || []).length > 1 ? 's' : ''})</span>
+            <span class="text-slate-500 font-normal">(${currentLang === 'fr' ? `${(compareUnitA.abilities || []).length} capacité${(compareUnitA.abilities || []).length > 1 ? 's' : ''}` : `${(compareUnitA.abilities || []).length} abilit${(compareUnitA.abilities || []).length > 1 ? 'ies' : 'y'}`})</span>
           </div>
           ${(compareUnitA.abilities && compareUnitA.abilities.length > 0) ? `
             <div class="space-y-2">
               ${compareUnitA.abilities.map(ab => `
                 <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/80 text-xs space-y-1">
                   <div class="flex items-center justify-between">
-                    <strong class="text-white">${ab.name}</strong>
-                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-900 border border-slate-700 text-slate-300">${ab.type || 'Capacité'}</span>
+                    <strong class="text-white">${translateAbilityName(ab.name)}</strong>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-900 border border-slate-700 text-slate-300">${translateUnlock(ab.type) || (ab.type ? ab.type : (currentLang === 'fr' ? 'Capacité' : 'Ability'))}</span>
                   </div>
-                  <p class="text-[11px] text-slate-300 leading-relaxed">${stripWikiMarkup(ab.description)}</p>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">${translateObtain(stripWikiMarkup(ab.description))}</p>
                 </div>
               `).join('')}
             </div>
           ` : `
             <div class="p-3 text-xs text-slate-500 italic bg-[#090e1c] rounded-lg border border-slate-800/60">
-              Aucune capacité spéciale documentée.
+              ${t('no_abilities_documented')}
             </div>
           `}
         </div>
@@ -3596,23 +3638,23 @@ function renderCompareView() {
           <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-amber-400"></span>
             <span>${compareUnitB.name}</span>
-            <span class="text-slate-500 font-normal">(${(compareUnitB.abilities || []).length} capacité${(compareUnitB.abilities || []).length > 1 ? 's' : ''})</span>
+            <span class="text-slate-500 font-normal">(${currentLang === 'fr' ? `${(compareUnitB.abilities || []).length} capacité${(compareUnitB.abilities || []).length > 1 ? 's' : ''}` : `${(compareUnitB.abilities || []).length} abilit${(compareUnitB.abilities || []).length > 1 ? 'ies' : 'y'}`})</span>
           </div>
           ${(compareUnitB.abilities && compareUnitB.abilities.length > 0) ? `
             <div class="space-y-2">
               ${compareUnitB.abilities.map(ab => `
                 <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/80 text-xs space-y-1">
                   <div class="flex items-center justify-between">
-                    <strong class="text-white">${ab.name}</strong>
-                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-900 border border-slate-700 text-slate-300">${ab.type || 'Capacité'}</span>
+                    <strong class="text-white">${translateAbilityName(ab.name)}</strong>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-900 border border-slate-700 text-slate-300">${translateUnlock(ab.type) || (ab.type ? ab.type : (currentLang === 'fr' ? 'Capacité' : 'Ability'))}</span>
                   </div>
-                  <p class="text-[11px] text-slate-300 leading-relaxed">${stripWikiMarkup(ab.description)}</p>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">${translateObtain(stripWikiMarkup(ab.description))}</p>
                 </div>
               `).join('')}
             </div>
           ` : `
             <div class="p-3 text-xs text-slate-500 italic bg-[#090e1c] rounded-lg border border-slate-800/60">
-              Aucune capacité spéciale documentée.
+              ${t('no_abilities_documented')}
             </div>
           `}
         </div>
@@ -3711,5 +3753,18 @@ if (typeof window !== 'undefined') {
   window.filterOrbs = filterOrbs;
   window.showToast = showToast;
   window.initSafeAds = initSafeAds;
+
+  // I18N Bilingue (FR / EN)
+  window.I18N = I18N;
+  window.setLanguage = setLanguage;
+  window.t = t;
+  window.currentLang = currentLang;
+  window.translateTowerType = translateTowerType;
+  window.translateAttackType = translateAttackType;
+  window.translateAbilityName = translateAbilityName;
+  window.translateUnlock = translateUnlock;
+  window.translateObtain = translateObtain;
+  window.translateReward = translateReward;
+  window.translateOrbEffect = translateOrbEffect;
 }
 
