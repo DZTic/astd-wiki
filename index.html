@@ -94,6 +94,10 @@
             <i data-lucide="layout-grid" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
             <span>Deck Builder</span>
           </button>
+          <button onclick="switchTab('compare')" id="nav-compare" data-tab="compare" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
+            <i data-lucide="arrow-left-right" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
+            <span>Comparateur</span>
+          </button>
         </nav>
 
         <!-- Right Quick Actions -->
@@ -144,6 +148,10 @@
         <i data-lucide="layout-grid" class="w-3.5 h-3.5" stroke-width="2"></i>
         <span>Deck</span>
       </button>
+      <button onclick="switchTab('compare')" data-tab="compare" class="mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5 tap-scale">
+        <i data-lucide="arrow-left-right" class="w-3.5 h-3.5" stroke-width="2"></i>
+        <span>Comparer</span>
+      </button>
     </div>
 
     <!-- Mobile Drawer Dropdown -->
@@ -179,6 +187,10 @@
         <button onclick="switchTabAndCloseDrawer('teambuilder')" data-tab="teambuilder" class="drawer-link p-2.5 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 tap-scale">
           <i data-lucide="layout-grid" class="w-4 h-4" stroke-width="2"></i>
           <span>Simulateur Deck</span>
+        </button>
+        <button onclick="switchTabAndCloseDrawer('compare')" data-tab="compare" class="drawer-link p-2.5 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 tap-scale col-span-2">
+          <i data-lucide="arrow-left-right" class="w-4 h-4 text-sky-400" stroke-width="2"></i>
+          <span>Comparateur de Personnages</span>
         </button>
       </div>
     </div>
@@ -546,6 +558,130 @@
 
     </section>
 
+    <!-- ==================== TAB 7 : COMPARATEUR ==================== -->
+    <section id="tab-compare" class="tab-content hidden space-y-4" aria-labelledby="compare-heading">
+      
+      <!-- Top Tactical Header with Level & Buff Idol Controls -->
+      <div class="tactical-card p-4 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div>
+          <h2 id="compare-heading" class="text-lg font-bold text-white flex items-center gap-2 text-balance">
+            <i data-lucide="arrow-left-right" class="w-5 h-5 text-sky-400" stroke-width="2"></i>
+            <span>Comparateur de Personnages</span>
+          </h2>
+          <p class="text-xs text-slate-400 text-pretty mt-0.5">
+            Confrontez deux unités face à face : DPS, portée, cadence, efficacité économique et aptitudes.
+          </p>
+        </div>
+
+        <!-- Global Compare Settings: Level 1 vs 175 & Idol Buff -->
+        <div class="flex items-center flex-wrap gap-2">
+          <!-- Level view toggle -->
+          <div class="flex items-center gap-1 bg-[#090e1c] p-1 rounded-lg border border-slate-800" role="group" aria-label="Niveau de carte pour la comparaison">
+            <button id="btn-compare-lvl-1" onclick="setCompareLevel(1)" aria-pressed="true" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-600 text-white border border-sky-500 tap-scale transition-colors shadow-sm">
+              Level 1
+            </button>
+            <button id="btn-compare-lvl-175" onclick="setCompareLevel(175)" aria-pressed="false" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-900 text-slate-300 border border-slate-800 hover:border-sky-500/50 hover:text-white tap-scale transition-colors">
+              Level 175 ★
+            </button>
+          </div>
+
+          <!-- Idol buff toggle -->
+          <label for="compare-idol-buff-toggle" class="cursor-pointer select-none px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-[#090e1c] border border-slate-800 hover:border-sky-500/40 text-slate-300 flex items-center gap-1.5 tap-scale transition-colors" title="Simuler avec le buff de dégâts d'Idol (aptitude Shine au palier max)">
+            <input type="checkbox" id="compare-idol-buff-toggle" onchange="toggleCompareIdolBuff()" class="rounded bg-slate-900 border-slate-700 text-sky-600 focus:ring-0 cursor-pointer">
+            <i data-lucide="music" class="w-3.5 h-3.5 text-sky-400" stroke-width="2"></i>
+            <span>Buff Idol</span>
+            <span id="compare-idol-pct" class="font-mono-num text-sky-300 font-bold text-[10px]">+130%</span>
+          </label>
+
+          <!-- Reset button -->
+          <button onclick="clearCompare()" class="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-700/50 text-slate-400 hover:text-rose-300 tap-scale transition-colors" title="Réinitialiser la comparaison" aria-label="Réinitialiser le comparateur">
+            <i data-lucide="rotate-ccw" class="w-4 h-4" stroke-width="2"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Selector Strip: Slot A vs Slot B with Swap Button -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+        
+        <!-- Slot A Selector -->
+        <div class="md:col-span-5 tactical-card p-3.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 relative">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+              <span class="text-xs font-bold text-sky-300 uppercase tracking-wider">Personnage 1</span>
+            </div>
+            <button id="compare-clear-a" onclick="clearCompareSlot('a')" class="text-[10px] text-slate-500 hover:text-rose-400 font-medium transition-colors hidden">
+              Retirer
+            </button>
+          </div>
+          <div class="relative">
+            <label for="compare-search-a" class="sr-only">Rechercher le premier personnage</label>
+            <input type="text" id="compare-search-a" oninput="handleCompareSearch('a')" onfocus="handleCompareSearch('a')" placeholder="Choisir une unité (ex: Demon Of Emotion)..."
+                   aria-label="Rechercher le premier personnage"
+                   autocomplete="off"
+                   class="w-full bg-[#070b14] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute right-3 top-2.5 pointer-events-none" stroke-width="1.75"></i>
+            <!-- Autocomplete list -->
+            <div id="compare-dropdown-a" class="compare-autocomplete-dropdown hidden"></div>
+          </div>
+        </div>
+
+        <!-- Central Swap Button (⇄) -->
+        <div class="md:col-span-2 flex justify-center py-1 md:py-0">
+          <button onclick="swapCompareUnits()" aria-label="Inverser les deux personnages" class="w-10 h-10 rounded-full bg-[#090e1c] hover:bg-sky-600 hover:text-white border border-slate-700/80 text-sky-400 flex items-center justify-center tap-scale transition-colors shadow-md group" title="Inverser A ⇄ B">
+            <i data-lucide="arrow-left-right" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" stroke-width="2.5"></i>
+          </button>
+        </div>
+
+        <!-- Slot B Selector -->
+        <div class="md:col-span-5 tactical-card p-3.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 relative">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Personnage 2</span>
+            </div>
+            <button id="compare-clear-b" onclick="clearCompareSlot('b')" class="text-[10px] text-slate-500 hover:text-rose-400 font-medium transition-colors hidden">
+              Retirer
+            </button>
+          </div>
+          <div class="relative">
+            <label for="compare-search-b" class="sr-only">Rechercher le second personnage</label>
+            <input type="text" id="compare-search-b" oninput="handleCompareSearch('b')" onfocus="handleCompareSearch('b')" placeholder="Choisir une unité (ex: Joke Da Fool)..."
+                   aria-label="Rechercher le second personnage"
+                   autocomplete="off"
+                   class="w-full bg-[#070b14] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute right-3 top-2.5 pointer-events-none" stroke-width="1.75"></i>
+            <!-- Autocomplete list -->
+            <div id="compare-dropdown-b" class="compare-autocomplete-dropdown hidden"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Dual Preset Suggestions -->
+      <div id="compare-presets-strip" class="flex items-center flex-wrap gap-2 text-xs text-slate-400 bg-[#090e1c]/70 p-2.5 rounded-xl border border-slate-800/80">
+        <span class="text-[11px] font-semibold text-slate-400 flex items-center gap-1 shrink-0">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400"></i>
+          Duels populaires :
+        </span>
+        <button onclick="loadComparePreset('demon_of_emotion', 'joke_da_fool')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 text-[11px] font-semibold tap-scale transition-colors">
+          Demon Of Emotion vs Joke Da Fool (7★)
+        </button>
+        <button onclick="loadComparePreset('idol', 'metallic_king')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 text-[11px] font-semibold tap-scale transition-colors">
+          Idol vs Metallic King (Buffers)
+        </button>
+        <button onclick="loadComparePreset('stampede', 'guts')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 text-[11px] font-semibold tap-scale transition-colors">
+          Stampede vs Guts
+        </button>
+      </div>
+
+      <!-- Dynamic Comparison Content Display -->
+      <div id="compare-display-area" class="space-y-4">
+        <!-- Rendered dynamically by renderCompareView() -->
+      </div>
+
+    </section>
+
   </main>
 
   <!-- ==================== UNIT DETAILS MODAL (Tactical HUD) ==================== -->
@@ -588,12 +724,16 @@
             <div id="modal-added-date" class="mt-1 text-center text-[10px] text-slate-400 font-sans hidden">
               Ajoutée le —
             </div>
-            <div class="flex items-center space-x-2 mt-3 w-full">
-              <button id="modal-add-team-btn" onclick="addCurrentModalUnitToTeam()" class="flex-1 ps-3.5 pe-3 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 tap-scale" aria-label="Ajouter cette unité au deck">
+            <div class="flex items-center space-x-1.5 mt-3 w-full">
+              <button id="modal-add-team-btn" onclick="addCurrentModalUnitToTeam()" class="flex-1 ps-3 pe-2.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 tap-scale" aria-label="Ajouter cette unité au deck">
                 <i data-lucide="plus-circle" class="w-3.5 h-3.5" stroke-width="2"></i>
                 <span>+ Deck</span>
               </button>
-              <a id="modal-fandom-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white tap-scale flex items-center justify-center" title="Fiche Fandom Wiki" aria-label="Consulter la page officielle Fandom de cette unité (nouvelle fenêtre)">
+              <button id="modal-compare-btn" onclick="startCompareWithModalUnit()" class="px-2.5 py-2 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-700 text-slate-300 font-semibold text-xs flex items-center justify-center space-x-1 tap-scale transition-colors" title="Comparer cette unité avec une autre" aria-label="Comparer cette unité">
+                <i data-lucide="arrow-left-right" class="w-3.5 h-3.5" stroke-width="2"></i>
+                <span class="hidden sm:inline">Comparer</span>
+              </button>
+              <a id="modal-fandom-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white tap-scale flex items-center justify-center" title="Fiche Fandom Wiki" aria-label="Consulter la page officielle Fandom de cette unité (nouvelle fenêtre)">
                 <i data-lucide="external-link" class="w-3.5 h-3.5" stroke-width="1.75"></i>
               </a>
             </div>

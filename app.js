@@ -308,7 +308,31 @@ function handleHashNavigation() {
   if (hash.startsWith('unit/')) {
     const unitId = hash.replace('unit/', '');
     openUnitModal(unitId);
-  } else if (['units', 'tierlist', 'codes', 'orbs', 'gamemodes', 'teambuilder'].includes(hash)) {
+  } else if (hash.startsWith('compare')) {
+    const parts = hash.split('/');
+    if (parts[1]) {
+      const uA = ALL_UNITS.find(u => u.id === parts[1] || u.name.toLowerCase() === parts[1].toLowerCase());
+      if (uA) {
+        compareUnitA = uA;
+        const inputA = document.getElementById('compare-search-a');
+        if (inputA) inputA.value = uA.name;
+        const clearBtnA = document.getElementById('compare-clear-a');
+        if (clearBtnA) clearBtnA.classList.remove('hidden');
+      }
+    }
+    if (parts[2]) {
+      const uB = ALL_UNITS.find(u => u.id === parts[2] || u.name.toLowerCase() === parts[2].toLowerCase());
+      if (uB) {
+        compareUnitB = uB;
+        const inputB = document.getElementById('compare-search-b');
+        if (inputB) inputB.value = uB.name;
+        const clearBtnB = document.getElementById('compare-clear-b');
+        if (clearBtnB) clearBtnB.classList.remove('hidden');
+      }
+    }
+    switchTab('compare');
+    renderCompareView();
+  } else if (['units', 'tierlist', 'codes', 'orbs', 'gamemodes', 'teambuilder', 'compare'].includes(hash)) {
     switchTab(hash);
   }
 }
@@ -323,6 +347,10 @@ function switchTab(tabId) {
   });
   const targetSection = document.getElementById(`tab-${tabId}`);
   if (targetSection) targetSection.classList.remove('hidden');
+
+  if (tabId === 'compare') {
+    renderCompareView();
+  }
 
   updateNavActiveState(tabId);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -655,10 +683,13 @@ function renderUnitsTable() {
       <td class="p-3 font-bold text-amber-300 font-mono-num" title="${u.max_dps.toLocaleString()} DPS">${formatCompactNumber(u.max_dps)}</td>
       <td class="p-3 text-slate-300 font-mono-num">${u.total_cost > 0 ? '$' + formatCompactNumber(u.total_cost) : '-'}</td>
       <td class="p-3 text-right space-x-1.5 font-sans" onclick="event.stopPropagation()">
-        <button onclick="openUnitModal('${u.id}')" aria-label="Consulter la fiche de ${u.name}" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale">
+        <button onclick="openUnitModal('${u.id}')" aria-label="Consulter la fiche de ${u.name}" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale transition-colors">
           Fiche
         </button>
-        <button onclick="addUnitToTeam('${u.id}')" aria-label="Ajouter ${u.name} au deck" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale" title="Ajouter au deck">
+        <button onclick="startCompareWith('${u.id}')" aria-label="Comparer ${u.name}" class="px-2 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale transition-colors" title="Comparer cette unité">
+          ⇄
+        </button>
+        <button onclick="addUnitToTeam('${u.id}')" aria-label="Ajouter ${u.name} au deck" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale transition-colors" title="Ajouter au deck">
           +
         </button>
       </td>
@@ -765,6 +796,9 @@ function createUnitCardHTML(unit) {
         <button onclick="openUnitModal('${unit.id}')" aria-label="Consulter la fiche de ${unit.name}" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1 transition-colors">
           <i data-lucide="eye" class="w-3 h-3" stroke-width="2"></i>
           <span>Fiche</span>
+        </button>
+        <button onclick="startCompareWith('${unit.id}')" aria-label="Comparer ${unit.name}" class="px-2 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="Comparer cette unité">
+          <i data-lucide="arrow-left-right" class="w-3 h-3" stroke-width="2"></i>
         </button>
         <button onclick="addUnitToTeam('${unit.id}')" aria-label="Ajouter ${unit.name} au deck" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="Ajouter au deck">
           +
@@ -1903,6 +1937,626 @@ function clearTeam() {
   teamSlots = [null, null, null, null, null, null];
   showToast("Le deck a été vidé");
   renderTeamBuilder();
+}
+
+// ==========================================
+// COMPARATEUR DE PERSONNAGES (TACTICAL VERSUS)
+// ==========================================
+
+let compareUnitA = null;
+let compareUnitB = null;
+let compareLevelView = 1; // 1 | 175
+let compareIdolBuff = false;
+
+function setCompareLevel(lvl) {
+  if (lvl !== 1 && lvl !== 175) return;
+  compareLevelView = lvl;
+  const btn1 = document.getElementById('btn-compare-lvl-1');
+  const btn175 = document.getElementById('btn-compare-lvl-175');
+  if (btn1) {
+    btn1.className = `px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors shadow-sm ${lvl === 1 ? 'bg-sky-600 text-white border border-sky-500' : 'bg-slate-900 text-slate-300 border border-slate-800 hover:border-sky-500/50 hover:text-white'}`;
+    btn1.setAttribute('aria-pressed', lvl === 1 ? 'true' : 'false');
+  }
+  if (btn175) {
+    btn175.className = `px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors ${lvl === 175 ? 'bg-sky-600 text-white border border-sky-500' : 'bg-slate-900 text-slate-300 border border-slate-800 hover:border-sky-500/50 hover:text-white'}`;
+    btn175.setAttribute('aria-pressed', lvl === 175 ? 'true' : 'false');
+  }
+  const pctEl = document.getElementById('compare-idol-pct');
+  if (pctEl) {
+    pctEl.textContent = lvl === 175 ? '+250%' : '+130%';
+  }
+  renderCompareView();
+}
+
+function toggleCompareIdolBuff() {
+  const cb = document.getElementById('compare-idol-buff-toggle');
+  compareIdolBuff = cb ? cb.checked : !compareIdolBuff;
+  const pctEl = document.getElementById('compare-idol-pct');
+  if (pctEl) {
+    pctEl.textContent = compareLevelView === 175 ? '+250%' : '+130%';
+  }
+  renderCompareView();
+}
+
+function getCompareIdolMultiplier() {
+  if (!compareIdolBuff) return 1;
+  const p = findBuffProvider();
+  if (!p) return 1;
+  let low = 0, high = 0;
+  p.upgrades.forEach(up => {
+    if (up.buff_damage_low != null) low = Math.max(low, up.buff_damage_low);
+    if (up.buff_damage_high != null) high = Math.max(high, up.buff_damage_high);
+  });
+  const pct = compareLevelView === 175 ? (high || low) : (low || high);
+  return pct ? 1 + pct / 100 : 1;
+}
+
+function setCompareUnit(slot, unitOrId) {
+  let unit = null;
+  if (typeof unitOrId === 'string') {
+    unit = ALL_UNITS.find(u => u.id === unitOrId || u.name.toLowerCase() === unitOrId.toLowerCase()) || null;
+  } else {
+    unit = unitOrId;
+  }
+
+  if (slot === 'a') {
+    compareUnitA = unit;
+    const inputA = document.getElementById('compare-search-a');
+    if (inputA) inputA.value = unit ? unit.name : '';
+    const clearBtnA = document.getElementById('compare-clear-a');
+    if (clearBtnA) clearBtnA.classList.toggle('hidden', !unit);
+    hideCompareDropdown('a');
+  } else if (slot === 'b') {
+    compareUnitB = unit;
+    const inputB = document.getElementById('compare-search-b');
+    if (inputB) inputB.value = unit ? unit.name : '';
+    const clearBtnB = document.getElementById('compare-clear-b');
+    if (clearBtnB) clearBtnB.classList.toggle('hidden', !unit);
+    hideCompareDropdown('b');
+  }
+
+  updateCompareUrl();
+  renderCompareView();
+}
+
+function clearCompareSlot(slot) {
+  setCompareUnit(slot, null);
+}
+
+function clearCompare() {
+  compareUnitA = null;
+  compareUnitB = null;
+  const inputA = document.getElementById('compare-search-a');
+  if (inputA) inputA.value = '';
+  const inputB = document.getElementById('compare-search-b');
+  if (inputB) inputB.value = '';
+  const clearBtnA = document.getElementById('compare-clear-a');
+  if (clearBtnA) clearBtnA.classList.add('hidden');
+  const clearBtnB = document.getElementById('compare-clear-b');
+  if (clearBtnB) clearBtnB.classList.add('hidden');
+  updateCompareUrl();
+  renderCompareView();
+}
+
+function swapCompareUnits() {
+  const tmp = compareUnitA;
+  compareUnitA = compareUnitB;
+  compareUnitB = tmp;
+
+  const inputA = document.getElementById('compare-search-a');
+  if (inputA) inputA.value = compareUnitA ? compareUnitA.name : '';
+  const inputB = document.getElementById('compare-search-b');
+  if (inputB) inputB.value = compareUnitB ? compareUnitB.name : '';
+
+  const clearBtnA = document.getElementById('compare-clear-a');
+  if (clearBtnA) clearBtnA.classList.toggle('hidden', !compareUnitA);
+  const clearBtnB = document.getElementById('compare-clear-b');
+  if (clearBtnB) clearBtnB.classList.toggle('hidden', !compareUnitB);
+
+  updateCompareUrl();
+  renderCompareView();
+}
+
+function updateCompareUrl() {
+  if (currentTab === 'compare') {
+    if (compareUnitA && compareUnitB) {
+      window.location.hash = `compare/${compareUnitA.id}/${compareUnitB.id}`;
+    } else if (compareUnitA) {
+      window.location.hash = `compare/${compareUnitA.id}`;
+    } else {
+      window.location.hash = 'compare';
+    }
+  }
+}
+
+function loadComparePreset(idA, idB) {
+  const uA = ALL_UNITS.find(u => u.id === idA || u.name.toLowerCase().includes(idA.replace(/_/g, ' ')));
+  const uB = ALL_UNITS.find(u => u.id === idB || u.name.toLowerCase().includes(idB.replace(/_/g, ' ')));
+  if (uA) setCompareUnit('a', uA);
+  if (uB) setCompareUnit('b', uB);
+  switchTab('compare');
+}
+
+function startCompareWith(unitId) {
+  const unit = ALL_UNITS.find(u => u.id === unitId || u.name.toLowerCase() === unitId.toLowerCase());
+  if (!unit) return;
+
+  if (!compareUnitA || compareUnitA.id === unit.id) {
+    setCompareUnit('a', unit);
+  } else if (!compareUnitB) {
+    setCompareUnit('b', unit);
+  } else {
+    setCompareUnit('b', unit);
+  }
+
+  switchTab('compare');
+  showToast(`« ${unit.name} » ajouté au comparateur`);
+}
+
+function startCompareWithModalUnit() {
+  if (currentModalUnit) {
+    const id = currentModalUnit.id;
+    closeUnitModal();
+    startCompareWith(id);
+  }
+}
+
+function handleCompareSearch(slot) {
+  const input = document.getElementById(`compare-search-${slot}`);
+  const dropdown = document.getElementById(`compare-dropdown-${slot}`);
+  if (!input || !dropdown) return;
+
+  const q = input.value.trim().toLowerCase();
+  const otherUnit = slot === 'a' ? compareUnitB : compareUnitA;
+
+  const matches = ALL_UNITS.filter(u => {
+    if (otherUnit && u.id === otherUnit.id) return false;
+    if (!q) return u.star >= 6;
+    return u.name.toLowerCase().includes(q) || (u.anime_origin || '').toLowerCase().includes(q);
+  }).slice(0, 10);
+
+  if (matches.length === 0) {
+    dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center italic">Aucune unité trouvée</div>`;
+    dropdown.classList.remove('hidden');
+    return;
+  }
+
+  const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
+  dropdown.innerHTML = matches.map(u => `
+    <div onclick="setCompareUnit('${slot}', '${u.id}')"
+         class="px-3 py-2 hover:bg-slate-800/80 cursor-pointer flex items-center justify-between border-b border-slate-800/60 last:border-0 transition-colors"
+         role="option" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setCompareUnit('${slot}','${u.id}');}">
+      <div class="flex items-center space-x-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-lg bg-[#070b14] border border-slate-800 p-0.5 shrink-0 flex items-center justify-center overflow-hidden">
+          <img src="${u.image || fallbackImg}" alt="" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+        </div>
+        <div class="min-w-0">
+          <div class="text-xs font-bold text-white truncate">${u.name}</div>
+          <div class="text-[10px] text-slate-400 truncate">${u.anime_origin || 'All Star'}</div>
+        </div>
+      </div>
+      <div class="flex items-center space-x-1.5 shrink-0">
+        <span class="text-[10px] font-mono-num font-bold px-1.5 py-0.5 rounded star-${u.star}-badge">${u.star}★</span>
+        <span class="text-[10px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-1 rounded">${u.tower_type || 'Ground'}</span>
+      </div>
+    </div>
+  `).join('');
+
+  dropdown.classList.remove('hidden');
+  if (window.lucide) lucide.createIcons();
+}
+
+function hideCompareDropdown(slot) {
+  const dropdown = document.getElementById(`compare-dropdown-${slot}`);
+  if (dropdown) dropdown.classList.add('hidden');
+}
+
+// Global click listener to close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#compare-search-a') && !e.target.closest('#compare-dropdown-a')) {
+    hideCompareDropdown('a');
+  }
+  if (!e.target.closest('#compare-search-b') && !e.target.closest('#compare-dropdown-b')) {
+    hideCompareDropdown('b');
+  }
+});
+
+function getUnitCompareStats(unit, at175, withIdol) {
+  if (!unit) return null;
+  const mult = (at175 ? LEVEL_175.damage : 1) * (withIdol ? getCompareIdolMultiplier() : 1);
+  const rangeMult = at175 ? LEVEL_175.range : 1;
+  const spaMult = at175 ? LEVEL_175.spa : 1;
+
+  const baseDmg = unit.upgrades && unit.upgrades.length > 0 ? (unit.upgrades[0].damage || 0) : 0;
+  const maxDmg = Math.round((unit.max_damage || baseDmg) * mult);
+  const maxRange = Math.round(((unit.max_range || 0) * rangeMult) * 10) / 10;
+  const minSpa = Math.round(((unit.min_spa || 0) * spaMult) * 10) / 10;
+  const maxDps = (maxDmg && minSpa > 0) ? Math.round(maxDmg / minSpa) : Math.round((unit.max_dps || 0) * mult);
+  const deployCost = unit.deployment_cost || 0;
+  const totalCost = unit.total_cost || 0;
+  const costPerDps = (totalCost > 0 && maxDps > 0) ? Math.round((totalCost / maxDps) * 10) / 10 : 0;
+  const upgradeCount = unit.upgrades ? unit.upgrades.length : 0;
+
+  return {
+    unit,
+    baseDmg: Math.round(baseDmg * mult),
+    maxDmg,
+    maxDps,
+    maxRange,
+    minSpa,
+    deployCost,
+    totalCost,
+    costPerDps,
+    upgradeCount
+  };
+}
+
+function evalMetric(valA, valB, higherIsBetter) {
+  if (valA === valB) {
+    return { winner: 'tie', diffText: 'Égalité', pctA: 50, pctB: 50, pctDiffText: '0%' };
+  }
+  const aWins = higherIsBetter ? valA > valB : valA < valB;
+  const winner = aWins ? 'a' : 'b';
+
+  let pctA = 50, pctB = 50;
+  if (higherIsBetter) {
+    const sum = valA + valB;
+    if (sum > 0) {
+      pctA = Math.round((valA / sum) * 100);
+      pctB = 100 - pctA;
+    }
+  } else {
+    const invA = 1 / (valA || 0.001);
+    const invB = 1 / (valB || 0.001);
+    const sumInv = invA + invB;
+    if (sumInv > 0) {
+      pctA = Math.round((invA / sumInv) * 100);
+      pctB = 100 - pctA;
+    }
+  }
+
+  const big = Math.max(valA, valB);
+  const small = Math.min(valA, valB);
+  const pctDiff = small > 0 ? Math.round(((big - small) / small) * 100) : 100;
+  const diffVal = Math.abs(valA - valB);
+
+  return {
+    winner,
+    pctA,
+    pctB,
+    diffText: `${aWins ? '+' : '-'}${formatCompactNumber(diffVal)}`,
+    pctDiffText: `+${pctDiff}%`
+  };
+}
+
+function generateTacticalVerdict(sA, sB) {
+  const uA = sA.unit;
+  const uB = sB.unit;
+
+  const dpsEval = evalMetric(sA.maxDps, sB.maxDps, true);
+  const spaEval = evalMetric(sA.minSpa, sB.minSpa, false);
+  const rangeEval = evalMetric(sA.maxRange, sB.maxRange, true);
+  const costEval = evalMetric(sA.costPerDps, sB.costPerDps, false);
+
+  let dpsLeader = dpsEval.winner === 'a' ? uA.name : (dpsEval.winner === 'b' ? uB.name : "Égalité");
+  let spaLeader = spaEval.winner === 'a' ? uA.name : (spaEval.winner === 'b' ? uB.name : "Égalité");
+  let rangeLeader = rangeEval.winner === 'a' ? uA.name : (rangeEval.winner === 'b' ? uB.name : "Égalité");
+  let costLeader = costEval.winner === 'a' ? uA.name : (costEval.winner === 'b' ? uB.name : "Égalité");
+
+  let recommendation = "";
+  if (dpsEval.winner === 'a') {
+    recommendation = `<strong>${uA.name}</strong> s'impose comme le choix prioritaire pour les vagues avancées et le <em>Mode Infini</em> grâce à son avantage massif de DPS (+${dpsEval.pctDiffText}).`;
+    if (spaEval.winner === 'b' || costEval.winner === 'b') {
+      recommendation += ` Cependant, <strong>${uB.name}</strong> reste redoutable en <em>Histoire / Début de partie</em> grâce à une cadence supérieure ou un investissement initial plus accessible.`;
+    }
+  } else if (dpsEval.winner === 'b') {
+    recommendation = `<strong>${uB.name}</strong> domine largement le duel en puissance brute (+${dpsEval.pctDiffText} DPS), idéale pour le <em>Mode Infini</em>.`;
+    if (spaEval.winner === 'a' || costEval.winner === 'a') {
+      recommendation += ` <strong>${uA.name}</strong> compense avec une meilleure rentabilité ou cadence d'attaque en soutien.`;
+    }
+  } else {
+    recommendation = `Les deux unités affichent un DPS équivalent. Le choix se fera sur la portée (${rangeLeader}), le type de placement (${uA.tower_type} vs ${uB.tower_type}) et leurs aptitudes passives.`;
+  }
+
+  return `
+    <div class="tactical-card p-4 rounded-xl border border-slate-800/80 bg-[#0a0f1d] space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div class="flex items-center gap-2">
+          <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Verdict & Synthèse Tactique</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-medium">Analyse comparative automatisée</span>
+      </div>
+
+      <!-- 4 pillars summary grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+        <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
+          <span class="text-[10px] text-slate-400 block font-semibold uppercase">💥 DPS Brut</span>
+          <span class="font-bold text-amber-300 truncate block mt-0.5" title="${dpsLeader}">${dpsLeader}</span>
+          <span class="text-[9px] text-slate-400">${dpsEval.pctDiffText} d'écart</span>
+        </div>
+        <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
+          <span class="text-[10px] text-slate-400 block font-semibold uppercase">⚡ Cadence (SPA)</span>
+          <span class="font-bold text-sky-300 truncate block mt-0.5" title="${spaLeader}">${spaLeader}</span>
+          <span class="text-[9px] text-slate-400">${spaEval.pctDiffText} plus rapide</span>
+        </div>
+        <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
+          <span class="text-[10px] text-slate-400 block font-semibold uppercase">🎯 Portée</span>
+          <span class="font-bold text-slate-200 truncate block mt-0.5" title="${rangeLeader}">${rangeLeader}</span>
+          <span class="text-[9px] text-slate-400">${rangeEval.pctDiffText} de rayon</span>
+        </div>
+        <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/60">
+          <span class="text-[10px] text-slate-400 block font-semibold uppercase">💰 Rentabilité ($/DPS)</span>
+          <span class="font-bold text-slate-200 truncate block mt-0.5" title="${costLeader}">${costLeader}</span>
+          <span class="text-[9px] text-slate-400">meilleur ratio</span>
+        </div>
+      </div>
+
+      <!-- Strategic recommendation paragraph -->
+      <div class="text-xs text-slate-300 leading-relaxed bg-[#0f1629]/90 p-3 rounded-lg border border-slate-800/80">
+        ${recommendation}
+      </div>
+    </div>
+  `;
+}
+
+function renderCompareView() {
+  const container = document.getElementById('compare-display-area');
+  if (!container) return;
+
+  const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
+  const at175 = compareLevelView === 175;
+  const withIdol = compareIdolBuff;
+
+  // Case 1: Empty state (0 or only 1 unit selected)
+  if (!compareUnitA || !compareUnitB) {
+    container.innerHTML = `
+      <div class="tactical-card p-8 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 text-center max-w-xl mx-auto space-y-4 my-6">
+        <div class="w-14 h-14 rounded-2xl bg-[#090e1c] border border-slate-800 flex items-center justify-center mx-auto text-sky-400 shadow-md">
+          <i data-lucide="arrow-left-right" class="w-7 h-7" stroke-width="2"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Sélectionnez 2 personnages pour comparer</h3>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed text-pretty">
+            Utilisez les champs de recherche ci-dessus pour désigner les deux unités à confronter, ou lancez un duel populaire en un clic.
+          </p>
+        </div>
+
+        <div class="pt-2 flex items-center justify-center gap-2">
+          ${compareUnitA ? `
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#070b14] border border-sky-500/40 text-xs">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+              <span class="text-white font-bold">${compareUnitA.name}</span>
+              <span class="text-sky-300 font-mono-num font-bold text-[10px]">${compareUnitA.star}★</span>
+              <span class="text-slate-400 italic text-[11px]">— choisissez la 2nde unité</span>
+            </div>
+          ` : `
+            <span class="text-xs text-slate-500 italic">Aucune unité sélectionnée pour le moment.</span>
+          `}
+        </div>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  // Case 2: Full comparison with both units selected
+  const sA = getUnitCompareStats(compareUnitA, at175, withIdol);
+  const sB = getUnitCompareStats(compareUnitB, at175, withIdol);
+
+  // Stats evaluation
+  const metrics = [
+    { label: "Dégâts Max", key: 'maxDmg', valA: sA.maxDmg, valB: sB.maxDmg, higherBetter: true, format: v => v.toLocaleString(), isDps: false },
+    { label: "DPS Max Estimé", key: 'maxDps', valA: sA.maxDps, valB: sB.maxDps, higherBetter: true, format: v => v.toLocaleString(), isDps: true },
+    { label: "Portée d'Attaque (Range)", key: 'maxRange', valA: sA.maxRange, valB: sB.maxRange, higherBetter: true, format: v => v, isDps: false },
+    { label: "SPA (Cadence d'attaque)", key: 'minSpa', valA: sA.minSpa, valB: sB.minSpa, higherBetter: false, format: v => v + 's', isDps: false, note: "Plus bas = plus rapide" },
+    { label: "Coût de Déploiement", key: 'deployCost', valA: sA.deployCost, valB: sB.deployCost, higherBetter: false, format: v => '$' + v.toLocaleString(), isDps: false, note: "Plus bas = plus facile à poser" },
+    { label: "Coût Total d'Amélioration", key: 'totalCost', valA: sA.totalCost, valB: sB.totalCost, higherBetter: false, format: v => '$' + v.toLocaleString(), isDps: false, note: "Plus bas = maxé plus tôt" },
+    { label: "Coût par point de DPS ($/DPS)", key: 'costPerDps', valA: sA.costPerDps, valB: sB.costPerDps, higherBetter: false, format: v => '$' + v, isDps: false, note: "Plus bas = plus rentable" },
+    { label: "Paliers d'Amélioration", key: 'upgradeCount', valA: sA.upgradeCount, valB: sB.upgradeCount, higherBetter: true, format: v => v + ' paliers', isDps: false }
+  ];
+
+  container.innerHTML = `
+    <!-- 1. Versus Identity Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      
+      <!-- Card A -->
+      <div class="tactical-card p-4 rounded-xl border border-sky-500/40 bg-[#0f1629]/95 flex flex-col justify-between space-y-3">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center space-x-3 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+              <img src="${compareUnitA.image || fallbackImg}" alt="${compareUnitA.name}" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono-num font-bold star-${compareUnitA.star}-badge shadow-sm">${compareUnitA.star}★</span>
+                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded">${compareUnitA.tower_type || 'Ground'}</span>
+                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 rounded">${compareUnitA.attack_type || 'AoE'}</span>
+              </div>
+              <h3 class="font-bold text-sm sm:text-base text-white truncate mt-1">${compareUnitA.name}</h3>
+              <p class="text-[11px] text-slate-400 truncate">${compareUnitA.anime_origin || 'All Star'}</p>
+            </div>
+          </div>
+          <button onclick="openUnitModal('${compareUnitA.id}')" aria-label="Consulter la fiche complète de ${compareUnitA.name}" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale transition-colors shrink-0">
+            Fiche
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800 font-mono-num text-[11px]">
+          <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS Max</span>
+            <span class="font-bold text-amber-300 text-xs">${sA.maxDps.toLocaleString()}</span>
+          </div>
+          <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">Dégâts Max</span>
+            <span class="font-bold text-slate-100 text-xs">${sA.maxDmg.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card B -->
+      <div class="tactical-card p-4 rounded-xl border border-amber-500/40 bg-[#0f1629]/95 flex flex-col justify-between space-y-3">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center space-x-3 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+              <img src="${compareUnitB.image || fallbackImg}" alt="${compareUnitB.name}" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono-num font-bold star-${compareUnitB.star}-badge shadow-sm">${compareUnitB.star}★</span>
+                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded">${compareUnitB.tower_type || 'Ground'}</span>
+                <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 rounded">${compareUnitB.attack_type || 'AoE'}</span>
+              </div>
+              <h3 class="font-bold text-sm sm:text-base text-white truncate mt-1">${compareUnitB.name}</h3>
+              <p class="text-[11px] text-slate-400 truncate">${compareUnitB.anime_origin || 'All Star'}</p>
+            </div>
+          </div>
+          <button onclick="openUnitModal('${compareUnitB.id}')" aria-label="Consulter la fiche complète de ${compareUnitB.name}" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-amber-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale transition-colors shrink-0">
+            Fiche
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800 font-mono-num text-[11px]">
+          <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">DPS Max</span>
+            <span class="font-bold text-amber-300 text-xs">${sB.maxDps.toLocaleString()}</span>
+          </div>
+          <div class="bg-[#090e1c] px-2.5 py-1.5 rounded-md border border-slate-800/60">
+            <span class="text-slate-400 block text-[9px] font-sans uppercase">Dégâts Max</span>
+            <span class="font-bold text-slate-100 text-xs">${sB.maxDmg.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 2. Tactical Verdict Banner -->
+    ${generateTacticalVerdict(sA, sB)}
+
+    <!-- 3. Direct Metrics Comparison Table with Gauges -->
+    <div class="tactical-card rounded-xl border border-slate-800/80 bg-[#0f1629]/95 overflow-hidden">
+      <div class="p-3.5 bg-[#141d33] border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4 text-sky-400"></i>
+          <span>Tableau Comparatif des Statistiques (Palier Max)</span>
+        </h3>
+        <span class="text-[10px] text-slate-400 font-sans">
+          Mode : <strong class="text-slate-200">${at175 ? 'Level 175' : 'Level 1'}</strong> ${withIdol ? '• avec Buff Idol' : ''}
+        </span>
+      </div>
+
+      <div class="divide-y divide-slate-800/70">
+        ${metrics.map(m => {
+          const ev = evalMetric(m.valA, m.valB, m.higherBetter);
+          const isAWin = ev.winner === 'a';
+          const isBWin = ev.winner === 'b';
+          return `
+            <div class="p-3.5 hover:bg-slate-800/30 transition-colors">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+                <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <span>${m.label}</span>
+                  ${m.note ? `<span class="text-[10px] text-slate-500 font-normal font-sans">(${m.note})</span>` : ''}
+                </span>
+                
+                <div class="flex items-center gap-2 text-xs font-mono-num">
+                  <span class="text-[11px] ${isAWin ? 'text-sky-300 font-bold' : 'text-slate-400'}">
+                    ${m.format(m.valA)}
+                  </span>
+                  <span class="text-[10px] text-slate-500">vs</span>
+                  <span class="text-[11px] ${isBWin ? 'text-amber-300 font-bold' : 'text-slate-400'}">
+                    ${m.format(m.valB)}
+                  </span>
+                  ${ev.winner !== 'tie' ? `
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${isAWin ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
+                      ${isAWin ? 'A' : 'B'} ${ev.pctDiffText}
+                    </span>
+                  ` : `
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                      Égalité
+                    </span>
+                  `}
+                </div>
+              </div>
+
+              <!-- Relative Gauge Bar -->
+              <div class="compare-gauge-track flex">
+                <div class="compare-gauge-fill-a" style="width: ${ev.pctA}%" title="${compareUnitA.name}: ${ev.pctA}%"></div>
+                <div class="compare-gauge-fill-b" style="width: ${ev.pctB}%" title="${compareUnitB.name}: ${ev.pctB}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- 4. Special Abilities Comparison -->
+    <div class="tactical-card p-4 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <i data-lucide="zap" class="w-4 h-4 text-amber-300"></i>
+          <span>Capacités Spéciales, Passifs & Leader</span>
+        </h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Abilities Unit A -->
+        <div class="space-y-2">
+          <div class="text-xs font-bold text-sky-300 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            <span>${compareUnitA.name}</span>
+            <span class="text-slate-500 font-normal">(${(compareUnitA.abilities || []).length} capacité${(compareUnitA.abilities || []).length > 1 ? 's' : ''})</span>
+          </div>
+          ${(compareUnitA.abilities && compareUnitA.abilities.length > 0) ? `
+            <div class="space-y-2">
+              ${compareUnitA.abilities.map(ab => `
+                <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/80 text-xs space-y-1">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-white">${ab.name}</strong>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-900 border border-slate-700 text-slate-300">${ab.type || 'Capacité'}</span>
+                  </div>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">${stripWikiMarkup(ab.description)}</p>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="p-3 text-xs text-slate-500 italic bg-[#090e1c] rounded-lg border border-slate-800/60">
+              Aucune capacité spéciale documentée.
+            </div>
+          `}
+        </div>
+
+        <!-- Abilities Unit B -->
+        <div class="space-y-2">
+          <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span>${compareUnitB.name}</span>
+            <span class="text-slate-500 font-normal">(${(compareUnitB.abilities || []).length} capacité${(compareUnitB.abilities || []).length > 1 ? 's' : ''})</span>
+          </div>
+          ${(compareUnitB.abilities && compareUnitB.abilities.length > 0) ? `
+            <div class="space-y-2">
+              ${compareUnitB.abilities.map(ab => `
+                <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/80 text-xs space-y-1">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-white">${ab.name}</strong>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-900 border border-slate-700 text-slate-300">${ab.type || 'Capacité'}</span>
+                  </div>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">${stripWikiMarkup(ab.description)}</p>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="p-3 text-xs text-slate-500 italic bg-[#090e1c] rounded-lg border border-slate-800/60">
+              Aucune capacité spéciale documentée.
+            </div>
+          `}
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  if (window.lucide) lucide.createIcons();
 }
 
 // ==========================================
