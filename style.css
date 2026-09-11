@@ -46,6 +46,13 @@ html, body {
   max-width: 100vw;
 }
 
+/* Verrouillage strict du défilement lors de l'ouverture d'une modale */
+html.modal-open,
+body.modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
 #app-header {
   overflow-x: clip;
 }
@@ -285,9 +292,16 @@ body {
   transition-property: opacity, backdrop-filter;
   transition-duration: 180ms;
   transition-timing-function: var(--ease-fluid);
+  overscroll-behavior: contain;
 }
 .modal-backdrop.closing {
   opacity: 0 !important;
+}
+
+#unit-modal,
+#unit-modal-dialog,
+#unit-modal .overflow-y-auto {
+  overscroll-behavior: contain;
 }
 
 /* Tactical Pill Button - Specific transitions */
@@ -491,5 +505,60 @@ body {
   background-color: rgba(14, 165, 233, 0.2);
   border-color: rgba(56, 189, 248, 0.45);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   PROTECTION PUBLICITAIRE RESPONSIVE STRICTE
+   Les skyscrapers publicitaires latéraux (160x600 px) sont STRICTEMENT
+   réservés aux très grands écrans de bureau (>= 1680px).
+   Sur mobile, tablette et écran intermédiaire (< 1680px), ils sont totalement
+   masqués et ont une empreinte nulle (aucun cadre, marge ou espace réservé).
+   ========================================================================== */
+#ad-skyscraper-left,
+#ad-skyscraper-right {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+@media (min-width: 1680px) {
+  #ad-skyscraper-left.ad-visible,
+  #ad-skyscraper-right.ad-visible {
+    display: block !important;
+    width: 180px !important;
+    height: auto !important;
+    padding: 1.5rem 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* ==========================================================================
+   OPTIMISATIONS RESPONSIVES MOBILE (TABLETTES & SMARTPHONES)
+   La version PC reste totalement intacte.
+   ========================================================================== */
+
+/* Fluidité du défilement tactile horizontal sur iOS & Android */
+.no-scrollbar,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Positionnement responsive de la notification Toast sur mobile */
+@media (max-width: 639px) {
+  #toast {
+    left: 1rem !important;
+    right: 1rem !important;
+    bottom: 1rem !important;
+    justify-content: center !important;
+    text-align: center !important;
+    max-width: calc(100vw - 2rem) !important;
+  }
 }
 

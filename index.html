@@ -39,7 +39,7 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9302236726754340" crossorigin="anonymous"></script>
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=i18n-v3">
+  <link rel="stylesheet" href="style.css?v=mobile-v5">
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
@@ -116,7 +116,7 @@
           </button>
 
           <!-- Language Switcher (Desktop) -->
-          <div class="lang-switcher-wrap shrink-0" role="group" aria-label="Sélection de langue / Language Selection">
+          <div class="lang-switcher-wrap shrink-0 hidden sm:inline-flex" role="group" aria-label="Sélection de langue / Language Selection">
             <button type="button" onclick="setLanguage('fr')" id="lang-btn-fr" class="lang-btn active" title="Français" aria-pressed="true">
               <span>🇫🇷</span> <span>FR</span>
             </button>
@@ -130,7 +130,7 @@
              aria-label="Consulter le wiki Fandom officiel ASTD (nouvelle fenêtre)"
              data-i18n-aria="wiki_link_aria"
              data-i18n-title="wiki_link_title"
-             class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white tap-scale flex items-center justify-center transition-colors" title="Wiki Fandom Original">
+             class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white tap-scale hidden sm:flex items-center justify-center transition-colors" title="Wiki Fandom Original">
             <i data-lucide="external-link" class="w-4 h-4" stroke-width="1.75"></i>
           </a>
           <!-- Mobile Menu Hamburger Button -->
@@ -231,10 +231,10 @@
   </header>
 
   <!-- QUICK METRICS STRIP -->
-  <div class="bg-[#0b0f19] border-b border-slate-800/80 py-2.5 px-4 sm:px-6">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+  <div class="bg-[#0b0f19] border-b border-slate-800/80 py-2 sm:py-2.5 px-3 sm:px-6">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 text-xs">
       
-      <div class="flex items-center space-x-5 text-slate-400">
+      <div class="flex items-center justify-between sm:justify-start space-x-3 sm:space-x-5 text-slate-400">
         <div class="flex items-center space-x-2">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
           <span data-i18n="db_label">Base de données :</span>
@@ -253,10 +253,12 @@
       </div>
 
       <!-- Quick Active Code Ticker -->
-      <div class="flex items-center space-x-2.5 bg-[#0e1526] border border-slate-800 px-2.5 py-1 rounded-lg text-xs">
-        <span class="text-slate-400 hidden sm:inline text-[11px]" data-i18n="latest_code_label">Dernier code :</span>
-        <code id="hero-code-name" class="font-mono-num font-bold text-emerald-400 select-all text-[11px]">Chargement...</code>
-        <button onclick="copyLatestCode()" aria-label="Copier le dernier code promo actif" data-i18n-aria="copy_code_aria" class="ps-2 pe-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-[11px] rounded tap-scale inline-flex items-center gap-1">
+      <div class="flex items-center justify-between sm:justify-start space-x-2.5 bg-[#0e1526] border border-slate-800 px-2.5 py-1.5 sm:py-1 rounded-lg text-xs">
+        <div class="flex items-center space-x-1.5 min-w-0">
+          <span class="text-slate-400 hidden sm:inline text-[11px]" data-i18n="latest_code_label">Dernier code :</span>
+          <code id="hero-code-name" class="font-mono-num font-bold text-emerald-400 select-all text-[11px] truncate">Chargement...</code>
+        </div>
+        <button onclick="copyLatestCode()" aria-label="Copier le dernier code promo actif" data-i18n-aria="copy_code_aria" class="ps-2 pe-2 py-1 sm:py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-[11px] rounded tap-scale inline-flex items-center gap-1 shrink-0">
           <i data-lucide="copy" class="w-3 h-3" stroke-width="2"></i>
           <span data-i18n="copy_btn">Copier</span>
         </button>
@@ -281,14 +283,14 @@
     </aside>
 
     <!-- MAIN CONTENT CONTAINER -->
-    <main id="main-content" tabindex="-1" class="flex-1 max-w-7xl w-full min-w-0 py-6 focus:outline-none">
+    <main id="main-content" tabindex="-1" class="flex-1 max-w-7xl w-full min-w-0 py-4 sm:py-6 focus:outline-none">
 
     <!-- ==================== TAB 1 : UNITES ==================== -->
     <section id="tab-units" class="tab-content space-y-4" aria-labelledby="units-section-title">
       <h1 id="units-section-title" class="sr-only" data-i18n="units_h1">Encyclopédie des Unités ASTD</h1>
       
       <!-- Structured Filter Toolbar -->
-      <div class="tactical-card rounded-xl p-4 border border-slate-800/90 space-y-3.5" role="search" aria-label="Filtres de recherche des unités" data-i18n-aria="units_filter_aria">
+      <div class="tactical-card rounded-xl p-3.5 sm:p-4 border border-slate-800/90 space-y-3.5" role="search" aria-label="Filtres de recherche des unités" data-i18n-aria="units_filter_aria">
         
         <!-- Row 1: Search Input + Star Pills + View Switcher -->
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
@@ -307,39 +309,42 @@
             </button>
           </div>
 
-          <!-- Star Filter Segmented Group -->
-          <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 font-medium" role="group" aria-label="Filtrer par rareté" data-i18n-aria="filter_star_aria">
-            <button onclick="setStarFilter('all')" class="star-btn active tap-scale px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 text-white border border-sky-500" aria-pressed="true" data-i18n="star_all">Tous</button>
-            <button onclick="setStarFilter(7)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800" aria-pressed="false">7★</button>
-            <button onclick="setStarFilter(6)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800" aria-pressed="false">6★</button>
-            <button onclick="setStarFilter(5)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800" aria-pressed="false">5★</button>
-            <button onclick="setStarFilter(4)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800" aria-pressed="false">4★</button>
-            <button onclick="setStarFilter(3)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800" aria-pressed="false">3★</button>
-            <button onclick="setStarFilter(2)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800" aria-pressed="false">2★</button>
-          </div>
+          <!-- Controls Sub-row (Stars + View Mode) -->
+          <div class="flex items-center justify-between gap-2">
+            <!-- Star Filter Segmented Group -->
+            <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 font-medium flex-1" role="group" aria-label="Filtrer par rareté" data-i18n-aria="filter_star_aria">
+              <button onclick="setStarFilter('all')" class="star-btn active tap-scale px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 text-white border border-sky-500 shrink-0" aria-pressed="true" data-i18n="star_all">Tous</button>
+              <button onclick="setStarFilter(7)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800 shrink-0" aria-pressed="false">7★</button>
+              <button onclick="setStarFilter(6)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800 shrink-0" aria-pressed="false">6★</button>
+              <button onclick="setStarFilter(5)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800 shrink-0" aria-pressed="false">5★</button>
+              <button onclick="setStarFilter(4)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800 shrink-0" aria-pressed="false">4★</button>
+              <button onclick="setStarFilter(3)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800 shrink-0" aria-pressed="false">3★</button>
+              <button onclick="setStarFilter(2)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800 shrink-0" aria-pressed="false">2★</button>
+            </div>
 
-          <!-- View Mode Toggle (Grid vs Table) -->
-          <div class="flex items-center space-x-1 bg-[#0a0f1d] p-1 rounded-lg border border-slate-800 shrink-0" role="group" aria-label="Mode d'affichage" data-i18n-aria="view_mode_aria">
-            <button id="btn-view-grid" onclick="setViewMode('grid')" aria-pressed="true" class="px-2.5 py-1 rounded text-xs font-semibold text-white bg-sky-600 flex items-center space-x-1.5 tap-scale" title="Vue Grille" data-i18n-title="view_grid_title" aria-label="Affichage en grille" data-i18n-aria="view_grid_aria">
-              <i data-lucide="grid" class="w-3.5 h-3.5" stroke-width="2"></i>
-              <span data-i18n="view_grid">Grille</span>
-            </button>
-            <button id="btn-view-table" onclick="setViewMode('table')" aria-pressed="false" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center space-x-1.5 tap-scale" title="Vue Tableau" data-i18n-title="view_table_title" aria-label="Affichage en tableau" data-i18n-aria="view_table_aria">
-              <i data-lucide="list" class="w-3.5 h-3.5" stroke-width="2"></i>
-              <span data-i18n="view_table">Tableau</span>
-            </button>
+            <!-- View Mode Toggle (Grid vs Table) -->
+            <div class="flex items-center space-x-1 bg-[#0a0f1d] p-1 rounded-lg border border-slate-800 shrink-0" role="group" aria-label="Mode d'affichage" data-i18n-aria="view_mode_aria">
+              <button id="btn-view-grid" onclick="setViewMode('grid')" aria-pressed="true" class="px-2.5 py-1 rounded text-xs font-semibold text-white bg-sky-600 flex items-center space-x-1.5 tap-scale" title="Vue Grille" data-i18n-title="view_grid_title" aria-label="Affichage en grille" data-i18n-aria="view_grid_aria">
+                <i data-lucide="grid" class="w-3.5 h-3.5" stroke-width="2"></i>
+                <span data-i18n="view_grid" class="hidden sm:inline">Grille</span>
+              </button>
+              <button id="btn-view-table" onclick="setViewMode('table')" aria-pressed="false" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center space-x-1.5 tap-scale" title="Vue Tableau" data-i18n-title="view_table_title" aria-label="Affichage en tableau" data-i18n-aria="view_table_aria">
+                <i data-lucide="list" class="w-3.5 h-3.5" stroke-width="2"></i>
+                <span data-i18n="view_table" class="hidden sm:inline">Tableau</span>
+              </button>
+            </div>
           </div>
 
         </div>
 
         <!-- Row 2: Detailed Selects & Checkboxes -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/80 text-xs">
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-3 border-t border-slate-800/80 text-xs">
           
-          <div class="flex flex-wrap items-center gap-2.5">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 flex-1">
             <!-- Type filter -->
-            <div class="min-w-[160px]">
+            <div class="w-full">
               <label for="filter-tower-type" class="sr-only" data-i18n="filter_tower_type_sr">Filtrer par type de tour</label>
-              <select id="filter-tower-type" aria-label="Filtrer par type de tour (Sol, Aérien, Colline, Hybride)" data-i18n-aria="filter_tower_type_aria" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+              <select id="filter-tower-type" aria-label="Filtrer par type de tour (Sol, Aérien, Colline, Hybride)" data-i18n-aria="filter_tower_type_aria" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-2 sm:py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
                 <option value="all" data-i18n="filter_type_all">Tous types (Sol/Air/Colline/Hybride)</option>
                 <option value="ground" data-i18n="filter_type_ground">Sol (Ground)</option>
                 <option value="air" data-i18n="filter_type_air">Aérien (Air)</option>
@@ -349,17 +354,17 @@
             </div>
 
             <!-- Anime filter -->
-            <div class="min-w-[180px]">
+            <div class="w-full">
               <label for="filter-anime" class="sr-only" data-i18n="filter_anime_sr">Filtrer par anime ou franchise</label>
-              <select id="filter-anime" aria-label="Filtrer par anime ou franchise" data-i18n-aria="filter_anime_aria" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+              <select id="filter-anime" aria-label="Filtrer par anime ou franchise" data-i18n-aria="filter_anime_aria" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-2 sm:py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
                 <option value="all" data-i18n="filter_anime_all">Toutes franchises anime</option>
               </select>
             </div>
 
             <!-- Sort selection -->
-            <div class="min-w-[150px]">
+            <div class="w-full">
               <label for="filter-sort" class="sr-only" data-i18n="filter_sort_sr">Trier les unités</label>
-              <select id="filter-sort" aria-label="Trier les unités par critère" data-i18n-aria="filter_sort_aria" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+              <select id="filter-sort" aria-label="Trier les unités par critère" data-i18n-aria="filter_sort_aria" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-2 sm:py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
                 <option value="recent-desc" data-i18n="sort_recent_desc">Nouveautés d'abord</option>
                 <option value="star-desc" data-i18n="sort_star_desc">Rareté : 7★ vers 2★</option>
                 <option value="star-asc" data-i18n="sort_star_asc">Rareté : 2★ vers 7★</option>
@@ -369,18 +374,21 @@
                 <option value="name-asc" data-i18n="sort_name_asc">Nom (A - Z)</option>
               </select>
             </div>
+          </div>
 
+          <!-- Bottom sub-row: Obtainable toggle & Result counter -->
+          <div class="flex items-center justify-between gap-3 pt-1 sm:pt-0 shrink-0">
             <!-- Obtainable toggle -->
-            <label class="flex items-center space-x-2 cursor-pointer text-slate-300 hover:text-white ml-1 select-none" title="Masque les unités retirées du jeu (bannières expirées, événements passés)" data-i18n-title="filter_obtainable_title">
+            <label class="flex items-center space-x-2 cursor-pointer text-slate-300 hover:text-white select-none py-1" title="Masque les unités retirées du jeu (bannières expirées, événements passés)" data-i18n-title="filter_obtainable_title">
               <input type="checkbox" id="filter-obtainable" class="rounded bg-[#0a0f1d] border-slate-800 text-sky-600 focus:ring-0 cursor-pointer">
               <span class="text-xs" data-i18n="filter_obtainable">Obtenables uniquement</span>
             </label>
-          </div>
 
-          <!-- Result counter -->
-          <div class="flex items-center space-x-1.5 text-xs">
-            <span class="text-slate-400" data-i18n="results_label">Résultat :</span>
-            <span id="results-count" class="font-mono-num font-bold text-slate-100" role="status" aria-live="polite">...</span>
+            <!-- Result counter -->
+            <div class="flex items-center space-x-1.5 text-xs shrink-0">
+              <span class="text-slate-400" data-i18n="results_label">Résultat :</span>
+              <span id="results-count" class="font-mono-num font-bold text-slate-100" role="status" aria-live="polite">...</span>
+            </div>
           </div>
 
         </div>
@@ -759,37 +767,37 @@
   </div>
 
   <!-- ==================== UNIT DETAILS MODAL (Tactical HUD) ==================== -->
-  <div id="unit-modal" role="dialog" aria-modal="true" aria-labelledby="modal-unit-name" aria-describedby="modal-overview-text" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto modal-backdrop">
-    <div id="unit-modal-dialog" class="relative w-full max-w-4xl bg-[#0f1629] border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden modal-enter my-6 max-h-[92vh] flex flex-col">
+  <div id="unit-modal" role="dialog" aria-modal="true" aria-labelledby="modal-unit-name" aria-describedby="modal-overview-text" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto modal-backdrop">
+    <div id="unit-modal-dialog" class="relative w-full max-w-4xl bg-[#0f1629] border border-slate-700/80 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden modal-enter my-2 sm:my-6 max-h-[96vh] sm:max-h-[92vh] flex flex-col">
       
       <!-- Modal Header -->
-      <div class="px-5 py-4 bg-[#141d33] border-b border-slate-800 flex items-center justify-between shrink-0">
-        <div class="flex items-center space-x-3">
-          <span id="modal-star-badge" class="px-2 py-0.5 rounded text-xs font-black bg-amber-500 text-slate-950 font-mono-num">
+      <div class="px-3.5 sm:px-5 py-3 sm:py-4 bg-[#141d33] border-b border-slate-800 flex items-center justify-between shrink-0 gap-2">
+        <div class="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+          <span id="modal-star-badge" class="px-2 py-0.5 rounded text-xs font-black bg-amber-500 text-slate-950 font-mono-num shrink-0">
             6★
           </span>
-          <h2 id="modal-unit-name" class="text-lg sm:text-xl font-bold text-white tracking-tight text-balance">Nom de l'unité</h2>
-          <span id="modal-trade-badge" class="px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded hidden">
+          <h2 id="modal-unit-name" class="text-base sm:text-xl font-bold text-white tracking-tight truncate">Nom de l'unité</h2>
+          <span id="modal-trade-badge" class="px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded hidden shrink-0">
             Tradeable
           </span>
-          <span id="modal-unobtainable-badge" class="px-2 py-0.5 text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded hidden" data-i18n="badge_unobtainable">
+          <span id="modal-unobtainable-badge" class="px-2 py-0.5 text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded hidden shrink-0" data-i18n="badge_unobtainable">
             Introuvable
           </span>
         </div>
-        <button id="modal-close-btn" onclick="closeUnitModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center tap-scale" aria-label="Fermer la fiche d'unité" data-i18n-aria="modal_close_aria">
+        <button id="modal-close-btn" onclick="closeUnitModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center tap-scale shrink-0" aria-label="Fermer la fiche d'unité" data-i18n-aria="modal_close_aria">
           <i data-lucide="x" class="w-4 h-4" stroke-width="2"></i>
         </button>
       </div>
 
       <!-- Modal Body (Scrollable) -->
-      <div class="p-5 overflow-y-auto space-y-5 flex-1 text-slate-300 text-xs">
+      <div class="p-3 sm:p-5 overflow-y-auto space-y-4 sm:space-y-5 flex-1 text-slate-300 text-xs">
         
         <!-- Top Info Row -->
-        <div class="flex flex-col sm:flex-row gap-5">
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-5">
           
           <!-- Portrait -->
           <div class="w-full sm:w-48 shrink-0 flex flex-col items-center">
-            <div id="modal-img-wrapper" class="w-44 h-44 rounded-xl bg-slate-900 border border-slate-800 p-2 overflow-hidden flex items-center justify-center shadow-md relative">
+            <div id="modal-img-wrapper" class="w-36 h-36 sm:w-44 sm:h-44 rounded-xl bg-slate-900 border border-slate-800 p-2 overflow-hidden flex items-center justify-center shadow-md relative">
               <img id="modal-unit-image" src="" alt="Portrait" class="max-w-full max-h-full object-contain img-outline rounded-lg">
             </div>
             <div id="modal-anime-origin" class="mt-2 text-center text-xs text-sky-400 font-semibold">
@@ -1006,7 +1014,7 @@
   </div>
 
   <!-- Application Logic -->
-  <script src="app.js?v=i18n-v4"></script>
+  <script src="app.js?v=mobile-v5"></script>
 </body>
 </html>
 

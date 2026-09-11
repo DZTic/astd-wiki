@@ -767,8 +767,14 @@ function setLanguage(lang) {
     if (currentTab === 'compare') {
       renderCompareView();
     }
-    if (currentModalUnit) {
+    const modal = document.getElementById('unit-modal');
+    const isModalOpen = modal && !modal.classList.contains('hidden');
+    if (currentModalUnit && isModalOpen) {
+      const savedLevel = currentLevelView;
       openUnitModal(currentModalUnit.id);
+      if (savedLevel && savedLevel !== 1) {
+        setLevelView(savedLevel);
+      }
     }
   }
 }
@@ -1313,21 +1319,35 @@ function initSafeAds() {
 
   const currentHost = window.location.hostname;
   const isAuthorized = ADS_CONFIG.allowedHosts.includes(currentHost);
+  const isConfigured = ADS_CONFIG.client && !ADS_CONFIG.client.includes('REPLACE_ME');
+  const isDesktopWide = window.innerWidth >= 1680;
 
   // Garde-fou 1 : domaine non autorisé (ex: localhost, ou fork tiers)
   // Garde-fou 2 : identifiant non encore renseigné
-  const isConfigured = ADS_CONFIG.client && !ADS_CONFIG.client.includes('REPLACE_ME');
-  if (!isAuthorized || !isConfigured) {
-    if (leftAside) leftAside.classList.add('hidden');
-    if (rightAside) rightAside.classList.add('hidden');
+  // Garde-fou 3 : écran mobile, tablette ou bureau standard (< 1680px)
+  if (!isAuthorized || !isConfigured || !isDesktopWide) {
+    if (leftAside) {
+      leftAside.classList.remove('ad-visible');
+      leftAside.classList.add('hidden');
+    }
+    if (rightAside) {
+      rightAside.classList.remove('ad-visible');
+      rightAside.classList.add('hidden');
+    }
     return;
   }
 
-  // Domaine autorisé et compte configuré : affichage des skyscrapers
-  if (leftAside) leftAside.classList.remove('hidden');
-  if (rightAside) rightAside.classList.remove('hidden');
+  // Domaine autorisé, compte configuré ET moniteur ultra-large (>= 1680px)
+  if (leftAside) {
+    leftAside.classList.add('ad-visible');
+    leftAside.classList.remove('hidden');
+  }
+  if (rightAside) {
+    rightAside.classList.add('ad-visible');
+    rightAside.classList.remove('hidden');
+  }
 
-  if (leftContent) {
+  if (leftContent && !leftContent.querySelector('ins.adsbygoogle')) {
     leftContent.innerHTML = `
       <ins class="adsbygoogle"
            style="display:inline-block;width:160px;height:600px"
@@ -1335,9 +1355,14 @@ function initSafeAds() {
            data-ad-slot="${ADS_CONFIG.slotLeft}"
            data-ad-format="vertical"></ins>
     `;
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (e) {
+      console.debug('AdSense left init error', e);
+    }
   }
 
-  if (rightContent) {
+  if (rightContent && !rightContent.querySelector('ins.adsbygoogle')) {
     rightContent.innerHTML = `
       <ins class="adsbygoogle"
            style="display:inline-block;width:160px;height:600px"
@@ -1345,6 +1370,11 @@ function initSafeAds() {
            data-ad-slot="${ADS_CONFIG.slotRight}"
            data-ad-format="vertical"></ins>
     `;
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (e) {
+      console.debug('AdSense right init error', e);
+    }
   }
 
   if (!document.getElementById('adsense-script')) {
@@ -1355,14 +1385,16 @@ function initSafeAds() {
     script.crossOrigin = 'anonymous';
     document.head.appendChild(script);
   }
-
-  try {
-    if (leftContent) (window.adsbygoogle = window.adsbygoogle || []).push({});
-    if (rightContent) (window.adsbygoogle = window.adsbygoogle || []).push({});
-  } catch (e) {
-    console.debug('AdSense init error', e);
-  }
 }
+
+// Réévaluation automatique lors du redimensionnement de la fenêtre
+let adResizeDebounce = null;
+window.addEventListener('resize', () => {
+  clearTimeout(adResizeDebounce);
+  adResizeDebounce = setTimeout(() => {
+    initSafeAds();
+  }, 200);
+});
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', () => {
@@ -1517,6 +1549,74 @@ function setupEventListeners() {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeUnitModal();
     });
+
+    // Empêcher le défilement de fuiter vers l'arrière-plan (wheel & touch)
+    modal.addEventListener('wheel', (e) => {
+      let target = e.target;
+      let scrollable = null;
+      while (target && target !== modal && target !== document.body) {
+        const style = window.getComputedStyle(target);
+        const overflowY = style.overflowY;
+        if ((overflowY === 'auto' || overflowY === 'scroll') && target.scrollHeight > target.clientHeight) {
+          scrollable = target;
+          break;
+        }
+        target = target.parentElement;
+      }
+
+      if (!scrollable) {
+        // Aucune zone défilable sous le curseur (fiche courte, header, backdrop)
+        e.preventDefault();
+        return;
+      }
+
+      const { scrollTop, scrollHeight, clientHeight } = scrollable;
+      const deltaY = e.deltaY;
+      if (deltaY > 0 && Math.ceil(scrollTop + clientHeight) >= scrollHeight) {
+        // Fin de défilement vers le bas : bloquer pour éviter de faire défiler l'arrière-plan
+        e.preventDefault();
+      } else if (deltaY < 0 && scrollTop <= 0) {
+        // Début de défilement vers le haut : bloquer pour éviter de faire défiler l'arrière-plan
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    let modalTouchStartY = 0;
+    modal.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        modalTouchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    modal.addEventListener('touchmove', (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      const currentY = e.touches[0].clientY;
+      const deltaY = modalTouchStartY - currentY;
+
+      let target = e.target;
+      let scrollable = null;
+      while (target && target !== modal && target !== document.body) {
+        const style = window.getComputedStyle(target);
+        const overflowY = style.overflowY;
+        if ((overflowY === 'auto' || overflowY === 'scroll') && target.scrollHeight > target.clientHeight) {
+          scrollable = target;
+          break;
+        }
+        target = target.parentElement;
+      }
+
+      if (!scrollable) {
+        e.preventDefault();
+        return;
+      }
+
+      const { scrollTop, scrollHeight, clientHeight } = scrollable;
+      if (deltaY > 0 && Math.ceil(scrollTop + clientHeight) >= scrollHeight) {
+        e.preventDefault();
+      } else if (deltaY < 0 && scrollTop <= 0) {
+        e.preventDefault();
+      }
+    }, { passive: false });
   }
 
   if (modalDialog) {
@@ -1561,37 +1661,49 @@ function handleHashNavigation() {
   if (hash.startsWith('unit/')) {
     const unitId = hash.replace('unit/', '');
     openUnitModal(unitId);
-  } else if (hash.startsWith('compare')) {
-    const parts = hash.split('/');
-    if (parts[1]) {
-      const uA = ALL_UNITS.find(u => u.id === parts[1] || u.name.toLowerCase() === parts[1].toLowerCase());
-      if (uA) {
-        compareUnitA = uA;
-        const inputA = document.getElementById('compare-search-a');
-        if (inputA) inputA.value = uA.name;
-        const clearBtnA = document.getElementById('compare-clear-a');
-        if (clearBtnA) clearBtnA.classList.remove('hidden');
+  } else {
+    const modal = document.getElementById('unit-modal');
+    if (modal && !modal.classList.contains('hidden')) {
+      closeUnitModal();
+    }
+    if (hash.startsWith('compare')) {
+      const parts = hash.split('/');
+      if (parts[1]) {
+        const uA = ALL_UNITS.find(u => u.id === parts[1] || u.name.toLowerCase() === parts[1].toLowerCase());
+        if (uA) {
+          compareUnitA = uA;
+          const inputA = document.getElementById('compare-search-a');
+          if (inputA) inputA.value = uA.name;
+          const clearBtnA = document.getElementById('compare-clear-a');
+          if (clearBtnA) clearBtnA.classList.remove('hidden');
+        }
+      }
+      if (parts[2]) {
+        const uB = ALL_UNITS.find(u => u.id === parts[2] || u.name.toLowerCase() === parts[2].toLowerCase());
+        if (uB) {
+          compareUnitB = uB;
+          const inputB = document.getElementById('compare-search-b');
+          if (inputB) inputB.value = uB.name;
+          const clearBtnB = document.getElementById('compare-clear-b');
+          if (clearBtnB) clearBtnB.classList.remove('hidden');
+        }
+      }
+      switchTab('compare');
+      renderCompareView();
+    } else if (['units', 'tierlist', 'codes', 'orbs', 'gamemodes', 'teambuilder', 'compare'].includes(hash)) {
+      if (currentTab !== hash) {
+        switchTab(hash);
       }
     }
-    if (parts[2]) {
-      const uB = ALL_UNITS.find(u => u.id === parts[2] || u.name.toLowerCase() === parts[2].toLowerCase());
-      if (uB) {
-        compareUnitB = uB;
-        const inputB = document.getElementById('compare-search-b');
-        if (inputB) inputB.value = uB.name;
-        const clearBtnB = document.getElementById('compare-clear-b');
-        if (clearBtnB) clearBtnB.classList.remove('hidden');
-      }
-    }
-    switchTab('compare');
-    renderCompareView();
-  } else if (['units', 'tierlist', 'codes', 'orbs', 'gamemodes', 'teambuilder', 'compare'].includes(hash)) {
-    switchTab(hash);
   }
 }
 
 // Switch Active Tab
 function switchTab(tabId) {
+  const modal = document.getElementById('unit-modal');
+  if (modal && !modal.classList.contains('hidden')) {
+    closeUnitModal();
+  }
   currentTab = tabId;
   window.location.hash = tabId;
 
@@ -2501,6 +2613,9 @@ function openUnitModal(unitId) {
     dialog.classList.remove('modal-exit');
     dialog.classList.add('modal-enter');
   }
+  document.documentElement.classList.add('modal-open');
+  document.body.classList.add('modal-open');
+  document.documentElement.style.overflow = 'hidden';
   document.body.style.overflow = 'hidden';
   if (window.lucide) lucide.createIcons();
 
@@ -2710,6 +2825,7 @@ function renderUpgradesTable() {
 }
 
 function closeUnitModal() {
+  currentModalUnit = null;
   const modal = document.getElementById('unit-modal');
   const dialog = document.getElementById('unit-modal-dialog');
   if (!modal || modal.classList.contains('hidden')) return;
@@ -2723,9 +2839,17 @@ function closeUnitModal() {
   if (footerEl) footerEl.removeAttribute('inert');
 
   const onClosed = () => {
+    currentModalUnit = null;
+    document.documentElement.classList.remove('modal-open');
+    document.body.classList.remove('modal-open');
+    document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
     if (window.location.hash.startsWith('#unit/')) {
-      window.location.hash = currentTab;
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '#' + currentTab);
+      } else {
+        window.location.hash = currentTab;
+      }
     }
     // Restore focus to trigger element
     if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
