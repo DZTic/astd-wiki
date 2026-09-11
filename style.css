@@ -42,6 +42,11 @@
 
 html, body {
   min-width: 320px;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+#app-header {
   overflow-x: clip;
 }
 

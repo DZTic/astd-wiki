@@ -61,50 +61,50 @@
               <span class="text-base font-bold tracking-tight text-white whitespace-nowrap">ASTD</span>
               <span class="text-base font-bold tracking-tight text-sky-400 whitespace-nowrap">DATABASE</span>
             </div>
-            <div class="text-[10px] text-slate-400 -mt-0.5 hidden sm:block whitespace-nowrap" data-i18n="brand_subtitle">
+            <div class="text-[10px] text-slate-400 -mt-0.5 hidden 2xl:block whitespace-nowrap" data-i18n="brand_subtitle">
               Roblox All Star Tower Defense Wiki
             </div>
           </div>
         </button>
 
         <!-- Desktop Navigation Tabs (lg: 1024px) -->
-        <nav aria-label="Navigation principale" data-i18n-aria="nav_main_aria" class="hidden lg:flex items-center gap-0.5 xl:gap-1 font-medium">
-          <button onclick="switchTab('units')" id="nav-units" data-tab="units" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale">
-            <i data-lucide="swords" class="w-4 h-4 shrink-0" stroke-width="2"></i>
+        <nav aria-label="Navigation principale" data-i18n-aria="nav_main_aria" class="hidden lg:flex items-center gap-1 xl:gap-1.5 font-medium min-w-0 shrink">
+          <button onclick="switchTab('units')" id="nav-units" data-tab="units" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale" title="Encyclopédie des Tours & Unités">
+            <i data-lucide="swords" class="w-3.5 h-3.5 shrink-0" stroke-width="2"></i>
             <span data-i18n="nav_units">Unités</span>
           </button>
-          <button onclick="switchTab('tierlist')" id="nav-tierlist" data-tab="tierlist" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
-            <i data-lucide="crown" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
+          <button onclick="switchTab('tierlist')" id="nav-tierlist" data-tab="tierlist" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Tier List Méta">
+            <i data-lucide="crown" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_tierlist">Tier List</span>
           </button>
-          <button onclick="switchTab('codes')" id="nav-codes" data-tab="codes" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale relative">
-            <i data-lucide="gift" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
+          <button onclick="switchTab('codes')" id="nav-codes" data-tab="codes" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale relative" title="Codes Cadeaux Actifs">
+            <i data-lucide="gift" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_codes">Codes</span>
-            <span id="badge-active-codes" class="ml-1 px-1.5 py-0.2 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-mono-num">
+            <span id="badge-active-codes" class="ml-0.5 px-1.5 py-0.2 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-mono-num">
               ...
             </span>
           </button>
-          <button onclick="switchTab('orbs')" id="nav-orbs" data-tab="orbs" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
-            <i data-lucide="sparkles" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
+          <button onclick="switchTab('orbs')" id="nav-orbs" data-tab="orbs" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Compendium des Orbes & Reliques">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_orbs">Orbes</span>
           </button>
-          <button onclick="switchTab('gamemodes')" id="nav-gamemodes" data-tab="gamemodes" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
-            <i data-lucide="map" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
-            <span data-i18n="nav_gamemodes">Modes & Raids</span>
+          <button onclick="switchTab('gamemodes')" id="nav-gamemodes" data-tab="gamemodes" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Guides des Modes & Raids">
+            <i data-lucide="map" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
+            <span data-i18n="nav_gamemodes">Modes</span>
           </button>
-          <button onclick="switchTab('teambuilder')" id="nav-teambuilder" data-tab="teambuilder" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
-            <i data-lucide="layout-grid" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
-            <span data-i18n="nav_teambuilder">Deck Builder</span>
+          <button onclick="switchTab('teambuilder')" id="nav-teambuilder" data-tab="teambuilder" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Simulateur de Deck">
+            <i data-lucide="layout-grid" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
+            <span data-i18n="nav_teambuilder">Deck</span>
           </button>
-          <button onclick="switchTab('compare')" id="nav-compare" data-tab="compare" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
-            <i data-lucide="arrow-left-right" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
+          <button onclick="switchTab('compare')" id="nav-compare" data-tab="compare" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Comparateur Versus">
+            <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_compare">Comparateur</span>
           </button>
         </nav>
 
         <!-- Right Quick Actions -->
         <div class="flex items-center space-x-2 shrink-0">
-          <div class="relative hidden xl:block">
+          <div class="relative hidden 2xl:block">
             <label for="quick-search" class="sr-only" data-i18n="quick_search_sr">Recherche rapide d'unité ou anime</label>
             <input type="text" id="quick-search" placeholder="Recherche rapide (Ctrl + K)..." 
                    data-i18n-placeholder="quick_search_placeholder"
