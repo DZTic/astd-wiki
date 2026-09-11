@@ -125,10 +125,9 @@ function isNewUnit(unit) {
 // et les skyscrapers latéraux restent totalement masqués.
 const ADS_CONFIG = {
   allowedHosts: ['dztic.github.io'],
-  // À remplacer par votre identifiant client Google AdSense ou régie partenaire
-  client: 'ca-pub-REPLACE_ME',
-  slotLeft: 'REPLACE_ME',
-  slotRight: 'REPLACE_ME'
+  client: 'ca-pub-9302236726754340',
+  slotLeft: '2599124005',
+  slotRight: '2599124005'
 };
 
 function initSafeAds() {
