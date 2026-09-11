@@ -1451,6 +1451,12 @@ async function loadData() {
       fetch(`${dataPrefix}material_images.json`).then(r => r.json()).catch(() => ({}))
     ]);
 
+    if (Array.isArray(unitsRes)) {
+      unitsRes.forEach(u => {
+        if (u.anime_origin) u.anime_origin = u.anime_origin.replace(/<[^>]*>/g, '').trim();
+        if (u.character_origin) u.character_origin = u.character_origin.replace(/<[^>]*>/g, '').trim();
+      });
+    }
     ALL_UNITS = unitsRes;
     // Le tableau du wiki n'est pas trié par date : on met les codes les plus récents en premier
     if (Array.isArray(codesRes.active)) {
@@ -1491,7 +1497,7 @@ async function loadData() {
     if (animeSelect) {
       const counts = {};
       ALL_UNITS.forEach(u => {
-        const a = (u.anime_origin || '').trim();
+        const a = (u.anime_origin || '').replace(/<[^>]*>/g, '').trim();
         if (a) counts[a] = (counts[a] || 0) + 1;
       });
       Object.entries(counts)

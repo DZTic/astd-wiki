@@ -4,6 +4,24 @@
 // Architecture hybride : persistance serveur local (server.py) + localStorage
 // ==========================================================================
 
+function stripHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/<[^>]*>/g, '')
+    .replace(/[\uFFFD\u0080-\u009F]/g, '')
+    .trim();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 const CommunityManager = (function() {
   const STORAGE_KEY = 'astd_community_contributions';
   const API_ENDPOINT = '/api/community';
@@ -169,12 +187,12 @@ const CommunityManager = (function() {
   // --- ACTIONS CRUD UNITÉS ---
 
   async function saveUnit(unitData) {
-    if (!unitData.name || !unitData.name.trim()) {
+    const name = stripHtml(unitData.name);
+    if (!name) {
       alert(window.t ? window.t('comm_name_required', 'Le nom de l\'unité est obligatoire.') : 'Le nom de l\'unité est obligatoire.');
       return false;
     }
 
-    const name = unitData.name.trim();
     const id = unitData.id || name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
     const dmg = parseFloat(unitData.max_damage) || 0;
     const spa = parseFloat(unitData.min_spa) || 1;
@@ -192,9 +210,9 @@ const CommunityManager = (function() {
       max_range: parseInt(unitData.max_range, 10) || 60,
       min_spa: spa,
       max_dps: dps,
-      character_origin: unitData.character_origin ? unitData.character_origin.trim() : null,
-      anime_origin: unitData.anime_origin ? unitData.anime_origin.trim() : 'ASTD Community',
-      overview: unitData.overview ? unitData.overview.trim() : 'Unité ajoutée par la communauté ASTD.',
+      character_origin: unitData.character_origin ? stripHtml(unitData.character_origin) : null,
+      anime_origin: unitData.anime_origin ? stripHtml(unitData.anime_origin) : 'ASTD Community',
+      overview: unitData.overview ? stripHtml(unitData.overview) : 'Unité ajoutée par la communauté ASTD.',
       image: unitData.image && unitData.image.trim() ? unitData.image.trim() : 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png',
       is_tradeable: !!unitData.is_tradeable,
       is_unobtainable: !!unitData.is_unobtainable,
@@ -868,7 +886,7 @@ const CommunityUI = (function() {
           ${window.t ? window.t('comm_select_unit_to_edit', 'Choisissez une unité à modifier :') : 'Choisissez une unité à modifier :'}
         </label>
         <select id="select-unit-to-edit" class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-sky-500">
-          ${units.slice(0, 300).map(u => `<option value="${u.id}">${u.name} (${u.star}★ - ${u.anime_origin || 'ASTD'})</option>`).join('')}
+          ${units.slice(0, 300).map(u => `<option value="${escapeHtml(u.id)}">${escapeHtml(stripHtml(u.name))} (${u.star}★ - ${escapeHtml(stripHtml(u.anime_origin) || 'ASTD')})</option>`).join('')}
         </select>
         <div class="flex justify-end gap-2 pt-2">
           <button onclick="CommunityUI.closeModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold tap-scale">
@@ -943,7 +961,11 @@ const CommunityUI = (function() {
     }
 
     const defaultImg = existing?.image || "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
-    const animeOptions = Array.from(new Set((window.ALL_UNITS || []).map(u => u.anime_origin).filter(Boolean))).sort();
+    const animeOptions = Array.from(new Set(
+      (window.ALL_UNITS || [])
+        .map(u => stripHtml(u.anime_origin))
+        .filter(Boolean)
+    )).sort((a, b) => a.localeCompare(b));
 
     bodyEl.innerHTML = `
       <form id="comm-unit-form" onsubmit="event.preventDefault(); CommunityUI.submitUnitForm();" class="space-y-4">
@@ -968,7 +990,7 @@ const CommunityUI = (function() {
                 <label class="block font-bold text-slate-200 mb-1">
                   ${window.t ? window.t('comm_field_name', 'Nom de l\'unité *') : 'Nom de l\'unité *'}
                 </label>
-                <input type="text" id="comm-unit-name" required value="${existing ? existing.name : ''}"
+                <input type="text" id="comm-unit-name" required value="${escapeHtml(stripHtml(existing?.name) || '')}"
                        placeholder="Ex: Goku Ultra Instinct, Nanami..."
                        class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-sky-500"
                        oninput="CommunityUI.updateLivePreview()">
@@ -995,19 +1017,19 @@ const CommunityUI = (function() {
                 <label class="block font-bold text-slate-200 mb-1">
                   ${window.t ? window.t('comm_field_anime', 'Franchise / Anime') : 'Franchise / Anime'}
                 </label>
-                <input type="text" id="comm-unit-anime" list="anime-suggestions" value="${existing?.anime_origin || ''}"
+                <input type="text" id="comm-unit-anime" list="anime-suggestions" value="${escapeHtml(stripHtml(existing?.anime_origin) || '')}"
                        placeholder="Ex: Dragon Ball, Naruto, Bleach..."
                        class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-sky-500"
                        oninput="CommunityUI.updateLivePreview()">
                 <datalist id="anime-suggestions">
-                  ${animeOptions.map(a => `<option value="${a}">`).join('')}
+                  ${animeOptions.map(a => `<option value="${escapeHtml(a)}">`).join('')}
                 </datalist>
               </div>
               <div>
                 <label class="block font-bold text-slate-200 mb-1">
                   ${window.t ? window.t('comm_field_char', 'Personnage d\'origine') : 'Personnage d\'origine'}
                 </label>
-                <input type="text" id="comm-unit-char" value="${existing?.character_origin || ''}"
+                <input type="text" id="comm-unit-char" value="${escapeHtml(stripHtml(existing?.character_origin) || '')}"
                        placeholder="Ex: Son Goku, Kakashi..."
                        class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-sky-500">
               </div>
@@ -1208,8 +1230,8 @@ const CommunityUI = (function() {
           </div>
 
           <div class="my-2 min-w-0">
-            <div class="font-bold text-xs sm:text-sm text-white truncate">${name}</div>
-            <div class="text-[11px] text-slate-400 truncate">${anime}</div>
+            <div class="font-bold text-xs sm:text-sm text-white truncate">${escapeHtml(stripHtml(name))}</div>
+            <div class="text-[11px] text-slate-400 truncate">${escapeHtml(stripHtml(anime))}</div>
           </div>
 
           <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800 font-mono-num text-[11px]">
