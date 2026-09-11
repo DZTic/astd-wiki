@@ -848,28 +848,195 @@ function translateObtain(text) {
   if (!text) return '';
   if (currentLang === 'fr') {
     return text
+      .replace(/via\s+Evolution\s+or\s+Hero\s+Summon/gi, "via Évolution ou Invocation Héros")
+      .replace(/via\s+Evolution\s+or\s+Special\s+Summon/gi, "via Évolution ou Invocation Spéciale")
+      .replace(/via\s+Evolution\s+or\s+Banner\s+Z/gi, "via Évolution ou Bannière Z")
+      .replace(/via\s+Evolution/gi, "via Évolution")
+      .replace(/via\s+Hero\s+Summon/gi, "via Invocation Héros")
+      .replace(/Evolution\s+or\s+/gi, "Évolution ou ")
+      .replace(/\bor\b/gi, "ou")
       .replace(/Summon Banner/gi, "Bannière d'invocation")
       .replace(/Hero Summon/gi, "Invocation Héros")
       .replace(/Special Summon/gi, "Invocation Spéciale")
+      .replace(/Banner\s+Z/gi, "Bannière Z")
       .replace(/Story Mode/gi, "Mode Histoire")
       .replace(/Infinite Mode/gi, "Mode Infini")
       .replace(/Trial/gi, "Épreuve")
       .replace(/Raid/gi, "Raid")
       .replace(/Traveling Merchant/gi, "Marchand ambulant")
       .replace(/Evolve from/gi, "Évolution de")
-      .replace(/Evolves into/gi, "Évolue en");
+      .replace(/Evolves into/gi, "Évolue en")
+      .replace(/Evolution/gi, "Évolution");
   } else {
     return text
+      .replace(/via\s+Évolution\s+ou\s+Invocation\s+Héros/gi, "via Evolution or Hero Summon")
+      .replace(/via\s+Évolution/gi, "via Evolution")
       .replace(/Bannière d'invocation/gi, "Summon Banner")
       .replace(/Invocation Héros/gi, "Hero Summon")
       .replace(/Invocation Spéciale/gi, "Special Summon")
+      .replace(/Bannière\s+Z/gi, "Banner Z")
       .replace(/Mode Histoire/gi, "Story Mode")
       .replace(/Mode Infini/gi, "Infinite Mode")
       .replace(/Épreuve/gi, "Trial")
       .replace(/Marchand ambulant/gi, "Traveling Merchant")
       .replace(/Évolution de/gi, "Evolve from")
-      .replace(/Évolue en/gi, "Evolves into");
+      .replace(/Évolue en/gi, "Evolves into")
+      .replace(/Évolution/gi, "Evolution")
+      .replace(/\bou\b/gi, "or");
   }
+}
+
+function translateOverview(text, unit) {
+  if (!text || currentLang === 'en') return text;
+  let fr = text;
+
+  // 1. Définition canonique de l'unité
+  fr = fr.replace(/([A-Za-z0-9\s\(\)\'\.\-\:\?\%]+?)\s+is\s+a\s+(\d+)[\-\s]star\s+(?:(ground|air|hill|hybrid)\s+)?unit\s+based\s+(?:on|off)\s+([^,\.]+?)\s+from\s+(?:the\s+)?([^,\.]+?)(?:\s+franchise|\s+series|\s+anime)?\./gi, (m, name, stars, type, char, fran) => {
+    let tStr = '';
+    if (type) {
+      const tl = type.toLowerCase();
+      tStr = tl === 'ground' ? ' (Sol)' : tl === 'air' ? ' (Aérien)' : tl === 'hill' ? ' (Colline)' : ' (Hybride)';
+    }
+    return `${name.trim()} est une unité ${stars} étoiles${tStr} basée sur ${char.trim()} de la franchise ${fran.trim()}.`;
+  });
+
+  // 2. Arc narratif / fin de série
+  fr = fr.replace(/This variant takes the place at\s+(?:the\s+)?(.+?)\s+arc,\s+where is the End of Series\.?/gi, 'Cette variante prend place lors de l\'arc $1, marquant la fin de la série.');
+  fr = fr.replace(/This variant takes the place at\s+(?:the\s+)?(.+?)\s+arc\.?/gi, 'Cette variante prend place lors de l\'arc $1.');
+  fr = fr.replace(/during his fight with\s+([^,\.]+?)\.?/gi, 'pendant son combat contre $1.');
+  fr = fr.replace(/in his\s+([^,\.]+?)\s+form from\s+([^,\.]+?)\.?/gi, 'sous sa forme $1 de $2.');
+
+  // 3. Évolution
+  fr = fr.replace(/([A-Za-z0-9\s\(\)\'\.\-\:\?\%]+?)\s+can\s+be\s+evolved\s+from\s+([^,\.]+?)\s+(?:by\s+using(?:\s+the\s+following\s+materials)?:?|using:?)\s*(.+)?$/gi, (m, name, from, mats) => {
+    const matStr = mats ? ` via : ${mats.trim().replace(/Evolution/gi, 'Évolution')}` : '.';
+    return `${name.trim()} peut être obtenue par évolution depuis ${from.trim()}${matStr}`;
+  });
+  fr = fr.replace(/([A-Za-z0-9\s\(\)\'\.\-\:\?\%]+?)\s+can\s+be\s+evolved\s+from\s+([^,\.]+?)\.?/gi, (m, name, from) => {
+    return `${name.trim()} peut être obtenue par évolution depuis ${from.trim()}.`;
+  });
+
+  // 4. Shiny / Boss de Raid / Obtention
+  fr = fr.replace(/(?:His|Her)\s+shiny\s+variant\s+is\s+based\s+on\s+([^,\.]+?)\s+from\s+the\s+same\s+franchise\.?/gi, 'Sa variante shiny est basée sur $1 de la même franchise.');
+  fr = fr.replace(/(?:He|She)\s+is\s+also\s+the\s+boss\s+of\s+(?:his|her)\s+own\s+event\s+raid\.?/gi, 'Cette unité est également le boss de son propre raid d\'événement.');
+  fr = fr.replace(/([A-Za-z0-9\s\(\)\'\.\-\:\?\%]+?)\s+can\s+be\s+obtained\s+from\s+(.+?)\.?$/gi, (m, name, src) => {
+    return `${name.trim()} peut être obtenue via ${translateObtain(src.trim())}.`;
+  });
+
+  // 5. Nettoyage
+  fr = fr.replace(/\bEvolution\b/g, 'Évolution');
+
+  return fr;
+}
+
+function translateAbilityDescription(text) {
+  if (!text || currentLang === 'en') return text;
+  let fr = text;
+
+  // 1. Leader Skills
+  fr = fr.replace(/units in the\s+['"]?([^'"]+?)['"]?\s+category gain (?:an?|a)\s*(\d+)%\s*attack boost(\s*and boosts money by\s*(\d+)%)?\.?/gi, (m, cat, boost, mBoost, money) => {
+    return `Les unités de la catégorie ${cat} bénéficient d'un bonus d'attaque de ${boost}%${money ? ` et augmentent l'argent de ${money}%` : ''}.`;
+  });
+  fr = fr.replace(/Units in the\s+['"]?([^'"]+?)['"]?\s+or\s+['"]?([^'"]+?)['"]?\s+Category gain (?:an?|a)\s*(\d+)%\s*attack boost\.?/gi, (m, cat1, cat2, boost) => {
+    return `Les unités des catégories ${cat1} ou ${cat2} bénéficient d'un bonus d'attaque de ${boost}%.`;
+  });
+  fr = fr.replace(/Units in the\s+['"]?([^'"]+?)['"]?\s+Category gain Attack Boost \+(\d+)% and \+(\d+)% Bonus\.?/gi, (m, cat, b1, b2) => {
+    return `Les unités de la catégorie ${cat} bénéficient d'un bonus d'attaque de +${b1}% et d'un bonus de +${b2}%.`;
+  });
+
+  // 2. Déclencheurs & Activation
+  fr = fr.replace(/^Upon activation,\s*/gi, 'À l\'activation, ');
+  fr = fr.replace(/^When activated,\s*/gi, 'À l\'activation, ');
+  fr = fr.replace(/^After activation,\s*/gi, 'Après activation, ');
+  fr = fr.replace(/^After activating this ability,\s*/gi, 'Après activation de cette capacité, ');
+  fr = fr.replace(/Upon activation of this ability,\s*/gi, 'À l\'activation de cette capacité, ');
+
+  // 3. Dégâts et multiplicateurs
+  fr = fr.replace(/Deals\s*([\d\.]+)x\s*damage to enemies affected by\s*([^,\.]+?)(?:,\s*([^,\.]+?))?(?:,\s*or\s*([^,\.]+?))?\./gi, (m, mult, e1, e2, e3) => {
+    const effs = [e1, e2, e3].filter(Boolean).map(e => e.trim().replace(/Bleed/gi, 'Saignement').replace(/Rupture/gi, 'Rupture').replace(/Judgement/gi, 'Jugement')).join(', ');
+    return `Inflige ${mult}x dégâts aux ennemis affectés par ${effs}.`;
+  });
+
+  // 4. Cooldowns & utilisations
+  fr = fr.replace(/(\d+)\s*minute\s*\((\d+)\s*second\)\s*global cooldown/gi, 'temps de recharge global de $1 min ($2 s)');
+  fr = fr.replace(/(\d+)\s*second\s*global cooldown/gi, 'temps de recharge global de $1 secondes');
+  fr = fr.replace(/global cooldown of (\d+) minutes/gi, 'temps de recharge global de $1 minutes');
+  fr = fr.replace(/This ability has a PERMANENT GLOBAL cooldown/gi, 'Cette capacité possède un temps de recharge GLOBAL PERMANENT');
+  fr = fr.replace(/This ability has a global cooldown/gi, 'Cette capacité possède un temps de recharge global');
+  fr = fr.replace(/that is shared with\s*/gi, 'partagé avec ');
+  fr = fr.replace(/is shared with\s*/gi, 'est partagé avec ');
+  fr = fr.replace(/shares global cooldown with\s*/gi, 'partage le temps de recharge global avec ');
+  fr = fr.replace(/shares a GLOBAL cooldown with\s*/gi, 'partage le temps de recharge global avec ');
+  fr = fr.replace(/One-time use per game/gi, 'Utilisation unique par partie');
+  fr = fr.replace(/can only be used once per game/gi, 'ne peut être utilisée qu\'une seule fois par partie');
+
+  // 5. Vocabulaire de combat ASTD
+  fr = fr.replace(/it plays a cutscene and/gi, 'lance une cinématique et');
+  fr = fr.replace(/plays a cutscene and/gi, 'lance une cinématique et');
+  fr = fr.replace(/to all units on the map/gi, 'à toutes les unités sur la carte');
+  fr = fr.replace(/all enemies within range/gi, 'tous les ennemis à portée');
+  fr = fr.replace(/all enemies on the map/gi, 'tous les ennemis sur la carte');
+  fr = fr.replace(/deal (\d+)x his damage/gi, 'infliger $1x ses dégâts');
+  fr = fr.replace(/apply Fear Debuff on them/gi, 'leur appliquer le malus Peur');
+  fr = fr.replace(/If amplified by the (\d+)(?:st|nd|rd|th) Ability/gi, 'Si amplifié par la $1e capacité');
+  fr = fr.replace(/Under the amplification of the (\d+)(?:st|nd|rd|th) Ability/gi, 'Sous l\'amplification de la $1e capacité');
+  fr = fr.replace(/the player will gain/gi, 'le joueur reçoit');
+  fr = fr.replace(/deals? (\d+(?:\.\d+)?)\s*billion damage/gi, 'inflige $1 milliards de dégâts');
+  fr = fr.replace(/deals? (\d+(?:\.\d+)?)\s*million damage/gi, 'inflige $1 millions de dégâts');
+  fr = fr.replace(/removes? (\d+)% of all enemies' current HP/gi, 'retire $1% des PV actuels de tous les ennemis');
+  fr = fr.replace(/under (\d+)% of their maximum health/gi, 'ayant moins de $1% de leurs PV max');
+  fr = fr.replace(/inflict poison/gi, 'inflige du poison');
+  fr = fr.replace(/HealHit/gi, 'Soin à l\'impact (HealHit)');
+  fr = fr.replace(/kills required to use ability/gi, 'éliminations requises pour utiliser la capacité');
+  fr = fr.replace(/Can be used (\d+) times/gi, 'Utilisable $1 fois');
+  fr = fr.replace(/Permanently increases base damage by\s*([\d,]+)/gi, 'Augmente définitivement les dégâts de base de $1');
+  fr = fr.replace(/boosts overall power/gi, 'augmente sa puissance globale');
+  fr = fr.replace(/adds a permanent ([\d,]+) damage/gi, 'ajoute $1 dégâts permanents');
+  fr = fr.replace(/allows him to hit elementals/gi, 'lui permet de toucher les élémentaires');
+  fr = fr.replace(/turn into regular enemies/gi, 'se transforment en ennemis normaux');
+  fr = fr.replace(/moves? (\d+)% slower/gi, 'se déplacent $1% plus lentement');
+  fr = fr.replace(/constantly lose ([\d\.]+)% of their max HP/gi, 'perdent constamment $1% de leurs PV max');
+  fr = fr.replace(/creates a domain within (\d+) (minutes|seconds)/gi, 'crée un domaine pendant $1 $2');
+  fr = fr.replace(/deal Super Effective Damage/gi, 'infligent des dégâts super efficaces');
+  fr = fr.replace(/delete himself without a refund/gi, 's\'auto-détruit sans remboursement');
+  fr = fr.replace(/he can be replaced afterwards/gi, 'il peut être replacé ensuite');
+  fr = fr.replace(/Bleed/gi, 'Saignement');
+  fr = fr.replace(/Judgement/gi, 'Jugement');
+  fr = fr.replace(/Billion/gi, 'Milliards');
+  fr = fr.replace(/Million/gi, 'Millions');
+
+  return fr;
+}
+
+function translateUpgradeEffect(eff) {
+  if (!eff || currentLang === 'en') return eff;
+  let fr = eff;
+  fr = fr.replace(/Unlocks\s+Ability/gi, "Débloque l'aptitude");
+  fr = fr.replace(/Unlocks\s+(.+)/gi, 'Débloque $1');
+  fr = fr.replace(/Changes\s+attack\s+type\s+to\s+(.+)/gi, "Change le type d'attaque en $1");
+  fr = fr.replace(/Changes\s+to\s+(.+)/gi, 'Passe à $1');
+  fr = fr.replace(/Enchant enemy with\s+(.+)/gi, 'Enchante les ennemis avec $1');
+  fr = fr.replace(/\bDamage Buff\b/gi, 'Buff de Dégâts');
+  fr = fr.replace(/\bRange Buff\b/gi, 'Buff de Portée');
+  fr = fr.replace(/\bProvides\s*per\s*wave\b/gi, 'Fournit par vague');
+  fr = fr.replace(/\bProvides\b/gi, 'Fournit');
+  fr = fr.replace(/\bElectric\b/gi, 'Électrique');
+  fr = fr.replace(/\bFire\b/gi, 'Feu');
+  fr = fr.replace(/\bWater\b/gi, 'Eau');
+  fr = fr.replace(/\bDark\b/gi, 'Ténèbres');
+  fr = fr.replace(/\bLight\b/gi, 'Lumière');
+  fr = fr.replace(/\bAir\b/gi, 'Aérien');
+  fr = fr.replace(/\bGround\b/gi, 'Terrestre');
+  fr = fr.replace(/\bHill\b/gi, 'Colline');
+  fr = fr.replace(/\bHybrid\b/gi, 'Hybride');
+  fr = fr.replace(/Leader Skill/gi, 'Compétence de Leader');
+  fr = fr.replace(/\bManual Ability\b/gi, 'Aptitude Manuelle');
+  fr = fr.replace(/\bPassive Ability\b/gi, 'Passif');
+  fr = fr.replace(/\bBurn\b/gi, 'Brûlure');
+  fr = fr.replace(/\bBleed\b/gi, 'Saignement');
+  fr = fr.replace(/\bSlow\b/gi, 'Ralentissement');
+  fr = fr.replace(/\bFreeze\b/gi, 'Gel');
+  fr = fr.replace(/\bStun\b/gi, 'Étourdissement');
+  return fr;
 }
 
 function translateReward(text) {
@@ -1865,7 +2032,7 @@ function renderModalAbilities(unit) {
       cardBorder: 'border-slate-800 hover:border-slate-700'
     };
 
-    const descLines = (ab.description || '').split('\n').filter(l => l.trim().length > 0);
+    const descLines = (translateAbilityDescription(ab.description) || '').split('\n').filter(l => l.trim().length > 0);
     const formattedDesc = descLines.map(line => {
       const l = line.trim();
       if (l.startsWith('•')) {
@@ -2000,7 +2167,7 @@ function openUnitModal(unitId) {
     }
   }
 
-  overviewEl.textContent = stripWikiMarkup(unit.overview) || t('no_overview', "Aucune description détaillée enregistrée pour cette unité.");
+  overviewEl.textContent = translateOverview(stripWikiMarkup(unit.overview), unit) || t('no_overview', "Aucune description détaillée enregistrée pour cette unité.");
 
   // Obtention : source racine derrière une évolution (raid, story, bannière...)
   const obtainBox = document.getElementById('modal-obtain-source');
@@ -2300,7 +2467,7 @@ function renderUpgradesTable() {
   if (unit.upgrades && unit.upgrades.length > 0) {
     tbody.innerHTML = unit.upgrades.map((upg, idx) => {
       const abilities = (upg.abilities && upg.abilities.length > 0) ? upg.abilities : [];
-      const abilitiesText = abilities.map(a => stripWikiMarkup(a)).join(' • ') || '-';
+      const abilitiesText = abilities.map(a => translateUpgradeEffect(stripWikiMarkup(a))).join(' • ') || '-';
       const hasAbilities = abilities.length > 0;
 
       // Check if this upgrade unlocks or references any known ability in unit.abilities
@@ -2377,7 +2544,7 @@ function renderUpgradesTable() {
                 ${abilities.map(a => `
                   <li class="text-[12px] text-slate-200 leading-relaxed flex gap-2">
                     <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
-                    <span>${stripWikiMarkup(a)}</span>
+                    <span>${translateUpgradeEffect(stripWikiMarkup(a))}</span>
                   </li>
                 `).join('')}
               </ul>
@@ -2391,7 +2558,7 @@ function renderUpgradesTable() {
                     ${ma.unlock ? `<span class="text-[10px] text-slate-400 font-mono-num">(${translateUnlock(ma.unlock)})</span>` : ''}
                   </div>
                   <div class="text-[11px] text-slate-300 font-sans leading-relaxed whitespace-pre-line bg-slate-900/60 p-2 rounded border border-slate-800/80">
-                    ${highlightStats(ma.description)}
+                    ${highlightStats(translateAbilityDescription(ma.description))}
                   </div>
                 </div>
               `).join('')}
@@ -3622,7 +3789,7 @@ function renderCompareView() {
                     <strong class="text-white">${translateAbilityName(ab.name)}</strong>
                     <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-900 border border-slate-700 text-slate-300">${translateUnlock(ab.type) || (ab.type ? ab.type : (currentLang === 'fr' ? 'Capacité' : 'Ability'))}</span>
                   </div>
-                  <p class="text-[11px] text-slate-300 leading-relaxed">${translateObtain(stripWikiMarkup(ab.description))}</p>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">${translateAbilityDescription(stripWikiMarkup(ab.description))}</p>
                 </div>
               `).join('')}
             </div>
@@ -3648,7 +3815,7 @@ function renderCompareView() {
                     <strong class="text-white">${translateAbilityName(ab.name)}</strong>
                     <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-900 border border-slate-700 text-slate-300">${translateUnlock(ab.type) || (ab.type ? ab.type : (currentLang === 'fr' ? 'Capacité' : 'Ability'))}</span>
                   </div>
-                  <p class="text-[11px] text-slate-300 leading-relaxed">${translateObtain(stripWikiMarkup(ab.description))}</p>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">${translateAbilityDescription(stripWikiMarkup(ab.description))}</p>
                 </div>
               `).join('')}
             </div>
@@ -3764,6 +3931,9 @@ if (typeof window !== 'undefined') {
   window.translateAbilityName = translateAbilityName;
   window.translateUnlock = translateUnlock;
   window.translateObtain = translateObtain;
+  window.translateOverview = translateOverview;
+  window.translateAbilityDescription = translateAbilityDescription;
+  window.translateUpgradeEffect = translateUpgradeEffect;
   window.translateReward = translateReward;
   window.translateOrbEffect = translateOrbEffect;
 }

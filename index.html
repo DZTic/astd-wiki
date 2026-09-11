@@ -68,35 +68,35 @@
         </button>
 
         <!-- Desktop Navigation Tabs (lg: 1024px) -->
-        <nav aria-label="Navigation principale" data-i18n-aria="nav_main_aria" class="hidden lg:flex items-center gap-1 font-medium">
-          <button onclick="switchTab('units')" id="nav-units" data-tab="units" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale">
+        <nav aria-label="Navigation principale" data-i18n-aria="nav_main_aria" class="hidden lg:flex items-center gap-0.5 xl:gap-1 font-medium">
+          <button onclick="switchTab('units')" id="nav-units" data-tab="units" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale">
             <i data-lucide="swords" class="w-4 h-4 shrink-0" stroke-width="2"></i>
             <span data-i18n="nav_units">Unités</span>
           </button>
-          <button onclick="switchTab('tierlist')" id="nav-tierlist" data-tab="tierlist" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
+          <button onclick="switchTab('tierlist')" id="nav-tierlist" data-tab="tierlist" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="crown" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_tierlist">Tier List</span>
           </button>
-          <button onclick="switchTab('codes')" id="nav-codes" data-tab="codes" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale relative">
+          <button onclick="switchTab('codes')" id="nav-codes" data-tab="codes" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale relative">
             <i data-lucide="gift" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_codes">Codes</span>
             <span id="badge-active-codes" class="ml-1 px-1.5 py-0.2 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-mono-num">
               ...
             </span>
           </button>
-          <button onclick="switchTab('orbs')" id="nav-orbs" data-tab="orbs" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
+          <button onclick="switchTab('orbs')" id="nav-orbs" data-tab="orbs" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="sparkles" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_orbs">Orbes</span>
           </button>
-          <button onclick="switchTab('gamemodes')" id="nav-gamemodes" data-tab="gamemodes" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
+          <button onclick="switchTab('gamemodes')" id="nav-gamemodes" data-tab="gamemodes" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="map" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_gamemodes">Modes & Raids</span>
           </button>
-          <button onclick="switchTab('teambuilder')" id="nav-teambuilder" data-tab="teambuilder" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
+          <button onclick="switchTab('teambuilder')" id="nav-teambuilder" data-tab="teambuilder" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="layout-grid" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_teambuilder">Deck Builder</span>
           </button>
-          <button onclick="switchTab('compare')" id="nav-compare" data-tab="compare" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
+          <button onclick="switchTab('compare')" id="nav-compare" data-tab="compare" class="nav-link whitespace-nowrap shrink-0 ps-2 pe-2.5 xl:ps-3 xl:pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="arrow-left-right" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_compare">Comparateur</span>
           </button>
@@ -104,7 +104,7 @@
 
         <!-- Right Quick Actions -->
         <div class="flex items-center space-x-2 shrink-0">
-          <div class="relative hidden sm:block">
+          <div class="relative hidden xl:block">
             <label for="quick-search" class="sr-only" data-i18n="quick_search_sr">Recherche rapide d'unité ou anime</label>
             <input type="text" id="quick-search" placeholder="Recherche rapide (Ctrl + K)..." 
                    data-i18n-placeholder="quick_search_placeholder"
@@ -115,7 +115,7 @@
           </div>
 
           <!-- Language Switcher (Desktop) -->
-          <div class="lang-switcher-wrap" role="group" aria-label="Sélection de langue / Language Selection">
+          <div class="lang-switcher-wrap shrink-0" role="group" aria-label="Sélection de langue / Language Selection">
             <button type="button" onclick="setLanguage('fr')" id="lang-btn-fr" class="lang-btn active" title="Français" aria-pressed="true">
               <span>🇫🇷</span> <span>FR</span>
             </button>
@@ -796,23 +796,25 @@
             <div id="modal-added-date" class="mt-1 text-center text-[10px] text-slate-400 font-sans hidden">
               Ajoutée le —
             </div>
-            <div class="flex items-center gap-1.5 mt-3 w-full">
-              <button id="modal-add-team-btn" onclick="addCurrentModalUnitToTeam()" class="flex-1 px-2.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 whitespace-nowrap tap-scale transition-colors shadow-sm" aria-label="Ajouter cette unité au deck" data-i18n-aria="modal_btn_deck_aria">
+            <div class="mt-3 w-full space-y-1.5">
+              <button id="modal-add-team-btn" onclick="addCurrentModalUnitToTeam()" class="w-full py-2 px-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 whitespace-nowrap tap-scale transition-colors shadow-sm" aria-label="Ajouter cette unité au deck" data-i18n-aria="modal_btn_deck_aria">
                 <i data-lucide="plus-circle" class="w-3.5 h-3.5 shrink-0" stroke-width="2"></i>
-                <span data-i18n="modal_btn_deck">Deck</span>
+                <span data-i18n="modal_btn_deck">Ajouter au Deck</span>
               </button>
-              <button id="modal-compare-btn" onclick="startCompareWithModalUnit()" class="px-2.5 py-2 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-700 text-slate-300 font-semibold text-xs flex items-center justify-center gap-1 whitespace-nowrap tap-scale transition-colors" title="Comparer cette unité avec une autre" data-i18n-title="modal_btn_compare_title" aria-label="Comparer cette unité" data-i18n-aria="modal_btn_compare_aria">
-                <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 shrink-0" stroke-width="2"></i>
-                <span class="hidden sm:inline" data-i18n="modal_btn_compare">Comparer</span>
-              </button>
-              <a id="modal-fandom-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white tap-scale flex items-center justify-center shrink-0" title="Fiche Fandom Wiki" data-i18n-title="modal_fandom_title" aria-label="Consulter la page officielle Fandom de cette unité (nouvelle fenêtre)" data-i18n-aria="modal_fandom_aria">
-                <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0" stroke-width="1.75"></i>
-              </a>
+              <div class="flex items-center gap-1.5 w-full">
+                <button id="modal-compare-btn" onclick="startCompareWithModalUnit()" class="flex-1 py-1.5 px-2.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-700 text-slate-300 font-semibold text-xs flex items-center justify-center gap-1 whitespace-nowrap tap-scale transition-colors" title="Comparer cette unité avec une autre" data-i18n-title="modal_btn_compare_title" aria-label="Comparer cette unité" data-i18n-aria="modal_btn_compare_aria">
+                  <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 shrink-0" stroke-width="2"></i>
+                  <span data-i18n="modal_btn_compare">Comparer</span>
+                </button>
+                <a id="modal-fandom-link" href="#" target="_blank" rel="noopener noreferrer" class="py-1.5 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white tap-scale flex items-center justify-center shrink-0" title="Fiche Fandom Wiki" data-i18n-title="modal_fandom_title" aria-label="Consulter la page officielle Fandom de cette unité (nouvelle fenêtre)" data-i18n-aria="modal_fandom_aria">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0" stroke-width="1.75"></i>
+                </a>
+              </div>
             </div>
           </div>
 
           <!-- Quick Stats HUD Grid -->
-          <div class="flex-1 space-y-3">
+          <div class="flex-1 min-w-0 space-y-3">
             <div id="modal-overview-text" class="text-xs text-slate-300 bg-slate-900/80 p-3 rounded-lg border border-slate-800 leading-relaxed text-pretty">
               Description de l'unité...
             </div>
@@ -828,29 +830,29 @@
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono-num">
-              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_tower_type">Type de Tour</span>
-                <span id="modal-tower-type" class="font-bold text-slate-100 text-xs font-sans">Ground</span>
+              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg min-w-0 overflow-hidden">
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold truncate" data-i18n="hud_tower_type">Type de Placement</span>
+                <span id="modal-tower-type" class="font-bold text-slate-100 text-xs font-sans truncate block">Ground</span>
               </div>
-              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_attack_type">Type d'Attaque</span>
-                <span id="modal-attack-type" class="font-bold text-slate-200 text-xs font-sans">AoE</span>
+              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg min-w-0 overflow-hidden">
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold truncate" data-i18n="hud_attack_type">Zone d'Attaque</span>
+                <span id="modal-attack-type" class="font-bold text-slate-200 text-xs font-sans truncate block">AoE</span>
               </div>
-              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_deploy_cost">Coût Déploiement</span>
-                <span id="modal-deploy-cost" class="font-bold text-slate-200 text-xs">$0</span>
+              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg min-w-0 overflow-hidden">
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold truncate" data-i18n="hud_deploy_cost">Déploiement</span>
+                <span id="modal-deploy-cost" class="font-bold text-slate-200 text-xs truncate block">$0</span>
               </div>
-              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_total_cost">Coût Total Max</span>
-                <span id="modal-total-cost" class="font-bold text-slate-200 text-xs">$0</span>
+              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg min-w-0 overflow-hidden">
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold truncate" data-i18n="hud_total_cost">Coût Total Max</span>
+                <span id="modal-total-cost" class="font-bold text-slate-200 text-xs truncate block">$0</span>
               </div>
-              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_max_dmg">Dégâts Max</span>
-                <span id="modal-max-damage" class="font-bold text-slate-100 text-xs">0</span>
+              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg min-w-0 overflow-hidden">
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold truncate" data-i18n="hud_max_dmg">Dégâts Max</span>
+                <span id="modal-max-damage" class="font-bold text-slate-100 text-xs truncate block">0</span>
               </div>
-              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_max_dps">DPS Max Estimé</span>
-                <span id="modal-max-dps" class="font-bold text-amber-300 text-xs">0</span>
+              <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg min-w-0 overflow-hidden">
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold truncate" data-i18n="hud_max_dps">DPS Max Estimé</span>
+                <span id="modal-max-dps" class="font-bold text-amber-300 text-xs truncate block">0</span>
               </div>
             </div>
 
