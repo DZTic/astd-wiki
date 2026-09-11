@@ -39,7 +39,9 @@
     "image": "https://static.wikia.nocookie.net/allstartd/images/1/11/Blueeye_Orb.png/revision/latest/scale-to-width-down/80?cb=20210706204306",
     "effect": "Initial-RNG 30%",
     "obtain": "Fabrication dans la Boutique d'Orbes avec : Fluorite ×1 500, Icey ×1 075, ColorMineral ×1 850",
-    "require": "All units"
+    "require": "All units",
+    "_community_approved": true,
+    "_approved_at": "2026-09-11T20:42:02.777612+00:00"
   },
   {
     "name": "Bomba Orb",
