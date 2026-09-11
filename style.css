@@ -1,19 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  /* better-colors: Palette sémantique et surfaces étagées */
-  --bg-main: #0b0f19;
-  --bg-surface: #111827;
-  --bg-surface-hover: #1f293d;
-  --bg-card: rgba(17, 24, 39, 0.9);
-  --border-subtle: rgba(255, 255, 255, 0.08);
+  /* better-colors: Palette sobre, structurée et surfaces étagées */
+  --bg-main: #090d16;
+  --bg-surface: #0f1629;
+  --bg-surface-elevated: #162038;
+  --bg-card: rgba(15, 22, 41, 0.92);
+  --bg-subtle: #090e1c;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.14);
   --border-focus: #38bdf8;
-  --cyan-accent: #06b6d4;
-  --cyan-glow: rgba(6, 182, 212, 0.25);
-  --emerald-accent: #10b981;
-  --amber-accent: #f59e0b;
-  --rose-accent: #f43f5e;
-  --purple-accent: #8b5cf6;
+
+  /* Accent de marque signature unique : Bleu Cobalt / Ciel tactique */
+  --accent-primary: #0284c7;
+  --accent-primary-hover: #0369a1;
+  --accent-primary-subtle: rgba(14, 165, 233, 0.12);
+  --accent-sky: #38bdf8;
+
+  /* Couleurs sémantiques strictes (réservées) */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #f43f5e;
 
   /* better-ui: Exact curves, durations and elevation tokens */
   --ease-fluid: cubic-bezier(0.2, 0, 0, 1);
@@ -21,16 +28,16 @@
   --duration-interactive: 150ms;
   --duration-enter: 200ms;
 
-  /* better-ui: Dark mode layered depth shadows instead of stark borders */
-  --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
-  --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.16), 0 12px 28px -6px rgba(0, 0, 0, 0.65);
-  --shadow-elevation-1: 0 0 0 1px oklch(1 0 0 / 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.5);
-  --shadow-elevation-2: 0 0 0 1px oklch(1 0 0 / 0.12), 0 16px 36px -8px rgba(0, 0, 0, 0.8);
+  /* better-ui: Dark mode layered depth shadows */
+  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-border-hover: 0 0 0 1px rgba(56, 189, 248, 0.35), 0 12px 28px -6px rgba(0, 0, 0, 0.65);
+  --shadow-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-elevation-2: 0 16px 36px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
 
   /* better-ui: Concentric border radius tokens */
-  --radius-outer-card: 16px;
+  --radius-outer-card: 14px;
   --radius-inner-media: 10px;
-  --radius-btn: 10px;
+  --radius-btn: 8px;
 }
 
 html, body {
@@ -95,11 +102,11 @@ body {
   background: #080c14;
 }
 ::-webkit-scrollbar-thumb {
-  background: #243046;
+  background: #1e293b;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b4c68;
+  background: #334155;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -118,13 +125,13 @@ body {
   border-radius: var(--radius-inner-media);
 }
 
-/* better-ui: Neutral 1px Image Outlines in dark mode (oklch(1 0 0 / 0.1)) */
+/* better-ui: Neutral 1px Image Outlines in dark mode */
 .img-outline {
-  outline: 1px solid oklch(1 0 0 / 0.12);
+  outline: 1px solid rgba(255, 255, 255, 0.09);
   outline-offset: -1px;
 }
 
-/* better-ui: Scale on press tactile feedback (exact 0.96 scale, 150ms ease-out) */
+/* better-ui: Scale on press tactile feedback */
 .tap-scale {
   transition-property: transform, opacity, box-shadow, background-color, border-color, color;
   transition-duration: var(--duration-interactive);
@@ -132,7 +139,7 @@ body {
   will-change: transform;
 }
 .tap-scale:active:not(:disabled) {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 .tap-scale-subtle {
@@ -142,16 +149,16 @@ body {
   will-change: transform;
 }
 .tap-scale-subtle:active:not(:disabled) {
-  transform: scale(0.985);
+  transform: scale(0.99);
 }
 
-/* Tactical Surface Cards - Shadows for elevation, specific transitions */
+/* Tactical Surface Cards - Clean, unified, structured design without neon glows */
 .tactical-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-border);
+  background-color: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-elevation-1);
   transition-property: transform, box-shadow, border-color, background-color;
   transition-duration: var(--duration-interactive);
   transition-timing-function: var(--ease-fluid);
@@ -163,89 +170,67 @@ body {
   border-color: rgba(56, 189, 248, 0.35);
 }
 
-/* Star Rarity Indicators (Layered shadows, high contrast for WCAG AA compliance) */
-.star-7-card {
-  border-color: rgba(244, 63, 94, 0.35);
-  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
-}
-.star-7-card:hover {
-  border-color: rgba(244, 63, 94, 0.7);
-  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.3), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 20px -2px rgba(244, 63, 94, 0.2);
-}
-.star-7-badge {
-  background: #be123c;
-  color: #ffffff;
-  font-weight: 800;
-}
-
-.star-6-card {
-  border-color: rgba(245, 158, 11, 0.35);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
-}
-.star-6-card:hover {
-  border-color: rgba(245, 158, 11, 0.7);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 20px -2px rgba(245, 158, 11, 0.2);
-}
-.star-6-badge {
-  background: #f59e0b;
-  color: #0b0f19;
-  font-weight: 800;
-}
-
-.star-5-card {
-  border-color: rgba(139, 92, 246, 0.35);
-  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
-}
-.star-5-card:hover {
-  border-color: rgba(139, 92, 246, 0.7);
-  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 20px -2px rgba(139, 92, 246, 0.2);
-}
-.star-5-badge {
-  background: #7c3aed;
-  color: #ffffff;
-  font-weight: 800;
-}
-
-.star-4-card {
-  border-color: rgba(59, 130, 246, 0.3);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
-}
-.star-4-card:hover {
-  border-color: rgba(59, 130, 246, 0.65);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 18px -2px rgba(59, 130, 246, 0.2);
-}
-.star-4-badge {
-  background: #2563eb;
-  color: #ffffff;
-  font-weight: 800;
-}
-
-.star-3-card {
-  border-color: rgba(16, 185, 129, 0.25);
-  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.1), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
-}
-.star-3-card:hover {
-  border-color: rgba(16, 185, 129, 0.6);
-  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 16px -2px rgba(16, 185, 129, 0.18);
-}
-.star-3-badge {
-  background: #059669;
-  color: #ffffff;
-  font-weight: 800;
-}
-
+/* Unified card borders (eliminates jarring neon borders) */
+.star-7-card,
+.star-6-card,
+.star-5-card,
+.star-4-card,
+.star-3-card,
 .star-2-card {
-  border-color: rgba(100, 116, 139, 0.25);
-  box-shadow: 0 0 0 1px rgba(100, 116, 139, 0.1), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
+  border-color: var(--border-subtle);
 }
+
+.star-7-card:hover,
+.star-6-card:hover,
+.star-5-card:hover,
+.star-4-card:hover,
+.star-3-card:hover,
 .star-2-card:hover {
-  border-color: rgba(100, 116, 139, 0.5);
-  box-shadow: 0 0 0 1px rgba(100, 116, 139, 0.2), 0 12px 28px -6px rgba(0, 0, 0, 0.65);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: var(--shadow-border-hover);
 }
+
+/* Star Rarity Badges: Refined, subdued dark-tint pills with high contrast */
+.star-7-badge {
+  background: rgba(225, 29, 72, 0.15);
+  color: #fda4af;
+  border: 1px solid rgba(225, 29, 72, 0.35);
+  font-weight: 700;
+}
+
+.star-6-badge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fde047;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  font-weight: 700;
+}
+
+.star-5-badge {
+  background: rgba(139, 92, 246, 0.15);
+  color: #d8b4fe;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  font-weight: 700;
+}
+
+.star-4-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  font-weight: 700;
+}
+
+.star-3-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #86efac;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  font-weight: 700;
+}
+
 .star-2-badge {
-  background: #475569;
-  color: #ffffff;
-  font-weight: 800;
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  font-weight: 700;
 }
 
 /* Tactical Data Table styling */

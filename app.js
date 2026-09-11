@@ -333,10 +333,19 @@ function updateNavActiveState(tabId) {
   // 1. Desktop Nav Links
   document.querySelectorAll('.nav-link').forEach(btn => {
     const isTarget = btn.getAttribute('data-tab') === tabId || btn.id === `nav-${tabId}`;
+    const icon = btn.querySelector('i');
     if (isTarget) {
-      btn.className = 'nav-link whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg text-xs xl:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale';
+      btn.className = 'nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale';
+      if (icon) {
+        icon.classList.remove('text-slate-400');
+        icon.classList.add('text-sky-400');
+      }
     } else {
-      btn.className = 'nav-link whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale';
+      btn.className = 'nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale';
+      if (icon) {
+        icon.classList.remove('text-sky-400');
+        icon.classList.add('text-slate-400');
+      }
     }
   });
 
@@ -469,8 +478,8 @@ function sortTableBy(field) {
 function setStarFilter(star, btnElement) {
   currentStarFilter = star;
   document.querySelectorAll('.star-btn').forEach(btn => {
-    btn.classList.remove('active', 'bg-sky-600', 'text-white');
-    btn.classList.add('bg-slate-900');
+    btn.classList.remove('active', 'bg-sky-600', 'text-white', 'border-sky-500');
+    btn.classList.add('bg-slate-900/90', 'text-slate-300', 'border-slate-800');
     btn.setAttribute('aria-pressed', 'false');
   });
 
@@ -479,8 +488,8 @@ function setStarFilter(star, btnElement) {
     || document.querySelector(`.star-btn[onclick*="${star}"]`);
 
   if (targetBtn) {
-    targetBtn.classList.add('active', 'bg-sky-600', 'text-white');
-    targetBtn.classList.remove('bg-slate-900');
+    targetBtn.classList.add('active', 'bg-sky-600', 'text-white', 'border-sky-500');
+    targetBtn.classList.remove('bg-slate-900/90', 'text-slate-300', 'border-slate-800');
     targetBtn.setAttribute('aria-pressed', 'true');
   }
 
@@ -635,21 +644,21 @@ function renderUnitsTable() {
       </td>
       <td class="p-3">
         <span class="px-2 py-0.5 rounded text-[11px] font-bold star-${u.star}-badge font-mono-num">${u.star}★</span>
-        ${isNewUnit(u) ? `<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase tracking-wide" title="Fiche wiki créée le ${new Date(u.created_at).toLocaleDateString('fr-FR')}">Nouveau</span>` : ''}
+        ${isNewUnit(u) ? `<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="Fiche wiki créée le ${new Date(u.created_at).toLocaleDateString('fr-FR')}">Nouveau</span>` : ''}
       </td>
       <td class="p-3 font-sans">
         <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 text-[10px] font-semibold">${u.tower_type || 'Ground'}</span>
       </td>
-      <td class="p-3 font-bold text-rose-400 font-mono-num" title="${u.max_damage.toLocaleString()} DMG">${formatCompactNumber(u.max_damage)}</td>
-      <td class="p-3 text-sky-400 font-mono-num">${u.max_range || '-'}</td>
-      <td class="p-3 text-slate-300 font-mono-num">${u.min_spa ? u.min_spa + 's' : '-'}</td>
-      <td class="p-3 font-bold text-amber-400 font-mono-num" title="${u.max_dps.toLocaleString()} DPS">${formatCompactNumber(u.max_dps)}</td>
-      <td class="p-3 text-emerald-400 font-mono-num">${u.total_cost > 0 ? '$' + formatCompactNumber(u.total_cost) : '-'}</td>
+      <td class="p-3 font-bold text-slate-100 font-mono-num" title="${u.max_damage.toLocaleString()} DMG">${formatCompactNumber(u.max_damage)}</td>
+      <td class="p-3 text-slate-300 font-mono-num">${u.max_range || '-'}</td>
+      <td class="p-3 text-slate-400 font-mono-num">${u.min_spa ? u.min_spa + 's' : '-'}</td>
+      <td class="p-3 font-bold text-amber-300 font-mono-num" title="${u.max_dps.toLocaleString()} DPS">${formatCompactNumber(u.max_dps)}</td>
+      <td class="p-3 text-slate-300 font-mono-num">${u.total_cost > 0 ? '$' + formatCompactNumber(u.total_cost) : '-'}</td>
       <td class="p-3 text-right space-x-1.5 font-sans" onclick="event.stopPropagation()">
         <button onclick="openUnitModal('${u.id}')" aria-label="Consulter la fiche de ${u.name}" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale">
           Fiche
         </button>
-        <button onclick="addUnitToTeam('${u.id}')" aria-label="Ajouter ${u.name} au deck" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale" title="Ajouter au deck">
+        <button onclick="addUnitToTeam('${u.id}')" aria-label="Ajouter ${u.name} au deck" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale" title="Ajouter au deck">
           +
         </button>
       </td>
@@ -692,7 +701,7 @@ function createUnitCardHTML(unit) {
   const originLine = unit.anime_origin || unit.character_origin || 'All Star Tower Defense';
 
   return `
-    <article class="tactical-card rounded-2xl p-3.5 border star-${unit.star}-card flex flex-col justify-between group cursor-pointer tap-scale-subtle focus-within:ring-2 focus-within:ring-sky-400"
+    <article class="tactical-card rounded-xl p-3.5 border border-slate-800/80 bg-[#0f1629]/95 flex flex-col justify-between group cursor-pointer tap-scale-subtle focus-within:ring-2 focus-within:ring-sky-500"
              role="button"
              tabindex="0"
              aria-label="${unit.name}, unité ${unit.star} étoiles, type ${unit.tower_type || 'Ground'}. Cliquer pour inspecter."
@@ -705,20 +714,20 @@ function createUnitCardHTML(unit) {
           <span class="px-2 py-0.5 rounded text-[11px] font-mono-num font-bold star-${unit.star}-badge shadow-sm">
             ${unit.star}★
           </span>
-          ${isNewUnit(unit) ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase tracking-wide" title="Fiche wiki créée le ${new Date(unit.created_at).toLocaleDateString('fr-FR')}">Nouveau</span>` : ''}
+          ${isNewUnit(unit) ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="Fiche wiki créée le ${new Date(unit.created_at).toLocaleDateString('fr-FR')}">Nouveau</span>` : ''}
         </div>
         <div class="flex items-center space-x-1">
-          ${unit.is_unobtainable ? '<span class="px-1.5 py-0.2 text-[9px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded" title="Unité retirée du jeu : bannière ou événement expiré">Introuvable</span>' : ''}
-          ${unit.is_tradeable ? '<span class="px-1.5 py-0.2 text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded">Trade</span>' : ''}
+          ${unit.is_unobtainable ? '<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 rounded" title="Unité retirée du jeu : bannière ou événement expiré">Introuvable</span>' : ''}
+          ${unit.is_tradeable ? '<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-slate-900 text-slate-300 border border-slate-800 rounded">Trade</span>' : ''}
           <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded" title="${towerTypeTooltip(unit.tower_type)}">${unit.tower_type || 'Ground'}</span>
         </div>
       </div>
 
       <!-- Avatar Framed with concentric radius & neutral outline -->
-      <div class="w-full h-32 rounded-xl bg-[#0c1220] border border-slate-800/80 p-2 my-1 flex items-center justify-center relative overflow-hidden group-hover:border-sky-500/40 transition-colors duration-150">
+      <div class="w-full h-32 rounded-lg bg-[#070b14] border border-slate-800/80 p-2 my-1 flex items-center justify-center relative overflow-hidden group-hover:border-sky-500/40 transition-colors duration-150">
         <img src="${imgSrc}" alt="" loading="lazy"
              onerror="this.src='${fallbackImg}'"
-             class="max-h-full max-w-full object-contain filter drop-shadow img-outline rounded-lg group-hover:scale-105 transition-transform duration-150 ease-out">
+             class="max-h-full max-w-full object-contain filter drop-shadow img-outline rounded-md group-hover:scale-105 transition-transform duration-150 ease-out">
       </div>
 
       <!-- Title & Origin -->
@@ -731,33 +740,33 @@ function createUnitCardHTML(unit) {
         </div>
       </div>
 
-      <!-- Tactical Micro-Metrics Grid (High Contrast WCAG AA) -->
+      <!-- Tactical Micro-Metrics Grid (Neutral, Readable, High Contrast WCAG AA) -->
       <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800/80 font-mono-num text-[11px]">
-        <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
+        <div class="bg-[#090e1c] px-2 py-1 rounded-md border border-slate-800/60 shadow-sm">
           <span class="text-slate-400 block text-[9px] font-sans uppercase" title="Dégâts au palier d'amélioration maximum">DMG</span>
-          <span class="font-bold text-rose-400" title="${unit.max_damage.toLocaleString()}">${formatCompactNumber(unit.max_damage)}</span>
+          <span class="font-bold text-slate-100" title="${unit.max_damage.toLocaleString()}">${formatCompactNumber(unit.max_damage)}</span>
         </div>
-        <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
+        <div class="bg-[#090e1c] px-2 py-1 rounded-md border border-slate-800/60 shadow-sm">
           <span class="text-slate-400 block text-[9px] font-sans uppercase" title="Dégâts Par Seconde au palier maximum">DPS</span>
-          <span class="font-bold text-amber-400" title="${unit.max_dps.toLocaleString()}">${formatCompactNumber(unit.max_dps)}</span>
+          <span class="font-bold text-amber-300" title="${unit.max_dps.toLocaleString()}">${formatCompactNumber(unit.max_dps)}</span>
         </div>
-        <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
+        <div class="bg-[#090e1c] px-2 py-1 rounded-md border border-slate-800/60 shadow-sm">
           <span class="text-slate-400 block text-[9px] font-sans uppercase" title="Distance d'attaque maximale">Portée</span>
-          <span class="font-bold text-sky-400">${unit.max_range || '-'}</span>
+          <span class="font-semibold text-slate-200">${unit.max_range || '-'}</span>
         </div>
-        <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
-          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="SPA : Secondes Par Attaque (délai entre deux attaques, plus c'est bas plus c'est rapide)">SPA</span>
-          <span class="font-bold text-slate-300">${unit.min_spa ? unit.min_spa + 's' : '-'}</span>
+        <div class="bg-[#090e1c] px-2 py-1 rounded-md border border-slate-800/60 shadow-sm">
+          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="SPA : Secondes Par Attaque (délai entre deux attaques)">SPA</span>
+          <span class="font-semibold text-slate-300">${unit.min_spa ? unit.min_spa + 's' : '-'}</span>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="mt-3 flex items-center space-x-1.5" onclick="event.stopPropagation()">
-        <button onclick="openUnitModal('${unit.id}')" aria-label="Consulter la fiche de ${unit.name}" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1">
+        <button onclick="openUnitModal('${unit.id}')" aria-label="Consulter la fiche de ${unit.name}" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1 transition-colors">
           <i data-lucide="eye" class="w-3 h-3" stroke-width="2"></i>
           <span>Fiche</span>
         </button>
-        <button onclick="addUnitToTeam('${unit.id}')" aria-label="Ajouter ${unit.name} au deck" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-emerald-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center" title="Ajouter au deck">
+        <button onclick="addUnitToTeam('${unit.id}')" aria-label="Ajouter ${unit.name} au deck" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="Ajouter au deck">
           +
         </button>
       </div>
@@ -959,7 +968,7 @@ function openUnitModal(unitId) {
   starBadge.className = `px-2 py-0.5 rounded text-xs font-black star-${unit.star}-badge`;
   
   imgEl.src = unit.image || "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
-  imgWrapper.className = `w-44 h-44 rounded-xl bg-slate-900 border star-${unit.star}-card p-2 overflow-hidden flex items-center justify-center shadow relative`;
+  imgWrapper.className = `w-44 h-44 rounded-xl bg-[#070b14] border border-slate-800/80 p-2 overflow-hidden flex items-center justify-center shadow relative`;
 
   tradeBadge.classList.toggle('hidden', !unit.is_tradeable);
   const unobtainableBadge = document.getElementById('modal-unobtainable-badge');
@@ -1087,7 +1096,7 @@ function openUnitModal(unitId) {
         <div class="flex flex-wrap gap-1.5">
           ${preEvos.map(p => `
             <button onclick="openUnitModal('${p.id}')"
-                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-violet-400/60 hover:bg-slate-800 tap-scale transition-colors shadow-sm">
+                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-sky-500/50 hover:bg-slate-800 tap-scale transition-colors shadow-sm">
               <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
                 <img src="${p.image || fallbackImg}" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
               </span>
@@ -1245,26 +1254,26 @@ function renderUpgradesTable() {
         if (lo != null || hi != null) {
           const shown = at175 ? (hi ?? lo) : (lo ?? hi);
           const other = at175 ? (lo ?? hi) : (hi ?? lo);
-          buffCell = `<td class="p-2.5 font-bold text-violet-400" title="Buff de dégâts fourni aux unités à portée (aptitude Shine) — ${at175 ? 'niveau de carte 175' : 'niveau de carte 1'}">+${shown}%${other && other !== shown ? ` <span class="text-[10px] text-slate-500">(${at175 ? 'L1: ' : 'L175: '}+${other}%)</span>` : ''}</td>`;
+          buffCell = `<td class="p-2.5 font-bold text-sky-300 font-mono-num" title="Buff de dégâts fourni aux unités à portée (aptitude Shine) — ${at175 ? 'niveau de carte 175' : 'niveau de carte 1'}">+${shown}%${other && other !== shown ? ` <span class="text-[10px] text-slate-500 font-mono-num">(${at175 ? 'L1: ' : 'L175: '}+${other}%)</span>` : ''}</td>`;
         } else {
-          buffCell = `<td class="p-2.5 text-slate-600" title="Aucun buff à ce palier (Your Star remplace Shine)">—</td>`;
+          buffCell = `<td class="p-2.5 text-slate-600 font-mono-num" title="Aucun buff à ce palier (Your Star remplace Shine)">—</td>`;
         }
       }
 
       return `
         <tr class="hover:bg-slate-800/40 transition ${(hasAbilities || hasMatched) ? 'cursor-pointer' : ''}"
             ${(hasAbilities || hasMatched) ? `onclick="toggleUpgradeAbility(${idx})" title="Cliquer pour lire les effets et détails de capacité"` : ''}>
-          <td class="p-2.5 font-bold text-slate-200">${upg.level !== undefined ? upg.level : idx}</td>
-          <td class="p-2.5 font-semibold text-emerald-400">$${(upg.cost || 0).toLocaleString()}</td>
-          <td class="p-2.5 font-bold text-rose-400">${dmg.toLocaleString()}</td>
-          <td class="p-2.5 text-sky-400">${rng}</td>
-          <td class="p-2.5 text-slate-300">${spa}s</td>
-          <td class="p-2.5 font-bold text-amber-400">${dps.toLocaleString()}</td>
+          <td class="p-2.5 font-bold text-slate-200 font-mono-num">${upg.level !== undefined ? upg.level : idx}</td>
+          <td class="p-2.5 font-semibold text-slate-300 font-mono-num">$${(upg.cost || 0).toLocaleString()}</td>
+          <td class="p-2.5 font-bold text-slate-100 font-mono-num">${dmg.toLocaleString()}</td>
+          <td class="p-2.5 text-slate-300 font-mono-num">${rng}</td>
+          <td class="p-2.5 text-slate-400 font-mono-num">${spa}s</td>
+          <td class="p-2.5 font-bold text-amber-300 font-mono-num">${dps.toLocaleString()}</td>
           ${buffCell}
           <td class="p-2.5 text-slate-400 font-sans text-[11px]">
             <div class="flex items-center gap-1.5 min-w-0">
               ${hasMatched ? `
-                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded ${matchedAbilities[0].type === 'manual' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'} text-[10px] font-bold shrink-0">
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-bold shrink-0">
                   <i data-lucide="${matchedAbilities[0].type === 'manual' ? 'flame' : 'shield'}" class="w-2.5 h-2.5"></i>
                   <span>${matchedAbilities[0].name}</span>
                 </span>
@@ -1434,18 +1443,11 @@ function renderTierList() {
   container.innerHTML = categories.map(catName => {
     const unitNames = TIERLIST_DATA[catName] || [];
 
-    let badgeColor = "bg-sky-950/40 border-sky-500/40 text-sky-300";
-    if (catName.toLowerCase().includes('meta dps') || catName.toLowerCase().includes('god')) {
-      badgeColor = "bg-rose-950/40 border-rose-500/40 text-rose-300";
-    } else if (catName.toLowerCase().includes('meta support')) {
-      badgeColor = "bg-amber-950/40 border-amber-500/40 text-amber-300";
-    }
-
     return `
-      <div class="tactical-card rounded-2xl p-4 border border-slate-800 space-y-3">
+      <div class="tactical-card rounded-xl p-4 border border-slate-800/80 bg-[#0f1629]/95 space-y-3">
         <div class="flex items-center justify-between border-b border-slate-800 pb-2">
           <div class="flex items-center space-x-2.5">
-            <span class="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border ${badgeColor}">
+            <span class="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border bg-sky-950/40 border-sky-500/40 text-sky-300">
               ${catName}
             </span>
             <span class="text-xs text-slate-500 font-mono-num font-semibold">${unitNames.length} unité${unitNames.length > 1 ? 's' : ''}</span>
@@ -1458,7 +1460,7 @@ function renderTierList() {
             if (!unitMatch) {
               return `
                 <button onclick="openUnitByName('${name.replace(/'/g, "\\'")}')"
-                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale">
+                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale transition-colors">
                   <span>${name}</span>
                   <i data-lucide="external-link" class="w-3 h-3 text-slate-500" stroke-width="1.75"></i>
                 </button>
@@ -1469,7 +1471,7 @@ function renderTierList() {
             if (!thumb) {
               return `
                 <button onclick="openUnitModal('${unitMatch.id}')"
-                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale">
+                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale transition-colors">
                   <span class="text-[10px] font-mono-num px-1 rounded star-${star}-badge">${star}★</span>
                   <span>${name}</span>
                   <i data-lucide="chevron-right" class="w-3 h-3 text-slate-500" stroke-width="2"></i>
@@ -1478,8 +1480,8 @@ function renderTierList() {
             }
             return `
               <button onclick="openUnitModal('${unitMatch.id}')"
-                      class="w-[92px] rounded-xl bg-slate-900 border border-slate-800 star-${star}-card p-1.5 flex flex-col items-center gap-1 group tap-scale">
-                <div class="w-full h-[76px] rounded-lg bg-[#0c1220] border border-slate-800/80 flex items-center justify-center overflow-hidden">
+                      class="w-[92px] rounded-xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-1.5 flex flex-col items-center gap-1 group tap-scale transition-colors">
+                <div class="w-full h-[76px] rounded-lg bg-[#070b14] border border-slate-800/80 flex items-center justify-center overflow-hidden">
                   <img src="${thumb}" alt="${name}" loading="lazy"
                        onerror="this.onerror=null;this.closest('div').classList.add('tier-img-fallback');this.style.display='none'"
                        class="max-h-full max-w-full object-contain img-outline rounded group-hover:scale-105 transition-transform duration-150 ease-out">
@@ -1526,23 +1528,23 @@ function renderCodes() {
 
   if (activeGrid) {
     activeGrid.innerHTML = CODES_DATA.active.map(c => `
-      <div class="tactical-card rounded-2xl p-4 border border-emerald-500/30 flex flex-col justify-between space-y-3 hover:border-emerald-500/60 transition-colors duration-150">
+      <div class="tactical-card rounded-xl p-4 border border-slate-800/80 bg-[#0f1629]/95 flex flex-col justify-between space-y-3 hover:border-sky-500/40 transition-colors duration-150">
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-sky-500/15 text-sky-400 border border-sky-500/30">
               Vérifié & Actif
             </span>
             <span class="text-[11px] text-slate-400 font-mono-num">${c.date || 'Récent'}</span>
           </div>
-          <div class="font-mono-num text-base font-bold text-white tracking-wide my-2 select-all bg-slate-900/90 px-3 py-2 rounded-xl border border-slate-800">
+          <div class="font-mono-num text-base font-bold text-white tracking-wide my-2 select-all bg-[#090e1c] px-3 py-2 rounded-lg border border-slate-800">
             ${c.code}
           </div>
-          <div class="text-xs text-slate-300 bg-slate-900/70 p-2.5 rounded-xl border border-slate-800/80">
-            <strong class="text-amber-400 font-sans">Récompenses :</strong> ${c.reward}
+          <div class="text-xs text-slate-300 bg-[#090e1c]/70 p-2.5 rounded-lg border border-slate-800/80">
+            <strong class="text-amber-300 font-sans">Récompenses :</strong> ${c.reward}
           </div>
         </div>
-        <button onclick="copyCodeText('${c.code}', this)" aria-label="Copier le code ${c.code}" class="w-full ps-3 pe-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs tracking-wide tap-scale flex items-center justify-center space-x-1.5">
-          <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i>
+        <button onclick="copyCodeText('${c.code}', this)" aria-label="Copier le code ${c.code}" class="w-full ps-3 pe-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs tracking-wide tap-scale flex items-center justify-center space-x-1.5 shadow-sm transition-colors">
+          <i data-lucide="copy" class="w-3.5 h-3.5 text-white" stroke-width="2.5"></i>
           <span>Copier le code</span>
         </button>
       </div>
@@ -1635,16 +1637,16 @@ function renderOrbCard(o) {
   const fallback = 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
   const isUniversal = /toutes les unit|all units/i.test(o.require || '');
   return `
-    <div class="tactical-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between space-y-3 hover:border-cyan-500/40 tap-scale-subtle">
+    <div class="tactical-card rounded-xl p-4 border border-slate-800/80 bg-[#0f1629]/95 flex flex-col justify-between space-y-3 hover:border-sky-500/40 tap-scale-subtle transition-colors">
       <div>
         <div class="flex items-center space-x-3 mb-2.5">
-          <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 p-1 flex items-center justify-center shrink-0">
-            <img src="${o.image || fallback}" alt="${o.name}" class="max-h-full max-w-full object-contain img-outline rounded-lg"
+          <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center shrink-0">
+            <img src="${o.image || fallback}" alt="${o.name}" class="max-h-full max-w-full object-contain img-outline rounded"
                  onerror="this.src='${fallback}'">
           </div>
           <div class="min-w-0">
             <h4 class="font-bold text-xs text-white truncate">${o.name}</h4>
-            <span class="text-[10px] font-semibold ${isUniversal ? 'text-emerald-400' : 'text-cyan-400'}"
+            <span class="text-[10px] font-semibold ${isUniversal ? 'text-sky-300' : 'text-slate-400'}"
                   title="${isUniversal ? 'Équipable par toutes les unités' : 'Réservé à cette unité (ou sa famille)'}">
               ${isUniversal ? '★ Toutes les unités' : o.require}
             </span>
@@ -1652,16 +1654,16 @@ function renderOrbCard(o) {
         </div>
 
         <div class="space-y-1.5 text-xs">
-          <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-            <strong class="text-amber-400 block text-[10px] uppercase font-sans">Bonus statistique :</strong>
-            <span class="text-slate-200 font-medium font-mono-num text-[11px]">${o.effect || 'Bonus spécial'}</span>
+          <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/80">
+            <strong class="text-amber-300 block text-[10px] uppercase font-sans">Bonus statistique :</strong>
+            <span class="text-slate-100 font-medium font-mono-num text-[11px]">${o.effect || 'Bonus spécial'}</span>
           </div>
           <div class="text-[11px] text-slate-400">
             <strong class="text-slate-300 font-sans">Obtention :</strong> ${o.obtain || 'Trial / Raid'}
           </div>
           ${!isUniversal ? `
           <div class="text-[11px] text-slate-400">
-            <strong class="text-slate-300 font-sans">Compatible :</strong> <span class="text-cyan-300">${o.require}</span>
+            <strong class="text-slate-300 font-sans">Compatible :</strong> <span class="text-sky-300">${o.require}</span>
           </div>` : ''}
         </div>
       </div>
@@ -1718,13 +1720,13 @@ function renderGameModes() {
   if (!grid) return;
 
   grid.innerHTML = GAMEMODES_DATA.map(mode => `
-    <div class="tactical-card rounded-2xl p-5 border border-slate-800/80 space-y-3 hover:border-rose-500/40 transition-colors tap-scale-subtle">
+    <div class="tactical-card rounded-xl p-5 border border-slate-800/80 bg-[#0f1629]/95 space-y-3 hover:border-sky-500/40 transition-colors tap-scale-subtle">
       <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i data-lucide="swords" class="w-4 h-4 text-rose-400" stroke-width="2"></i>
+          <i data-lucide="swords" class="w-4 h-4 text-sky-400" stroke-width="2"></i>
           <span>${mode.name}</span>
         </h3>
-        <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30">
+        <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-800 text-slate-300 border border-slate-700">
           ${mode.type}
         </span>
       </div>
@@ -1733,8 +1735,8 @@ function renderGameModes() {
         ${mode.description}
       </p>
 
-      <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800/80 text-[11px]">
-        <strong class="text-amber-400 font-semibold">Récompenses :</strong> ${mode.rewards}
+      <div class="bg-[#090e1c] p-3 rounded-lg border border-slate-800/80 text-[11px]">
+        <strong class="text-amber-300 font-semibold">Récompenses :</strong> ${mode.rewards}
       </div>
     </div>
   `).join('');
@@ -1753,28 +1755,28 @@ function renderTeamBuilder() {
   slotsContainer.innerHTML = teamSlots.map((unit, idx) => {
     if (unit) {
       return `
-        <div class="tactical-card rounded-2xl p-3 border star-${unit.star}-card relative flex flex-col items-center text-center group tap-scale-subtle">
+        <div class="tactical-card rounded-xl p-3 border border-slate-800/80 bg-[#0f1629]/95 relative flex flex-col items-center text-center group tap-scale-subtle">
           <button onclick="removeUnitFromTeam(${idx})" aria-label="Retirer ${unit.name} du deck" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-600/90 hover:bg-rose-500 text-white flex items-center justify-center tap-scale transition-colors shadow-sm" title="Retirer ${unit.name} du deck">
             <i data-lucide="x" class="w-3.5 h-3.5" stroke-width="2.5"></i>
           </button>
-          <div class="w-16 h-16 rounded-xl bg-slate-900/90 border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
-            <img src="${unit.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded-lg" alt="${unit.name}">
+          <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
+            <img src="${unit.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${unit.name}">
           </div>
           <div class="font-bold text-xs text-white truncate w-full" title="${unit.name}">
             ${unit.name}
           </div>
-          <span class="text-[10px] text-amber-400 font-mono-num font-bold">${unit.star}★ • ${unit.tower_type || 'Ground'}</span>
-          <div class="text-[10px] text-emerald-400 font-mono-num font-semibold mt-0.5">
+          <span class="text-[10px] text-amber-300 font-mono-num font-bold">${unit.star}★ • ${unit.tower_type || 'Ground'}</span>
+          <div class="text-[10px] text-slate-300 font-mono-num font-semibold mt-0.5">
             Dép: $${(unit.deployment_cost || 0).toLocaleString()}
           </div>
         </div>
       `;
     } else {
       return `
-        <button type="button" onclick="focusTeamSearch()" aria-label="Slot ${idx + 1} vide. Cliquer pour rechercher une tour." class="border border-dashed border-slate-700/80 rounded-2xl p-4 flex flex-col items-center justify-center text-slate-400 h-36 hover:border-sky-500/50 hover:text-sky-400 tap-scale transition-colors cursor-pointer group w-full text-center">
+        <button type="button" onclick="focusTeamSearch()" aria-label="Slot ${idx + 1} vide. Cliquer pour rechercher une tour." class="border border-dashed border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center text-slate-400 h-36 hover:border-sky-500/50 hover:text-sky-400 tap-scale transition-colors cursor-pointer group w-full text-center bg-[#090e1c]/40">
           <i data-lucide="plus-circle" class="w-6 h-6 mb-1.5 text-slate-500 group-hover:text-sky-400 transition-colors" stroke-width="2"></i>
           <span class="text-[11px] font-bold text-slate-300 group-hover:text-white transition-colors">SLOT ${idx + 1}</span>
-          <span class="text-[9px] text-slate-400 group-hover:text-slate-300 transition-colors">Ajouter une tour</span>
+          <span class="text-[9px] text-slate-500 group-hover:text-slate-400 transition-colors">Ajouter une tour</span>
         </button>
       `;
     }
@@ -1814,19 +1816,19 @@ function updateTeamStats() {
   const checklistEl = document.getElementById('team-checklist');
   if (checklistEl) {
     checklistEl.innerHTML = `
-      <div class="p-2.5 rounded-xl ${hasGround ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
+      <div class="p-2.5 rounded-xl ${hasGround ? 'bg-sky-950/40 border border-sky-500/40 text-sky-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
         <i data-lucide="${hasGround ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
         <span class="font-medium">Anti-Sol (Ground)</span>
       </div>
-      <div class="p-2.5 rounded-xl ${hasAir ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
+      <div class="p-2.5 rounded-xl ${hasAir ? 'bg-sky-950/40 border border-sky-500/40 text-sky-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
         <i data-lucide="${hasAir ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
         <span class="font-medium">Anti-Aérien (Air)</span>
       </div>
-      <div class="p-2.5 rounded-xl ${hasMoney ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
+      <div class="p-2.5 rounded-xl ${hasMoney ? 'bg-sky-950/40 border border-sky-500/40 text-sky-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
         <i data-lucide="${hasMoney ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
         <span class="font-medium">Économie / Farm</span>
       </div>
-      <div class="p-2.5 rounded-xl ${hasSlowOrSupport ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
+      <div class="p-2.5 rounded-xl ${hasSlowOrSupport ? 'bg-sky-950/40 border border-sky-500/40 text-sky-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
         <i data-lucide="${hasSlowOrSupport ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
         <span class="font-medium">Support / Contrôle</span>
       </div>
@@ -1845,9 +1847,9 @@ function renderTeamPicker() {
   }).slice(0, 18);
 
   pickerGrid.innerHTML = filtered.map(u => `
-    <div class="tactical-card p-2.5 rounded-xl border star-${u.star}-card text-center flex flex-col items-center justify-between group">
-      <div class="w-12 h-12 rounded-lg bg-slate-900/90 border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
-        <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded-md" alt="${u.name}">
+    <div class="tactical-card p-2.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 text-center flex flex-col items-center justify-between group">
+      <div class="w-12 h-12 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
+        <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${u.name}">
       </div>
       <div class="text-[11px] font-bold text-white truncate w-full" title="${u.name}">${u.name}</div>
       <span class="text-[10px] star-${u.star}-badge px-1.5 py-0.5 rounded my-1 font-mono-num font-bold">${u.star}★</span>
