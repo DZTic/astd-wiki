@@ -724,17 +724,17 @@
             <div id="modal-added-date" class="mt-1 text-center text-[10px] text-slate-400 font-sans hidden">
               Ajoutée le —
             </div>
-            <div class="flex items-center space-x-1.5 mt-3 w-full">
-              <button id="modal-add-team-btn" onclick="addCurrentModalUnitToTeam()" class="flex-1 ps-3 pe-2.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 tap-scale" aria-label="Ajouter cette unité au deck">
-                <i data-lucide="plus-circle" class="w-3.5 h-3.5" stroke-width="2"></i>
-                <span>+ Deck</span>
+            <div class="flex items-center gap-1.5 mt-3 w-full">
+              <button id="modal-add-team-btn" onclick="addCurrentModalUnitToTeam()" class="flex-1 px-2.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 whitespace-nowrap tap-scale transition-colors shadow-sm" aria-label="Ajouter cette unité au deck">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5 shrink-0" stroke-width="2"></i>
+                <span>Deck</span>
               </button>
-              <button id="modal-compare-btn" onclick="startCompareWithModalUnit()" class="px-2.5 py-2 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-700 text-slate-300 font-semibold text-xs flex items-center justify-center space-x-1 tap-scale transition-colors" title="Comparer cette unité avec une autre" aria-label="Comparer cette unité">
-                <i data-lucide="arrow-left-right" class="w-3.5 h-3.5" stroke-width="2"></i>
+              <button id="modal-compare-btn" onclick="startCompareWithModalUnit()" class="px-2.5 py-2 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-700 text-slate-300 font-semibold text-xs flex items-center justify-center gap-1 whitespace-nowrap tap-scale transition-colors" title="Comparer cette unité avec une autre" aria-label="Comparer cette unité">
+                <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 shrink-0" stroke-width="2"></i>
                 <span class="hidden sm:inline">Comparer</span>
               </button>
-              <a id="modal-fandom-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white tap-scale flex items-center justify-center" title="Fiche Fandom Wiki" aria-label="Consulter la page officielle Fandom de cette unité (nouvelle fenêtre)">
-                <i data-lucide="external-link" class="w-3.5 h-3.5" stroke-width="1.75"></i>
+              <a id="modal-fandom-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white tap-scale flex items-center justify-center shrink-0" title="Fiche Fandom Wiki" aria-label="Consulter la page officielle Fandom de cette unité (nouvelle fenêtre)">
+                <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0" stroke-width="1.75"></i>
               </a>
             </div>
           </div>
