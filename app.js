@@ -3346,11 +3346,6 @@ function renderOrbCard(o) {
           <div class="min-w-0 flex-1">
             <div class="flex items-center justify-between gap-1">
               <h4 class="font-bold text-xs text-white truncate">${o.name}</h4>
-              ${isCommunity ? `
-                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase shrink-0">
-                  ${t('comm_badge_orb', 'Communauté')}
-                </span>
-              ` : ''}
             </div>
             <span class="text-[10px] font-semibold ${isUniversal ? 'text-sky-300' : 'text-slate-400'}"
                   title="${requireTitle}">
@@ -3374,10 +3369,7 @@ function renderOrbCard(o) {
         </div>
       </div>
 
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px]">
-        <span class="text-[10px] text-slate-500 font-mono-num">
-          ${isCommunity ? (o._is_community_new ? t('comm_orb_new_badge', 'Création locale') : t('comm_orb_mod_badge', 'Modifié localement')) : 'Wiki Officiel'}
-        </span>
+      <div class="flex items-center justify-end pt-2 border-t border-slate-800/80 text-[11px]">
         <button onclick="if(window.CommunityUI) CommunityUI.openOrbModalForEdit(decodeURIComponent('${encodedName}'))" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-600 hover:text-white text-slate-300 font-semibold text-xs tap-scale flex items-center gap-1.5 transition-colors" title="${t('comm_btn_edit_orb_title', 'Modifier cet orbe')}">
           <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
           <span>${t('comm_action_edit', 'Éditer')}</span>

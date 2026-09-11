@@ -2871,43 +2871,37 @@ const CommunityUI = (function() {
             </div>
             <div class="min-w-0 flex-1">
               <div class="flex items-center justify-between gap-1">
-                <h4 class="font-bold text-xs text-white truncate">${escapeHtml(name)}</h4>
-                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase shrink-0">
-                  ${window.t ? window.t('comm_badge_orb', 'Communauté') : 'Communauté'}
-                </span>
-              </div>
-              <span class="text-[10px] font-semibold ${isUniversal ? 'text-sky-300' : 'text-slate-400'}">
-                ${escapeHtml(requireText)}
-              </span>
+              <h4 class="font-bold text-xs text-white truncate">${escapeHtml(name)}</h4>
             </div>
-          </div>
-
-          <div class="space-y-1.5 text-xs">
-            <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/80">
-              <strong class="text-amber-300 block text-[10px] uppercase font-sans">
-                ${window.t ? window.t('stat_bonus_label', 'Bonus statistique :') : 'Bonus statistique :'}
-              </strong>
-              <span class="text-slate-100 font-medium font-mono-num text-[11px]">${escapeHtml(effect)}</span>
-            </div>
-            <div class="text-[11px] text-slate-400">
-              <strong class="text-slate-300 font-sans">${window.t ? window.t('obtain_label', 'Obtention :') : 'Obtention :'}</strong> ${escapeHtml(obtain)}
-            </div>
-            ${!isUniversal ? `
-            <div class="text-[11px] text-slate-400">
-              <strong class="text-slate-300 font-sans">${window.t ? window.t('compatible_label', 'Compatible :') : 'Compatible :'}</strong> <span class="text-sky-300">${escapeHtml(rawRequire)}</span>
-            </div>` : ''}
+            <span class="text-[10px] font-semibold ${isUniversal ? 'text-sky-300' : 'text-slate-400'}">
+              ${escapeHtml(requireText)}
+            </span>
           </div>
         </div>
 
-        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px]">
-          <span class="text-[10px] text-cyan-400 font-mono-num">
-            ${editingOrbName ? (window.t ? window.t('comm_orb_mod_badge', 'Modifié localement') : 'Modifié localement') : (window.t ? window.t('comm_orb_new_badge', 'Création locale') : 'Création locale')}
-          </span>
-          <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-semibold">
-            ${window.t ? window.t('comm_preview_badge', 'Aperçu Direct') : 'Aperçu Direct'}
-          </span>
+        <div class="space-y-1.5 text-xs">
+          <div class="bg-[#090e1c] p-2.5 rounded-lg border border-slate-800/80">
+            <strong class="text-amber-300 block text-[10px] uppercase font-sans">
+              ${window.t ? window.t('stat_bonus_label', 'Bonus statistique :') : 'Bonus statistique :'}
+            </strong>
+            <span class="text-slate-100 font-medium font-mono-num text-[11px]">${escapeHtml(effect)}</span>
+          </div>
+          <div class="text-[11px] text-slate-400">
+            <strong class="text-slate-300 font-sans">${window.t ? window.t('obtain_label', 'Obtention :') : 'Obtention :'}</strong> ${escapeHtml(obtain)}
+          </div>
+          ${!isUniversal ? `
+          <div class="text-[11px] text-slate-400">
+            <strong class="text-slate-300 font-sans">${window.t ? window.t('compatible_label', 'Compatible :') : 'Compatible :'}</strong> <span class="text-sky-300">${escapeHtml(rawRequire)}</span>
+          </div>` : ''}
         </div>
       </div>
+
+      <div class="flex items-center justify-end pt-2 border-t border-slate-800/80 text-[11px]">
+        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-semibold">
+          ${window.t ? window.t('comm_preview_badge', 'Aperçu Direct') : 'Aperçu Direct'}
+        </span>
+      </div>
+    </div>
     `;
   }
 
