@@ -100,6 +100,16 @@ const I18N = {
     comm_or_enter_url: "ou saisissez un lien URL ci-dessous :",
     comm_img_from_pc_loaded: "Fichier PC importé",
     comm_img_remove: "Retirer cette image",
+    comm_th_tower_type: "Type de Tour",
+    comm_type_unchanged: "— Inchangé —",
+    comm_type_ground: "🌱 Sol (Ground)",
+    comm_type_hill: "🏔️ Colline (Hill)",
+    comm_type_hybrid: "⚡ Hybride (Hybrid)",
+    comm_type_air: "🦅 Aérien (Air)",
+    comm_type_hybrid_badge: "Hybride",
+    comm_type_hill_badge: "Colline",
+    comm_type_air_badge: "Aérien",
+    comm_type_ground_badge: "Sol",
 
     // Units Tab & Filters
     units_h1: "Base de Données des Tours & Unités ASTD",
@@ -444,6 +454,16 @@ const I18N = {
     comm_or_enter_url: "or enter a web image URL below:",
     comm_img_from_pc_loaded: "PC file imported",
     comm_img_remove: "Remove this image",
+    comm_th_tower_type: "Tower Type",
+    comm_type_unchanged: "— Unchanged —",
+    comm_type_ground: "🌱 Ground",
+    comm_type_hill: "🏔️ Hill",
+    comm_type_hybrid: "⚡ Hybrid",
+    comm_type_air: "🦅 Air",
+    comm_type_hybrid_badge: "Hybrid",
+    comm_type_hill_badge: "Hill",
+    comm_type_air_badge: "Air",
+    comm_type_ground_badge: "Ground",
 
     // Units Tab & Filters
     units_h1: "ASTD Towers & Units Database",
@@ -838,17 +858,33 @@ function setLanguage(lang) {
 }
 
 // Data translation helpers
-function translateTowerType(type) {
+function translateSingleTowerType(type) {
   if (!type) return currentLang === 'fr' ? 'Sol' : 'Ground';
-  const t = type.toLowerCase();
-  if (t.includes('hybrid')) return currentLang === 'fr' ? 'Hybride' : 'Hybrid';
-  if (t.includes('hill')) return currentLang === 'fr' ? 'Colline' : 'Hill';
-  if (t.includes('air')) return currentLang === 'fr' ? 'Aérien' : 'Air';
+  const t = type.trim().toLowerCase();
+  if (t === 'hybrid' || t.includes('hybrid')) return currentLang === 'fr' ? 'Hybride' : 'Hybrid';
+  if (t === 'hill' || t.includes('hill')) return currentLang === 'fr' ? 'Colline' : 'Hill';
+  if (t === 'air' || t.includes('air')) return currentLang === 'fr' ? 'Aérien' : 'Air';
   return currentLang === 'fr' ? 'Sol' : 'Ground';
 }
 
+function translateTowerType(type) {
+  if (!type) return currentLang === 'fr' ? 'Sol' : 'Ground';
+  if (type.includes('->') || type.includes('→')) {
+    const parts = type.split(/->|→/).map(p => p.trim()).filter(Boolean);
+    return parts.map(translateSingleTowerType).join(' → ');
+  }
+  return translateSingleTowerType(type);
+}
+
 function towerTypeTooltip(type) {
-  const t = (type || 'Ground').toLowerCase();
+  const raw = type || 'Ground';
+  if (raw.includes('->') || raw.includes('→')) {
+    const translated = translateTowerType(raw);
+    return currentLang === 'fr' ?
+      `Type évolutif : ${translated} (change de placement au fil des paliers d'amélioration)` :
+      `Evolving type: ${translated} (changes placement/targeting through upgrade tiers)`;
+  }
+  const t = raw.toLowerCase();
   if (currentLang === 'fr') {
     if (t.includes('hybrid')) return "Hybride : peut attaquer les ennemis au sol ET aériens";
     if (t.includes('hill')) return "Colline (Hill) : se place sur les hauteurs, attaque sol et air";
@@ -2827,6 +2863,26 @@ function renderUpgradesTable() {
         }
       }
 
+      // Type change badge detection for this upgrade tier
+      let typeBadge = '';
+      const uTowerType = (upg.tower_type || '').toLowerCase();
+      const hasHybrid = uTowerType === 'hybrid' || abilities.some(a => (a || '').toLowerCase().includes('hybrid'));
+      const hasHill = uTowerType === 'hill' || abilities.some(a => (a || '').toLowerCase().includes('hill'));
+      const hasAir = uTowerType === 'air' || abilities.some(a => (a || '').toLowerCase().includes('air'));
+      const hasGround = uTowerType === 'ground';
+
+      if (idx > 0) {
+        if (hasHybrid) {
+          typeBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-500/25 text-purple-300 border border-purple-500/40 text-[10px] font-bold shrink-0">⚡ ${t('comm_type_hybrid_badge', 'Hybride')}</span>`;
+        } else if (hasHill) {
+          typeBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold shrink-0">🏔️ ${t('comm_type_hill_badge', 'Colline')}</span>`;
+        } else if (hasAir) {
+          typeBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-500/25 text-sky-300 border border-sky-500/40 text-[10px] font-bold shrink-0">🦅 ${t('comm_type_air_badge', 'Aérien')}</span>`;
+        } else if (hasGround) {
+          typeBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/25 text-amber-300 border border-amber-500/40 text-[10px] font-bold shrink-0">🌱 ${t('comm_type_ground_badge', 'Sol')}</span>`;
+        }
+      }
+
       return `
         <tr class="hover:bg-slate-800/40 transition ${(hasAbilities || hasMatched) ? 'cursor-pointer' : ''}"
             ${(hasAbilities || hasMatched) ? `onclick="toggleUpgradeAbility(${idx})" title="${t('click_read_ability', 'Cliquer pour lire les effets et détails de capacité')}"` : ''}>
@@ -2839,6 +2895,7 @@ function renderUpgradesTable() {
           ${buffCell}
           <td class="p-2.5 text-slate-400 font-sans text-[11px]">
             <div class="flex items-center gap-1.5 min-w-0">
+              ${typeBadge}
               ${hasMatched ? `
                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-bold shrink-0">
                   <i data-lucide="${matchedAbilities[0].type === 'manual' ? 'flame' : 'shield'}" class="w-2.5 h-2.5"></i>

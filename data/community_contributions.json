@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "last_updated": "2026-09-11T19:54:04.348396+00:00",
+  "last_updated": "2026-09-11T19:59:23.662193+00:00",
   "units": {
     "Goku_Ultra_Instinct_Custom": {
       "id": "Goku_Ultra_Instinct_Custom",
       "name": "Goku Ultra Instinct (Custom)",
       "star": 7,
-      "tower_type": "Ground",
+      "tower_type": "Ground -> Hybrid",
       "attack_type": "AoE (Circle)",
       "deployment_cost": 600,
       "total_cost": 19100,
@@ -27,6 +27,7 @@
           "damage": 2500,
           "range": 30,
           "spa": 4,
+          "tower_type": "Ground",
           "abilities": []
         },
         {
@@ -35,6 +36,7 @@
           "damage": 10000,
           "range": 45,
           "spa": 4,
+          "tower_type": "",
           "abilities": []
         },
         {
@@ -43,8 +45,10 @@
           "damage": 60000,
           "range": 70,
           "spa": 3,
+          "tower_type": "Hybrid",
           "abilities": [
-            "+ Full AoE"
+            "+ Full AoE",
+            "+ Hybrid"
           ]
         },
         {
@@ -53,6 +57,7 @@
           "damage": 240000,
           "range": 110,
           "spa": 3,
+          "tower_type": "",
           "abilities": [
             "+ Max Upgrade",
             "Ultra Instinct"
@@ -60,7 +65,7 @@
         }
       ],
       "_community": true,
-      "created_at": "2026-09-11T19:54:01.060Z"
+      "created_at": "2026-09-11T19:59:20.014Z"
     }
   },
   "deleted_units": [],
@@ -75,6 +80,13 @@
   ],
   "tips": {
     "Goku_Ultra_Instinct_Custom": [
+      {
+        "id": "tip_1789156762187",
+        "author": "VegetaMaster",
+        "type": "raid",
+        "text": "Excellente unite en Raid 2 : placez-la en debut de chemin pour appliquer ses degats de zone.",
+        "date": "11/09/2026"
+      },
       {
         "id": "tip_1789156442998",
         "author": "VegetaMaster",

@@ -1006,6 +1006,26 @@ const CommunityUI = (function() {
     };
   }
 
+  function computeUnitTowerType() {
+    const topType = document.getElementById('comm-unit-tower-type')?.value || 'Ground';
+    if (!currentUnitUpgrades || currentUnitUpgrades.length === 0) {
+      return topType;
+    }
+    const baseType = currentUnitUpgrades[0].tower_type || topType;
+    const chain = [baseType];
+    let currentActive = baseType;
+
+    for (let i = 1; i < currentUnitUpgrades.length; i++) {
+      const t = currentUnitUpgrades[i].tower_type;
+      if (t && t !== currentActive) {
+        chain.push(t);
+        currentActive = t;
+      }
+    }
+
+    return chain.join(' -> ');
+  }
+
   function updateTiersSummaryBadges() {
     const stats = computeTierStats();
     const deployEl = document.getElementById('comm-summary-deploy');
@@ -1029,7 +1049,7 @@ const CommunityUI = (function() {
 
     if (!currentUnitUpgrades || currentUnitUpgrades.length === 0) {
       currentUnitUpgrades = [
-        { level: 0, cost: 500, damage: 1500, range: 25, spa: 4.0, abilities: [] }
+        { level: 0, cost: 500, damage: 1500, range: 25, spa: 4.0, tower_type: 'Ground', abilities: [] }
       ];
     }
 
@@ -1038,6 +1058,7 @@ const CommunityUI = (function() {
       const levelLabel = isDeploy ? (window.t ? window.t('comm_tier_deploy', '0 (Déploiement)') : '0 (Déploiement)') : `Palier ${tier.level !== undefined ? tier.level : idx}`;
       const dps = tier.spa > 0 ? (tier.damage / tier.spa) : tier.damage;
       const abilitiesStr = (tier.abilities || []).join(', ');
+      const tType = tier.tower_type || (isDeploy ? (document.getElementById('comm-unit-tower-type')?.value || 'Ground') : '');
 
       return `
         <tr class="transition">
@@ -1046,7 +1067,7 @@ const CommunityUI = (function() {
               ${levelLabel}
             </span>
           </td>
-          <td style="min-width: 110px;">
+          <td style="min-width: 105px;">
             <div class="relative">
               <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 font-mono-num text-xs">$</span>
               <input type="number" min="0" step="50" value="${tier.cost || 0}"
@@ -1055,30 +1076,48 @@ const CommunityUI = (function() {
                      oninput="CommunityUI.onUpgradeChange(${idx}, 'cost', this.value)">
             </div>
           </td>
-          <td style="min-width: 110px;">
+          <td style="min-width: 105px;">
             <input type="number" min="0" step="100" value="${tier.damage || 0}"
                    aria-label="Dégâts palier ${idx}"
                    class="comm-upg-input text-xs font-mono-num font-bold text-slate-100"
                    oninput="CommunityUI.onUpgradeChange(${idx}, 'damage', this.value)">
           </td>
-          <td style="min-width: 80px;">
+          <td style="min-width: 75px;">
             <input type="number" min="1" max="500" step="1" value="${tier.range || 30}"
                    aria-label="Portée palier ${idx}"
                    class="comm-upg-input text-xs font-mono-num"
                    oninput="CommunityUI.onUpgradeChange(${idx}, 'range', this.value)">
           </td>
-          <td style="min-width: 80px;">
+          <td style="min-width: 75px;">
             <input type="number" min="0.1" max="60" step="0.1" value="${tier.spa || 4}"
                    aria-label="SPA palier ${idx}"
                    class="comm-upg-input text-xs font-mono-num"
                    oninput="CommunityUI.onUpgradeChange(${idx}, 'spa', this.value)">
           </td>
-          <td style="min-width: 90px;" class="text-center font-mono-num">
+          <td style="min-width: 85px;" class="text-center font-mono-num">
             <span id="comm-upg-dps-${idx}" class="inline-block px-2 py-1 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold text-xs">
               ${Math.round(dps).toLocaleString()}
             </span>
           </td>
-          <td style="min-width: 160px;">
+          <td style="min-width: 135px;">
+            <select class="comm-upg-input text-[11px] font-semibold"
+                    aria-label="Type de tour palier ${idx}"
+                    onchange="CommunityUI.onUpgradeChange(${idx}, 'tower_type', this.value)">
+              ${isDeploy ? `
+                <option value="Ground" ${(!tType || tType === 'Ground') ? 'selected' : ''}>${window.t ? window.t('comm_type_ground', '🌱 Sol (Ground)') : '🌱 Sol (Ground)'}</option>
+                <option value="Hill" ${tType === 'Hill' ? 'selected' : ''}>${window.t ? window.t('comm_type_hill', '🏔️ Colline (Hill)') : '🏔️ Colline (Hill)'}</option>
+                <option value="Hybrid" ${tType === 'Hybrid' ? 'selected' : ''}>${window.t ? window.t('comm_type_hybrid', '⚡ Hybride (Hybrid)') : '⚡ Hybride (Hybrid)'}</option>
+                <option value="Air" ${tType === 'Air' ? 'selected' : ''}>${window.t ? window.t('comm_type_air', '🦅 Aérien (Air)') : '🦅 Aérien (Air)'}</option>
+              ` : `
+                <option value="" ${!tType ? 'selected' : ''}>${window.t ? window.t('comm_type_unchanged', '— Inchangé —') : '— Inchangé —'}</option>
+                <option value="Hybrid" ${tType === 'Hybrid' ? 'selected' : ''}>${window.t ? window.t('comm_type_hybrid', '⚡ Hybride (Hybrid)') : '⚡ Hybride (Hybrid)'}</option>
+                <option value="Hill" ${tType === 'Hill' ? 'selected' : ''}>${window.t ? window.t('comm_type_hill', '🏔️ Colline (Hill)') : '🏔️ Colline (Hill)'}</option>
+                <option value="Ground" ${tType === 'Ground' ? 'selected' : ''}>${window.t ? window.t('comm_type_ground', '🌱 Sol (Ground)') : '🌱 Sol (Ground)'}</option>
+                <option value="Air" ${tType === 'Air' ? 'selected' : ''}>${window.t ? window.t('comm_type_air', '🦅 Aérien (Air)') : '🦅 Aérien (Air)'}</option>
+              `}
+            </select>
+          </td>
+          <td style="min-width: 150px;">
             <input type="text" value="${escapeHtml(abilitiesStr)}"
                    placeholder="${isDeploy ? 'Capacité initiale...' : 'Ex: + Max Upgrade, Full AoE...'}"
                    aria-label="Effets palier ${idx}"
@@ -1106,7 +1145,7 @@ const CommunityUI = (function() {
 
   function addUpgradeRow() {
     const nextLevel = currentUnitUpgrades.length;
-    const prevTier = currentUnitUpgrades[nextLevel - 1] || { cost: 1000, damage: 2000, range: 30, spa: 4, abilities: [] };
+    const prevTier = currentUnitUpgrades[nextLevel - 1] || { cost: 1000, damage: 2000, range: 30, spa: 4, tower_type: '', abilities: [] };
 
     // Suggérer des valeurs de départ que l'utilisateur peut modifier à sa guise
     currentUnitUpgrades.push({
@@ -1115,6 +1154,7 @@ const CommunityUI = (function() {
       damage: prevTier.damage > 0 ? Math.round(prevTier.damage * 1.5) : 3000,
       range: prevTier.range || 30,
       spa: prevTier.spa || 4,
+      tower_type: '',
       abilities: []
     });
 
@@ -1143,6 +1183,27 @@ const CommunityUI = (function() {
       currentUnitUpgrades[idx].spa = Math.max(0.1, parseFloat(value) || 0.1);
     } else if (field === 'abilities') {
       currentUnitUpgrades[idx].abilities = value ? value.split(',').map(s => s.trim()).filter(Boolean) : [];
+    } else if (field === 'tower_type') {
+      currentUnitUpgrades[idx].tower_type = value;
+      if (idx === 0) {
+        const topEl = document.getElementById('comm-unit-tower-type');
+        if (topEl && value) topEl.value = value;
+      } else if (value === 'Hybrid') {
+        if (!currentUnitUpgrades[idx].abilities.some(a => (a || '').toLowerCase().includes('hybrid'))) {
+          currentUnitUpgrades[idx].abilities.push('+ Hybrid');
+        }
+      } else if (value === 'Hill') {
+        if (!currentUnitUpgrades[idx].abilities.some(a => (a || '').toLowerCase().includes('hill'))) {
+          currentUnitUpgrades[idx].abilities.push('+ Hill Type');
+        }
+      } else if (value === 'Air') {
+        if (!currentUnitUpgrades[idx].abilities.some(a => (a || '').toLowerCase().includes('air'))) {
+          currentUnitUpgrades[idx].abilities.push('+ Air Type');
+        }
+      }
+      renderUpgradeRows();
+      updateLivePreview();
+      return;
     }
 
     // Mettre à jour le badge DPS du palier en direct
@@ -1287,28 +1348,43 @@ const CommunityUI = (function() {
 
     // Initialiser les paliers d'amélioration
     if (existing && Array.isArray(existing.upgrades) && existing.upgrades.length > 0) {
-      currentUnitUpgrades = existing.upgrades.map((u, idx) => ({
-        level: u.level !== undefined ? u.level : idx,
-        cost: Number(u.cost) || 0,
-        damage: Number(u.damage) || 0,
-        range: Number(u.range) || 0,
-        spa: Number(u.spa) || 1,
-        abilities: Array.isArray(u.abilities) ? [...u.abilities] : (u.abilities ? [String(u.abilities)] : [])
-      }));
+      currentUnitUpgrades = existing.upgrades.map((u, idx) => {
+        let tType = u.tower_type || '';
+        if (!tType && idx > 0) {
+          const abList = Array.isArray(u.abilities) ? u.abilities : (u.abilities ? [String(u.abilities)] : []);
+          if (abList.some(a => (a || '').toLowerCase().includes('hybrid'))) tType = 'Hybrid';
+          else if (abList.some(a => (a || '').toLowerCase().includes('hill'))) tType = 'Hill';
+          else if (abList.some(a => (a || '').toLowerCase().includes('air'))) tType = 'Air';
+        } else if (!tType && idx === 0) {
+          const baseRaw = (existing.tower_type || '').split(/->|→/)[0].trim();
+          tType = baseRaw || 'Ground';
+        }
+        return {
+          level: u.level !== undefined ? u.level : idx,
+          cost: Number(u.cost) || 0,
+          damage: Number(u.damage) || 0,
+          range: Number(u.range) || 0,
+          spa: Number(u.spa) || 1,
+          tower_type: tType,
+          abilities: Array.isArray(u.abilities) ? [...u.abilities] : (u.abilities ? [String(u.abilities)] : [])
+        };
+      });
     } else if (existing) {
+      const baseRaw = (existing.tower_type || '').split(/->|→/)[0].trim() || 'Ground';
       currentUnitUpgrades = [{
         level: 0,
         cost: Number(existing.deployment_cost) || 500,
         damage: Number(existing.max_damage) || 1000,
         range: Number(existing.max_range) || 30,
         spa: Number(existing.min_spa) || 4,
+        tower_type: baseRaw,
         abilities: []
       }];
     } else {
       currentUnitUpgrades = [
-        { level: 0, cost: 500, damage: 1500, range: 25, spa: 4.0, abilities: [] },
-        { level: 1, cost: 1200, damage: 5500, range: 32, spa: 4.0, abilities: [] },
-        { level: 2, cost: 3500, damage: 18000, range: 45, spa: 3.5, abilities: ['+ Max Upgrade'] }
+        { level: 0, cost: 500, damage: 1500, range: 25, spa: 4.0, tower_type: 'Ground', abilities: [] },
+        { level: 1, cost: 1200, damage: 5500, range: 32, spa: 4.0, tower_type: '', abilities: [] },
+        { level: 2, cost: 3500, damage: 18000, range: 45, spa: 3.5, tower_type: '', abilities: ['+ Max Upgrade'] }
       ];
     }
 
@@ -1431,11 +1507,11 @@ const CommunityUI = (function() {
                   ${window.t ? window.t('comm_field_tower_type', 'Type de Placement') : 'Type de Placement'}
                 </label>
                 <select id="comm-unit-tower-type" class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-sky-500"
-                        onchange="CommunityUI.updateLivePreview()">
-                  <option value="Ground" ${existing?.tower_type === 'Ground' || !existing ? 'selected' : ''}>Sol (Ground)</option>
-                  <option value="Air" ${existing?.tower_type === 'Air' ? 'selected' : ''}>Aérien (Air)</option>
-                  <option value="Hill" ${existing?.tower_type === 'Hill' ? 'selected' : ''}>Colline (Hill)</option>
-                  <option value="Hybrid" ${existing?.tower_type === 'Hybrid' ? 'selected' : ''}>Hybride (Sol & Air)</option>
+                        onchange="CommunityUI.onTopTowerTypeChange(this.value)">
+                  <option value="Ground" ${(!existing?.tower_type || existing.tower_type.startsWith('Ground')) ? 'selected' : ''}>Sol (Ground)</option>
+                  <option value="Air" ${existing?.tower_type?.startsWith('Air') ? 'selected' : ''}>Aérien (Air)</option>
+                  <option value="Hill" ${existing?.tower_type?.startsWith('Hill') ? 'selected' : ''}>Colline (Hill)</option>
+                  <option value="Hybrid" ${existing?.tower_type?.startsWith('Hybrid') ? 'selected' : ''}>Hybride (Sol & Air)</option>
                 </select>
               </div>
               <div>
@@ -1526,11 +1602,12 @@ const CommunityUI = (function() {
               <thead class="sticky top-0 z-10">
                 <tr>
                   <th class="w-24">Palier</th>
-                  <th class="w-32">Coût ($)</th>
-                  <th class="w-32">Dégâts (DMG)</th>
-                  <th class="w-24">Portée</th>
-                  <th class="w-24">SPA (s)</th>
-                  <th class="w-28 text-center">DPS</th>
+                  <th class="w-28">Coût ($)</th>
+                  <th class="w-28">Dégâts (DMG)</th>
+                  <th class="w-20">Portée</th>
+                  <th class="w-20">SPA (s)</th>
+                  <th class="w-24 text-center">DPS</th>
+                  <th class="w-36">${window.t ? window.t('comm_th_tower_type', 'Type de Tour') : 'Type de Tour'}</th>
                   <th>Effets / Aptitude</th>
                   <th class="w-16 text-right">Action</th>
                 </tr>
@@ -1585,13 +1662,22 @@ const CommunityUI = (function() {
     if (window.lucide) lucide.createIcons();
   }
 
+  function onTopTowerTypeChange(val) {
+    if (currentUnitUpgrades && currentUnitUpgrades.length > 0) {
+      currentUnitUpgrades[0].tower_type = val;
+      renderUpgradeRows();
+    }
+    updateLivePreview();
+  }
+
   function updateLivePreview() {
     const name = document.getElementById('comm-unit-name')?.value?.trim() || 'Nom de l\'unité';
     const star = document.getElementById('comm-unit-star')?.value || '6';
     const anime = document.getElementById('comm-unit-anime')?.value?.trim() || 'All Star Tower Defense';
     const inputUrl = document.getElementById('comm-unit-image')?.value?.trim();
     const image = currentUploadedImageDataUrl || inputUrl || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
-    const towerType = document.getElementById('comm-unit-tower-type')?.value || 'Ground';
+    const towerType = computeUnitTowerType();
+    const translatedTower = window.translateTowerType ? window.translateTowerType(towerType) : towerType;
 
     const stats = computeTierStats();
     const dps = stats.max_dps;
@@ -1612,8 +1698,8 @@ const CommunityUI = (function() {
                 Communauté
               </span>
             </div>
-            <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded">
-              ${towerType}
+            <span class="px-2 py-0.5 text-[10px] font-bold bg-slate-900 border border-slate-700 text-sky-300 rounded font-mono-num" title="${towerType}">
+              ${translatedTower}
             </span>
           </div>
 
@@ -1667,6 +1753,7 @@ const CommunityUI = (function() {
     const stats = computeTierStats();
     const inputUrl = document.getElementById('comm-unit-image')?.value?.trim();
     const finalImage = currentUploadedImageDataUrl || inputUrl || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
+    const computedTower = computeUnitTowerType();
 
     const unitData = {
       id: editingUnitId,
@@ -1675,7 +1762,7 @@ const CommunityUI = (function() {
       anime_origin: document.getElementById('comm-unit-anime').value.trim(),
       character_origin: document.getElementById('comm-unit-char').value.trim(),
       image: finalImage,
-      tower_type: document.getElementById('comm-unit-tower-type').value,
+      tower_type: computedTower,
       attack_type: document.getElementById('comm-unit-attack-type').value,
       deployment_cost: stats.deployment_cost,
       total_cost: stats.total_cost,
@@ -1683,7 +1770,15 @@ const CommunityUI = (function() {
       max_range: stats.max_range,
       min_spa: stats.min_spa,
       max_dps: Math.round(stats.max_dps),
-      upgrades: currentUnitUpgrades,
+      upgrades: currentUnitUpgrades.map((u, i) => ({
+        level: u.level !== undefined ? u.level : i,
+        cost: Number(u.cost) || 0,
+        damage: Number(u.damage) || 0,
+        range: Number(u.range) || 0,
+        spa: Number(u.spa) || 1,
+        tower_type: u.tower_type || '',
+        abilities: Array.isArray(u.abilities) ? u.abilities : []
+      })),
       overview: document.getElementById('comm-unit-overview').value.trim(),
       is_tradeable: document.getElementById('comm-unit-tradeable').checked,
       is_unobtainable: document.getElementById('comm-unit-unobtainable').checked
@@ -1874,7 +1969,9 @@ const CommunityUI = (function() {
     removeUploadedImage,
     onImageUrlInput,
     renderImagePreviewWidget,
-    getCurrentUploadedImageDataUrl: () => currentUploadedImageDataUrl
+    getCurrentUploadedImageDataUrl: () => currentUploadedImageDataUrl,
+    computeUnitTowerType,
+    onTopTowerTypeChange
   };
 })();
 
