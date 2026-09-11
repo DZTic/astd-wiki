@@ -502,38 +502,120 @@ const CommunityManager = (function() {
     const base = 'https://github.com/DZTic/astd-wiki/issues/new';
     let title = '';
     let body = '';
+    let labels = 'proposition,en-attente';
 
     if (type === 'unit') {
-      const upgFormatted = (data.upgrades && data.upgrades.length > 0)
-        ? data.upgrades.map(u => `  - Palier ${u.level}: Coût: $${(u.cost || 0).toLocaleString()} | Dégâts: ${(u.damage || 0).toLocaleString()} | Portée: ${u.range || 0} | SPA: ${u.spa || 0}s${(u.abilities && u.abilities.length > 0) ? ` | Effets: ${u.abilities.join(', ')}` : ''}`).join('\n')
-        : '-';
+      const isLocalImage = data.image && data.image.startsWith('data:image');
+      const cleanUpgrades = (data.upgrades || []).map((u, idx) => ({
+        level: u.level !== undefined ? u.level : idx,
+        cost: Number(u.cost) || 0,
+        damage: Number(u.damage) || 0,
+        range: Number(u.range) || 0,
+        spa: Number(u.spa) || 1,
+        tower_type: u.tower_type || '',
+        attack_type: u.attack_type || '',
+        abilities: Array.isArray(u.abilities) ? u.abilities : []
+      }));
 
-      title = `[Proposition Communauté] Unité : ${data.name || 'Nouvelle Unité'}`;
-      body = `### Proposition d'ajout / modification d'unité ASTD\n\n` +
-             `**Nom :** ${data.name || '-'}\n` +
-             `**Rareté :** ${data.star || 5}★\n` +
-             `**Franchise Anime :** ${data.anime_origin || '-'}\n` +
-             `**Type de Tour :** ${data.tower_type || '-'}\n` +
-             `**Zone d'Attaque :** ${data.attack_type || '-'}\n` +
-             `**Coût Déploiement :** $${data.deployment_cost?.toLocaleString() || '-'}\n` +
-             `**Coût Total :** $${data.total_cost?.toLocaleString() || '-'}\n` +
-             `**Dégâts Max :** ${data.max_damage?.toLocaleString() || '-'}\n` +
-             `**SPA :** ${data.min_spa || '-'}s\n` +
-             `**DPS Estimé :** ${data.max_dps?.toLocaleString() || '-'}\n` +
-             `**Portée :** ${data.max_range || '-'}\n` +
-             `**Description :** ${data.overview || '-'}\n\n` +
-             `### Paliers d'Amélioration :\n${upgFormatted}\n\n` +
-             `*Généré automatiquement depuis l'Assistant Communautaire ASTD Wiki.*`;
+      const payload = {
+        version: 1,
+        type: 'unit',
+        action: 'save_unit',
+        data: {
+          id: data.id || (data.name ? data.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '') : 'nouvelle_unite'),
+          name: data.name || 'Nouvelle Unité',
+          star: parseInt(data.star, 10) || 5,
+          tower_type: data.tower_type || 'Ground',
+          attack_type: data.attack_type || 'Single Target',
+          deployment_cost: Number(data.deployment_cost) || 0,
+          total_cost: Number(data.total_cost) || 0,
+          max_damage: Number(data.max_damage) || 0,
+          max_range: Number(data.max_range) || 0,
+          min_spa: Number(data.min_spa) || 1,
+          max_dps: Number(data.max_dps) || 0,
+          character_origin: data.character_origin || null,
+          anime_origin: data.anime_origin || 'ASTD Community',
+          overview: data.overview || '',
+          image: isLocalImage ? '' : (data.image || ''),
+          is_tradeable: !!data.is_tradeable,
+          is_unobtainable: !!data.is_unobtainable,
+          upgrades: cleanUpgrades
+        }
+      };
+
+      const upgRows = cleanUpgrades.length > 0
+        ? cleanUpgrades.map(u => {
+            const dps = u.spa > 0 ? Math.round(u.damage / u.spa) : u.damage;
+            const ab = (u.abilities && u.abilities.length > 0) ? u.abilities.join(', ') : '-';
+            return `| Palier ${u.level} | $${u.cost.toLocaleString()} | ${u.damage.toLocaleString()} | ${u.range} | ${u.spa}s | ${dps.toLocaleString()} | ${u.tower_type || '-'} | ${ab} |`;
+          }).join('\n')
+        : '| 0 | $0 | 0 | 0 | 0s | 0 | - | - |';
+
+      title = `[Proposition Unité] ${data.name || 'Nouvelle Unité'} (${data.star || 5}★)`;
+      body = `### 📋 Proposition d'Ajout / Modification d'Unité ASTD\n\n` +
+             `| Caractéristique | Valeur |\n` +
+             `| :--- | :--- |\n` +
+             `| **Nom** | **${data.name || '-'}** |\n` +
+             `| **ID Détecté** | \`${payload.data.id}\` |\n` +
+             `| **Rareté** | ${data.star || 5}★ |\n` +
+             `| **Franchise / Anime** | ${data.anime_origin || '-'} |\n` +
+             `| **Personnage d'origine** | ${data.character_origin || '-'} |\n` +
+             `| **Type de Tour** | ${data.tower_type || '-'} |\n` +
+             `| **Zone d'Attaque** | ${data.attack_type || '-'} |\n` +
+             `| **Coût Déploiement** | $${(data.deployment_cost || 0).toLocaleString()} |\n` +
+             `| **Coût Total** | $${(data.total_cost || 0).toLocaleString()} |\n` +
+             `| **Dégâts Max** | ${(data.max_damage || 0).toLocaleString()} |\n` +
+             `| **Portée Max** | ${data.max_range || '-'} |\n` +
+             `| **SPA Min** | ${data.min_spa || '-'}s |\n` +
+             `| **DPS Estimé** | ${(data.max_dps || 0).toLocaleString()} |\n` +
+             `| **Échangeable** | ${data.is_tradeable ? 'Oui' : 'Non'} |\n` +
+             `| **Introuvable / Retiré** | ${data.is_unobtainable ? 'Oui' : 'Non'} |\n\n` +
+             `### 📖 Description & Aperçu\n${data.overview || '*Aucune description renseignée.*'}\n\n` +
+             (isLocalImage ? `> ⚠️ **Image Locale Détectée :** Une image sur votre ordinateur a été utilisée. Veuillez glisser-déposer votre fichier image directement dans cette issue GitHub pour qu'elle s'affiche.\n\n` : (data.image ? `**Image :** ${data.image}\n\n` : '')) +
+             `### ⚡ Paliers d'Amélioration (${cleanUpgrades.length} niveaux)\n` +
+             `| Palier | Coût ($) | Dégâts | Portée | SPA | DPS | Type | Aptitudes |\n` +
+             `| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |\n` +
+             `${upgRows}\n\n` +
+             `---\n` +
+             `### 🛠️ Intégration Automatique au Wiki (Mainteneurs)\n` +
+             `> **Pour valider et insérer directement ce personnage dans \`data/units.json\` sans saisie manuelle :**\n` +
+             `> 1. Ajoutez le label **\`validé\`** ou **\`approved\`** à cette issue, **OU**\n` +
+             `> 2. Commentez **/valider** ou **/approve**, **OU**\n` +
+             `> 3. Fermez l'issue via **"Close as completed"**.\n` +
+             `>\n` +
+             `> 🚀 *Un robot GitHub Actions intégrera instantanément les statistiques et lancera le déploiement GitHub Pages.*\n\n` +
+             `<!-- ASTD_PAYLOAD_START\n${JSON.stringify(payload)}\nASTD_PAYLOAD_END -->\n\n` +
+             `<details>\n<summary>🤖 Données techniques JSON (ne pas modifier)</summary>\n\n` +
+             `\`\`\`json\n${JSON.stringify(payload, null, 2)}\n\`\`\`\n\n</details>`;
+
     } else if (type === 'code') {
-      title = `[Proposition Communauté] Code Promo : ${data.code || ''}`;
-      body = `### Nouveau Code Promo Signalé\n\n` +
-             `**Code :** \`${data.code}\`\n` +
-             `**Récompenses :** ${data.reward || '-'}\n` +
-             `**Statut :** ${data.status || 'active'}\n\n` +
-             `*Généré automatiquement depuis l'Assistant Communautaire ASTD Wiki.*`;
+      const payload = {
+        version: 1,
+        type: 'code',
+        action: 'save_code',
+        data: {
+          code: data.code || '',
+          reward: data.reward || '',
+          status: data.status || 'active'
+        }
+      };
+
+      title = `[Proposition Code Promo] ${data.code || ''}`;
+      body = `### 🎁 Nouveau Code Promo ASTD\n\n` +
+             `| Champ | Valeur |\n` +
+             `| :--- | :--- |\n` +
+             `| **Code Promo** | \`${data.code}\` |\n` +
+             `| **Récompenses** | ${data.reward || '-'} |\n` +
+             `| **Statut** | ${data.status === 'expired' ? 'Expiré' : 'Actif'} |\n\n` +
+             `---\n` +
+             `### 🛠️ Validation Automatique du Wiki\n` +
+             `> Ajoutez le label **\`validé\`** ou commentez **/valider** pour intégrer automatiquement ce code.\n\n` +
+             `<!-- ASTD_PAYLOAD_START\n${JSON.stringify(payload)}\nASTD_PAYLOAD_END -->\n\n` +
+             `<details>\n<summary>🤖 Données techniques JSON</summary>\n\n` +
+             `\`\`\`json\n${JSON.stringify(payload, null, 2)}\n\`\`\`\n\n</details>`;
     }
 
-    return `${base}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+    return `${base}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&labels=${encodeURIComponent(labels)}`;
   }
 
   function copyForDiscord(type, data) {
@@ -1643,14 +1725,20 @@ const CommunityUI = (function() {
         </div>
 
         <!-- Boutons d'action en bas -->
-        <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-slate-800">
           <button type="button" onclick="CommunityUI.closeModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs tap-scale">
             ${window.t ? window.t('cancel', 'Annuler') : 'Annuler'}
           </button>
-          <button type="submit" id="comm-unit-submit-btn" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 tap-scale shadow-md">
-            <i data-lucide="check" class="w-4 h-4"></i>
-            <span>${isEdit ? (window.t ? window.t('comm_btn_save_changes', 'Enregistrer les Modifications') : 'Enregistrer les Modifications') : (window.t ? window.t('comm_btn_create_unit', 'Créer & Ajouter l\'Unite') : 'Créer & Ajouter l\'Unite')}</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="CommunityUI.submitAndProposeToGitHub()" class="px-3.5 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 font-bold text-xs flex items-center gap-1.5 tap-scale transition-colors shadow-sm" title="Enregistrer et ouvrir l'issue GitHub pré-remplie pour le Wiki">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              <span>${window.t ? window.t('comm_btn_propose_gh', 'Proposer sur GitHub') : 'Proposer sur GitHub'}</span>
+            </button>
+            <button type="submit" id="comm-unit-submit-btn" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 tap-scale shadow-md">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>${isEdit ? (window.t ? window.t('comm_btn_save_changes', 'Enregistrer les Modifications') : 'Enregistrer les Modifications') : (window.t ? window.t('comm_btn_create_unit', 'Créer & Ajouter l\'Unite') : 'Créer & Ajouter l\'Unite')}</span>
+            </button>
+          </div>
         </div>
 
       </form>
@@ -1787,6 +1875,63 @@ const CommunityUI = (function() {
     const success = await CommunityManager.saveUnit(unitData);
     if (success) {
       closeModal();
+    }
+  }
+
+  async function submitAndProposeToGitHub() {
+    const name = document.getElementById('comm-unit-name')?.value?.trim();
+    if (!name) {
+      alert(window.t ? window.t('comm_name_required', 'Le nom de l\'unité est obligatoire.') : 'Le nom de l\'unité est obligatoire.');
+      return;
+    }
+
+    if (!currentUnitUpgrades || currentUnitUpgrades.length === 0) {
+      alert(window.t ? window.t('comm_tier_required', 'Veuillez renseigner au moins un palier d\'amélioration.') : 'Veuillez renseigner au moins un palier d\'amélioration.');
+      return;
+    }
+
+    const stats = computeTierStats();
+    const inputUrl = document.getElementById('comm-unit-image')?.value?.trim();
+    const finalImage = currentUploadedImageDataUrl || inputUrl || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
+    const computedTower = computeUnitTowerType();
+
+    const unitData = {
+      id: editingUnitId,
+      name: name,
+      star: parseInt(document.getElementById('comm-unit-star').value, 10),
+      anime_origin: document.getElementById('comm-unit-anime').value.trim(),
+      character_origin: document.getElementById('comm-unit-char').value.trim(),
+      image: finalImage,
+      tower_type: computedTower,
+      attack_type: document.getElementById('comm-unit-attack-type').value,
+      deployment_cost: stats.deployment_cost,
+      total_cost: stats.total_cost,
+      max_damage: stats.max_damage,
+      max_range: stats.max_range,
+      min_spa: stats.min_spa,
+      max_dps: Math.round(stats.max_dps),
+      upgrades: currentUnitUpgrades.map((u, i) => ({
+        level: u.level !== undefined ? u.level : i,
+        cost: Number(u.cost) || 0,
+        damage: Number(u.damage) || 0,
+        range: Number(u.range) || 0,
+        spa: Number(u.spa) || 1,
+        tower_type: u.tower_type || '',
+        abilities: Array.isArray(u.abilities) ? u.abilities : []
+      })),
+      overview: document.getElementById('comm-unit-overview').value.trim(),
+      is_tradeable: document.getElementById('comm-unit-tradeable').checked,
+      is_unobtainable: document.getElementById('comm-unit-unobtainable').checked
+    };
+
+    const success = await CommunityManager.saveUnit(unitData);
+    if (success) {
+      closeModal();
+      const issueUrl = generateGitHubIssueURL('unit', unitData);
+      window.open(issueUrl, '_blank', 'noopener,noreferrer');
+      if (window.showToast) {
+        window.showToast(window.t ? window.t('comm_github_opened', 'Page GitHub ouverte ! Soumettez l\'issue pour l\'intégration automatique.') : 'Page GitHub ouverte ! Soumettez l\'issue pour l\'intégration automatique.');
+      }
     }
   }
 
@@ -1958,6 +2103,7 @@ const CommunityUI = (function() {
     closeModal,
     updateLivePreview,
     submitUnitForm,
+    submitAndProposeToGitHub,
     submitCodeForm,
     submitTipForm,
     addUpgradeRow,
