@@ -34,9 +34,10 @@ const I18N = {
     skip_to_content: "Aller au contenu principal",
     brand_subtitle: "Base de Données & Meta Hub",
     brand_aria: "Accueil ASTD Wiki",
-    quick_search_placeholder: "Rechercher une unité (Ctrl+K)...",
+    quick_search_placeholder: "Recherche rapide (Ctrl + K)...",
+    quick_search_btn: "Rechercher...",
+    quick_search_sr: "Recherche rapide d'unité ou anime",
     quick_search_aria: "Rechercher une unité",
-    quick_search_sr: "Rechercher une unité",
     wiki_sync_label: "Synchro wiki :",
     units_label: "Unités",
     orbs_label: "Orbes",
@@ -351,6 +352,7 @@ const I18N = {
     brand_subtitle: "Database & Meta Hub",
     brand_aria: "ASTD Wiki Home",
     quick_search_placeholder: "Search unit (Ctrl+K)...",
+    quick_search_btn: "Search...",
     quick_search_aria: "Search unit",
     quick_search_sr: "Search unit",
     wiki_sync_label: "Wiki sync:",
@@ -1386,8 +1388,7 @@ function setupEventListeners() {
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
-      const input = document.getElementById('filter-search') || document.getElementById('quick-search');
-      input?.focus();
+      focusMainSearch();
     }
     if (e.key === 'Escape') closeUnitModal();
   });
@@ -1424,6 +1425,17 @@ function setupEventListeners() {
   }
 
   window.addEventListener('hashchange', handleHashNavigation);
+}
+
+function focusMainSearch() {
+  switchTab('units');
+  setTimeout(() => {
+    const input = document.getElementById('filter-search') || document.getElementById('quick-search');
+    if (input) {
+      input.focus();
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 50);
 }
 
 // Handle URL Hash navigation
@@ -3920,6 +3932,7 @@ if (typeof window !== 'undefined') {
   window.filterOrbs = filterOrbs;
   window.showToast = showToast;
   window.initSafeAds = initSafeAds;
+  window.focusMainSearch = focusMainSearch;
 
   // I18N Bilingue (FR / EN)
   window.I18N = I18N;

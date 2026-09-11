@@ -39,7 +39,7 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9302236726754340" crossorigin="anonymous"></script>
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=compare-v4">
+  <link rel="stylesheet" href="style.css?v=i18n-v3">
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
@@ -68,51 +68,52 @@
         </button>
 
         <!-- Desktop Navigation Tabs (lg: 1024px) -->
-        <nav aria-label="Navigation principale" data-i18n-aria="nav_main_aria" class="hidden lg:flex items-center gap-1 xl:gap-1.5 font-medium min-w-0 shrink">
-          <button onclick="switchTab('units')" id="nav-units" data-tab="units" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale" title="Encyclopédie des Tours & Unités">
+        <nav aria-label="Navigation principale" data-i18n-aria="nav_main_aria" class="hidden lg:flex items-center gap-1 xl:gap-2 font-medium shrink-0">
+          <button onclick="switchTab('units')" id="nav-units" data-tab="units" class="nav-link whitespace-nowrap shrink-0 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale transition-all" title="Encyclopédie des Tours & Unités">
             <i data-lucide="swords" class="w-3.5 h-3.5 shrink-0" stroke-width="2"></i>
             <span data-i18n="nav_units">Unités</span>
           </button>
-          <button onclick="switchTab('tierlist')" id="nav-tierlist" data-tab="tierlist" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Tier List Méta">
+          <button onclick="switchTab('tierlist')" id="nav-tierlist" data-tab="tierlist" class="nav-link whitespace-nowrap shrink-0 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale transition-all" title="Tier List Méta">
             <i data-lucide="crown" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_tierlist">Tier List</span>
           </button>
-          <button onclick="switchTab('codes')" id="nav-codes" data-tab="codes" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale relative" title="Codes Cadeaux Actifs">
+          <button onclick="switchTab('codes')" id="nav-codes" data-tab="codes" class="nav-link whitespace-nowrap shrink-0 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale transition-all relative" title="Codes Cadeaux Actifs">
             <i data-lucide="gift" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_codes">Codes</span>
             <span id="badge-active-codes" class="ml-0.5 px-1.5 py-0.2 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-mono-num">
               ...
             </span>
           </button>
-          <button onclick="switchTab('orbs')" id="nav-orbs" data-tab="orbs" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Compendium des Orbes & Reliques">
+          <button onclick="switchTab('orbs')" id="nav-orbs" data-tab="orbs" class="nav-link whitespace-nowrap shrink-0 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale transition-all" title="Compendium des Orbes & Reliques">
             <i data-lucide="sparkles" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_orbs">Orbes</span>
           </button>
-          <button onclick="switchTab('gamemodes')" id="nav-gamemodes" data-tab="gamemodes" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Guides des Modes & Raids">
+          <button onclick="switchTab('gamemodes')" id="nav-gamemodes" data-tab="gamemodes" class="nav-link whitespace-nowrap shrink-0 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale transition-all" title="Guides des Modes & Raids">
             <i data-lucide="map" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_gamemodes">Modes</span>
           </button>
-          <button onclick="switchTab('teambuilder')" id="nav-teambuilder" data-tab="teambuilder" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Simulateur de Deck">
+          <button onclick="switchTab('teambuilder')" id="nav-teambuilder" data-tab="teambuilder" class="nav-link whitespace-nowrap shrink-0 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale transition-all" title="Simulateur de Deck">
             <i data-lucide="layout-grid" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_teambuilder">Deck</span>
           </button>
-          <button onclick="switchTab('compare')" id="nav-compare" data-tab="compare" class="nav-link whitespace-nowrap shrink-0 px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale" title="Comparateur Versus">
+          <button onclick="switchTab('compare')" id="nav-compare" data-tab="compare" class="nav-link whitespace-nowrap shrink-0 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale transition-all" title="Comparateur Versus">
             <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 shrink-0 text-slate-400" stroke-width="2"></i>
             <span data-i18n="nav_compare">Comparateur</span>
           </button>
         </nav>
 
         <!-- Right Quick Actions -->
-        <div class="flex items-center space-x-2 shrink-0">
-          <div class="relative hidden 2xl:block">
-            <label for="quick-search" class="sr-only" data-i18n="quick_search_sr">Recherche rapide d'unité ou anime</label>
-            <input type="text" id="quick-search" placeholder="Recherche rapide (Ctrl + K)..." 
-                   data-i18n-placeholder="quick_search_placeholder"
-                   aria-label="Recherche rapide par nom d'unité ou anime"
-                   data-i18n-aria="quick_search_aria"
-                   class="w-32 sm:w-40 xl:w-52 bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 pl-8 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors duration-150">
-            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" stroke-width="1.5"></i>
-          </div>
+        <div class="flex items-center gap-2 xl:gap-2.5 shrink-0">
+          <!-- Quick Search Button / Input -->
+          <button type="button" onclick="focusMainSearch()" 
+                  class="p-2 xl:px-3 xl:py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white flex items-center gap-2 tap-scale transition-all" 
+                  title="Rechercher une unité ou un anime (Ctrl + K)" 
+                  aria-label="Recherche rapide (Ctrl + K)"
+                  data-i18n-title="quick_search_placeholder">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400" stroke-width="1.75"></i>
+            <span class="hidden 2xl:inline text-xs text-slate-300" data-i18n="quick_search_btn">Rechercher...</span>
+            <kbd class="hidden 2xl:inline text-[10px] font-mono-num px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-400">Ctrl K</kbd>
+          </button>
 
           <!-- Language Switcher (Desktop) -->
           <div class="lang-switcher-wrap shrink-0" role="group" aria-label="Sélection de langue / Language Selection">
@@ -124,11 +125,12 @@
             </button>
           </div>
 
+          <!-- Fandom Wiki External Link -->
           <a href="https://allstartd.fandom.com/wiki/Roblox:_All_Star_Tower_Defense_Wiki" target="_blank" rel="noopener noreferrer" 
              aria-label="Consulter le wiki Fandom officiel ASTD (nouvelle fenêtre)"
              data-i18n-aria="wiki_link_aria"
              data-i18n-title="wiki_link_title"
-             class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white tap-scale flex items-center justify-center" title="Wiki Fandom Original">
+             class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white tap-scale flex items-center justify-center transition-colors" title="Wiki Fandom Original">
             <i data-lucide="external-link" class="w-4 h-4" stroke-width="1.75"></i>
           </a>
           <!-- Mobile Menu Hamburger Button -->
@@ -1004,7 +1006,7 @@
   </div>
 
   <!-- Application Logic -->
-  <script src="app.js?v=i18n-v1"></script>
+  <script src="app.js?v=i18n-v3"></script>
 </body>
 </html>
 
