@@ -944,67 +944,184 @@ function translateAbilityDescription(text) {
   fr = fr.replace(/Units in the\s+['"]?([^'"]+?)['"]?\s+Category gain Attack Boost \+(\d+)% and \+(\d+)% Bonus\.?/gi, (m, cat, b1, b2) => {
     return `Les unités de la catégorie ${cat} bénéficient d'un bonus d'attaque de +${b1}% et d'un bonus de +${b2}%.`;
   });
+  fr = fr.replace(/units in the\s+['"]?([^'"]+?)['"]?\s+category gain (?:an?|a)\s*(\d+)%\s*damage buff/gi, 'les unités de la catégorie $1 bénéficient d\'un bonus de dégâts de $2%');
 
-  // 2. Déclencheurs & Activation
-  fr = fr.replace(/^Upon activation,\s*/gi, 'À l\'activation, ');
-  fr = fr.replace(/^When activated,\s*/gi, 'À l\'activation, ');
-  fr = fr.replace(/^After activation,\s*/gi, 'Après activation, ');
-  fr = fr.replace(/^After activating this ability,\s*/gi, 'Après activation de cette capacité, ');
-  fr = fr.replace(/Upon activation of this ability,\s*/gi, 'À l\'activation de cette capacité, ');
+  // 2. TypeBane & Spécialités d'ennemis
+  fr = fr.replace(/Her attack can cause (\d+x) Damage on all Special Enemies, especially she can damage on Elemental enemies\./gi, 'Son attaque inflige $1 dégâts à tous les ennemis spéciaux, et elle peut notamment toucher les ennemis élémentaires.');
+  fr = fr.replace(/His attack can cause (\d+x) Damage on all Special Enemies, especially he can damage on Elemental enemies\./gi, 'Son attaque inflige $1 dégâts à tous les ennemis spéciaux, et il peut notamment toucher les ennemis élémentaires.');
+  fr = fr.replace(/Their attack can cause (\d+x) Damage on all Special Enemies, especially they can damage on Elemental enemies\./gi, 'Leur attaque inflige $1 dégâts à tous les ennemis spéciaux, et ils peuvent notamment toucher les ennemis élémentaires.');
+  fr = fr.replace(/attack can cause (\d+x) Damage on all Special Enemies/gi, 'l\'attaque inflige $1 dégâts à tous les ennemis spéciaux');
+  fr = fr.replace(/especially (?:she|he|they) can damage on Elemental enemies/gi, 'notamment la capacité de toucher les ennemis élémentaires');
+  fr = fr.replace(/can do (\d+x) damage to enemies that have or originally\s*•?\s*have a Title and can also do Piercing damage to Elemental enemies/gi, 'inflige $1 dégâts aux ennemis possédant ou ayant eu un Titre, et inflige des dégâts perforants aux ennemis élémentaires');
+  fr = fr.replace(/can do (\d+x) damage to enemies with a Title and can also do Piercing damage to Elemental enemies/gi, 'inflige $1 dégâts aux ennemis possédant un Titre, et inflige des dégâts perforants aux ennemis élémentaires');
+  fr = fr.replace(/can still do (\d+x) damage to enemies that got turned? into regular enemies/gi, 'inflige toujours $1 dégâts aux ennemis transformés en ennemis normaux');
+  fr = fr.replace(/can still do (\d+x) damage to enemies that got turn to regular enemies/gi, 'inflige toujours $1 dégâts aux ennemis transformés en ennemis normaux');
 
-  // 3. Dégâts et multiplicateurs
+  // 3. Formulations de frappe critique et récurrence
+  fr = fr.replace(/Every (\d+)(?:st|nd|rd|th)? attack, (?:she|he|they|it) will deal ([\d\.]+)x of (?:her|his|their|its) current Damage\./gi, 'Toutes les $1 attaques, inflige $2x ses dégâts actuels.');
+  fr = fr.replace(/Every (\d+)(?:st|nd|rd|th)? attack, (?:she|he|they|it) deals? ([\d\.]+)x damage\./gi, 'Toutes les $1 attaques, inflige $2x dégâts.');
+
+  // 4. Déclencheurs & Activation
+  fr = fr.replace(/(?:•\s*)?Upon activation of this ability,\s*/gi, 'À l\'activation de cette capacité, ');
+  fr = fr.replace(/(?:•\s*)?Upon activation,\s*/gi, 'À l\'activation, ');
+  fr = fr.replace(/(?:•\s*)?When activated,\s*/gi, 'À l\'activation, ');
+  fr = fr.replace(/(?:•\s*)?After activation,\s*/gi, 'Après activation, ');
+  fr = fr.replace(/(?:•\s*)?After activating this ability,\s*/gi, 'Après activation de cette capacité, ');
+  fr = fr.replace(/(?:•\s*)?When Attacking,\s*/gi, 'En attaquant, ');
+
+  // 5. Domaines et altérations massives
+  fr = fr.replace(/will release a nuke of ([\d\.]+)\s*billion damage to all enemies on the map/gi, 'déclenche une explosion de $1 milliards de dégâts à tous les ennemis sur la carte');
+  fr = fr.replace(/will deploy a Domain Effect within (\d+) seconds \((\d+) minutes\)/gi, 'déploie un effet de domaine pendant $1 secondes ($2 minutes)');
+  fr = fr.replace(/In this active domain,\s*/gi, 'Dans ce domaine actif, ');
+  fr = fr.replace(/all enemies will move (\d+)% slower/gi, 'tous les ennemis se déplacent $1% plus lentement');
+  fr = fr.replace(/\(Stacking with Slow\s*\)/gi, '(Cumulable avec Ralentissement)');
+  fr = fr.replace(/and they also constantly lose ([\d\.]+)% of their max HP until it reaches (\d+)% of their Max HP/gi, 'et ils perdent constamment $1% de leurs PV max jusqu\'à atteindre $2% de leurs PV max');
+  fr = fr.replace(/Additionally, the ally units placed with the\s*([^.]+?)\s*categories will gain an extra (\d+)% damage boost and will deal Super Effective Damage against Enchant enemies/gi, 'De plus, les unités alliées placées avec les catégories $1 bénéficient d\'un bonus de dégâts supplémentaire de $2% et infligent des dégâts super efficaces contre les ennemis enchantés');
+
+  // 6. Dégâts et multiplicateurs
   fr = fr.replace(/Deals\s*([\d\.]+)x\s*damage to enemies affected by\s*([^,\.]+?)(?:,\s*([^,\.]+?))?(?:,\s*or\s*([^,\.]+?))?\./gi, (m, mult, e1, e2, e3) => {
     const effs = [e1, e2, e3].filter(Boolean).map(e => e.trim().replace(/Bleed/gi, 'Saignement').replace(/Rupture/gi, 'Rupture').replace(/Judgement/gi, 'Jugement')).join(', ');
     return `Inflige ${mult}x dégâts aux ennemis affectés par ${effs}.`;
   });
+  fr = fr.replace(/deals? (\d+(?:\.\d+)?)\s*billion damage/gi, 'inflige $1 milliards de dégâts');
+  fr = fr.replace(/deals? (\d+(?:\.\d+)?)\s*million damage/gi, 'inflige $1 millions de dégâts');
+  fr = fr.replace(/deal (\d+)x (?:his|her|their) damage/gi, 'infliger $1x ses dégâts');
+  fr = fr.replace(/deal (\d+)x damage/gi, 'infliger $1x dégâts');
+  fr = fr.replace(/deal Super Effective Damage/gi, 'infligent des dégâts super efficaces');
+  fr = fr.replace(/damages the base when raging/gi, 'inflige des dégâts à la base en état d\'enragement');
+  fr = fr.replace(/removes? (\d+)% of all enemies' current HP/gi, 'retire $1% des PV actuels de tous les ennemis');
+  fr = fr.replace(/under (\d+)% of their maximum health/gi, 'ayant moins de $1% de leurs PV max');
 
-  // 4. Cooldowns & utilisations
+  // 7. Base HP & Sacrifices
+  fr = fr.replace(/half of your base's HP will be removed/gi, 'la moitié des PV de votre base est retirée');
+  fr = fr.replace(/The removed HP is added to the base nuke of ([\d\.]+)\s*billion/gi, 'Les PV retirés sont ajoutés à l\'explosion de base de $1 milliards');
+  fr = fr.replace(/The total damage caps at ([\d\.]+)\s*billion/gi, 'Les dégâts totaux sont plafonnés à $1 milliards');
+  fr = fr.replace(/delete (?:himself|herself|itself) without a refund/gi, 's\'auto-détruit sans remboursement');
+  fr = fr.replace(/(?:he|she|it) can be replaced afterwards/gi, 'peut être replacé(e) ensuite');
+
+  // 8. Timestop & Stun
+  fr = fr.replace(/deals ultimate timestop to all enemies for (\d+) seconds/gi, 'applique un arrêt du temps ultime à tous les ennemis pendant $1 secondes');
+  fr = fr.replace(/inflicts them with a debuff that increases damage taken by (\d+)%/gi, 'leur applique un malus augmentant les dégâts subis de $1%');
+  fr = fr.replace(/Within (\d+) seconds of activation, if the enemy hits the base, it will push all of them backward (\d+) paths\/corners/gi, 'Dans les $1 secondes suivant l\'activation, si un ennemi touche la base, il les repousse tous en arrière de $2 virages/chemins');
+  fr = fr.replace(/It works similarly as and shares the global cooldown with\s*/gi, 'Fonctionne de manière similaire et partage le temps de recharge global avec ');
+
+  // 9. Cooldowns & Règles d'usage
   fr = fr.replace(/(\d+)\s*minute\s*\((\d+)\s*second\)\s*global cooldown/gi, 'temps de recharge global de $1 min ($2 s)');
   fr = fr.replace(/(\d+)\s*second\s*global cooldown/gi, 'temps de recharge global de $1 secondes');
   fr = fr.replace(/global cooldown of (\d+) minutes/gi, 'temps de recharge global de $1 minutes');
+  fr = fr.replace(/cooldown of (\d+) seconds \((\d+) minutes and (\d+) seconds\)/gi, 'temps de recharge de $1 secondes ($2 min $3 s)');
+  fr = fr.replace(/cooldown of (\d+) minutes (\d+) seconds \((\d+) seconds\)/gi, 'temps de recharge de $1 min $2 s ($3 secondes)');
+  fr = fr.replace(/has an infinite global cooldown, meaning it can only be used once per game/gi, 'possède un temps de recharge global infini (utilisation unique par partie)');
+  fr = fr.replace(/This ability has an infinite global cooldown that shared with\s*/gi, 'Cette capacité possède un temps de recharge global infini partagé avec ');
   fr = fr.replace(/This ability has a PERMANENT GLOBAL cooldown/gi, 'Cette capacité possède un temps de recharge GLOBAL PERMANENT');
   fr = fr.replace(/This ability has a global cooldown/gi, 'Cette capacité possède un temps de recharge global');
-  fr = fr.replace(/that is shared with\s*/gi, 'partagé avec ');
-  fr = fr.replace(/is shared with\s*/gi, 'est partagé avec ');
   fr = fr.replace(/shares global cooldown with\s*/gi, 'partage le temps de recharge global avec ');
   fr = fr.replace(/shares a GLOBAL cooldown with\s*/gi, 'partage le temps de recharge global avec ');
+  fr = fr.replace(/shares a Global Cooldown with\s*/gi, 'partage le temps de recharge global avec ');
   fr = fr.replace(/One-time use per game/gi, 'Utilisation unique par partie');
   fr = fr.replace(/can only be used once per game/gi, 'ne peut être utilisée qu\'une seule fois par partie');
-
-  // 5. Vocabulaire de combat ASTD
-  fr = fr.replace(/it plays a cutscene and/gi, 'lance une cinématique et');
-  fr = fr.replace(/plays a cutscene and/gi, 'lance une cinématique et');
-  fr = fr.replace(/to all units on the map/gi, 'à toutes les unités sur la carte');
-  fr = fr.replace(/all enemies within range/gi, 'tous les ennemis à portée');
-  fr = fr.replace(/all enemies on the map/gi, 'tous les ennemis sur la carte');
-  fr = fr.replace(/deal (\d+)x his damage/gi, 'infliger $1x ses dégâts');
-  fr = fr.replace(/apply Fear Debuff on them/gi, 'leur appliquer le malus Peur');
-  fr = fr.replace(/If amplified by the (\d+)(?:st|nd|rd|th) Ability/gi, 'Si amplifié par la $1e capacité');
-  fr = fr.replace(/Under the amplification of the (\d+)(?:st|nd|rd|th) Ability/gi, 'Sous l\'amplification de la $1e capacité');
-  fr = fr.replace(/the player will gain/gi, 'le joueur reçoit');
-  fr = fr.replace(/deals? (\d+(?:\.\d+)?)\s*billion damage/gi, 'inflige $1 milliards de dégâts');
-  fr = fr.replace(/deals? (\d+(?:\.\d+)?)\s*million damage/gi, 'inflige $1 millions de dégâts');
-  fr = fr.replace(/removes? (\d+)% of all enemies' current HP/gi, 'retire $1% des PV actuels de tous les ennemis');
-  fr = fr.replace(/under (\d+)% of their maximum health/gi, 'ayant moins de $1% de leurs PV max');
-  fr = fr.replace(/inflict poison/gi, 'inflige du poison');
-  fr = fr.replace(/HealHit/gi, 'Soin à l\'impact (HealHit)');
   fr = fr.replace(/kills required to use ability/gi, 'éliminations requises pour utiliser la capacité');
   fr = fr.replace(/Can be used (\d+) times/gi, 'Utilisable $1 fois');
+
+  // 10. Transformations d'ennemis
+  fr = fr.replace(/turns? into regular enemies/gi, 'se transforment en ennemis normaux');
+  fr = fr.replace(/turn Cloners into regular enemies/gi, 'transformer les Cloneurs en ennemis normaux');
+  fr = fr.replace(/Air enemies on the map that are affected by the ability will be targetable by ground units/gi, 'les ennemis aériens sur la carte affectés par la capacité deviennent ciblables par les unités terrestres');
+  fr = fr.replace(/allows ground units to target affected air enemies/gi, 'permet aux unités terrestres de cibler les ennemis aériens affectés');
+
+  // 11. Buffs et améliorations de stats
   fr = fr.replace(/Permanently increases base damage by\s*([\d,]+)/gi, 'Augmente définitivement les dégâts de base de $1');
-  fr = fr.replace(/boosts overall power/gi, 'augmente sa puissance globale');
   fr = fr.replace(/adds a permanent ([\d,]+) damage/gi, 'ajoute $1 dégâts permanents');
-  fr = fr.replace(/allows him to hit elementals/gi, 'lui permet de toucher les élémentaires');
-  fr = fr.replace(/turn into regular enemies/gi, 'se transforment en ennemis normaux');
-  fr = fr.replace(/moves? (\d+)% slower/gi, 'se déplacent $1% plus lentement');
-  fr = fr.replace(/constantly lose ([\d\.]+)% of their max HP/gi, 'perdent constamment $1% de leurs PV max');
+  fr = fr.replace(/boosts overall power/gi, 'augmente sa puissance globale');
+  fr = fr.replace(/allows (?:him|her|them) to hit elementals/gi, 'lui permet de toucher les élémentaires');
+  fr = fr.replace(/for (\d+)% of (?:his|her|their) damage/gi, 'pour $1% de ses dégâts');
+  fr = fr.replace(/the player will gain/gi, 'le joueur reçoit');
   fr = fr.replace(/creates a domain within (\d+) (minutes|seconds)/gi, 'crée un domaine pendant $1 $2');
-  fr = fr.replace(/deal Super Effective Damage/gi, 'infligent des dégâts super efficaces');
-  fr = fr.replace(/delete himself without a refund/gi, 's\'auto-détruit sans remboursement');
-  fr = fr.replace(/he can be replaced afterwards/gi, 'il peut être replacé ensuite');
-  fr = fr.replace(/Bleed/gi, 'Saignement');
-  fr = fr.replace(/Judgement/gi, 'Jugement');
-  fr = fr.replace(/Billion/gi, 'Milliards');
-  fr = fr.replace(/Million/gi, 'Millions');
+  fr = fr.replace(/constantly lose ([\d\.]+)% of their max HP/gi, 'perdent constamment $1% de leurs PV max');
+
+  // 12. Invocations et Titans
+  fr = fr.replace(/Gives\s*\$([\d,]+)\s*and spawns a Titan with\s*([\d,]+M?B?)\s*HP/gi, 'Donne \$$1 et fait apparaître un Titan avec $2 PV');
+  fr = fr.replace(/Rewinds all enemies in (?:her|his|their) range for (\d+) seconds and spawns a Titan with\s*([\d,]+M?B?)\s*HP(?:\s*\(([\d,]+)\)\s*)?/gi, 'Remonte le temps pour tous les ennemis à portée pendant $1 secondes et fait apparaître un Titan de $2 PV');
+  fr = fr.replace(/Spawns a Titan that can only hit air with\s*([\d,]+M?B?)\s*HP(?:\s*\(([\d,]+)\)\s*)?/gi, 'Fait apparaître un Titan ne touchant que les airs avec $1 PV');
+  fr = fr.replace(/spawns a Titan with\s*([\d,]+M?B?)\s*HP/gi, 'fait apparaître un Titan avec $1 PV');
+  fr = fr.replace(/During The Rumbling,\s*([^.]+?)\s*will spawn at the base and slowly march across the entire map/gi, 'Pendant le Grand Terrassement, $1 apparaissent à la base et marchent lentement sur toute la carte');
+
+  // 13. Altérations instantanées sur attaques
+  fr = fr.replace(/Attacks now stun enemies upon attack\./gi, 'Les attaques étourdissent désormais les ennemis à l\'impact.');
+  fr = fr.replace(/Attacks now slow enemies upon attack\./gi, 'Les attaques ralentissent désormais les ennemis à l\'impact.');
+  fr = fr.replace(/Attacks change to AoE Cone\./gi, 'Les attaques passent en zone (AoE Cône).');
+  fr = fr.replace(/Every (\d+)(?:st|nd|rd|th)? attack,\s*([^.]+?)\s*deals? (\d+x) (?:his|her|their)?\s*base damage/gi, 'Toutes les $1 attaques, $2 inflige $3 ses dégâts de base');
+  fr = fr.replace(/Every (\d+)(?:st|nd|rd|th)? attack,\s*([^.]+?)\s*does an attack which deals (\d+x) (?:his|her|their)?\s*base damage/gi, 'Toutes les $1 attaques, $2 effectue une attaque infligeant $3 ses dégâts de base');
+
+  // 14. Durées, cumuls et limitations
+  fr = fr.replace(/Cooldown:\s*~?(\d+)\s*seconds/gi, 'Temps de recharge : ~$1 secondes');
+  fr = fr.replace(/Duration:\s*(\d+)\s*seconds/gi, 'Durée : $1 secondes');
+  fr = fr.replace(/This ability doesn't stack with\s*([^.]+)/gi, 'Cette capacité ne se cumule pas avec $1');
+  fr = fr.replace(/does NOT stack with\s*([^.]+)/gi, 'NE SE CUMULE PAS avec $1');
+  fr = fr.replace(/does not stack with\s*([^.]+)/gi, 'ne se cumule pas avec $1');
+  fr = fr.replace(/This ability also does not have a global cooldown\./gi, 'Cette capacité ne possède pas de temps de recharge global.');
+  fr = fr.replace(/This ability doesn't have a global cooldown\./gi, 'Cette capacité ne possède pas de temps de recharge global.');
+  fr = fr.replace(/Does not work on Boss enemies/gi, 'Ne fonctionne pas sur les ennemis Boss');
+  fr = fr.replace(/excluding Air, Miniboss, and Boss enemies/gi, 'à l\'exclusion des ennemis Aériens, Miniboss et Boss');
+  fr = fr.replace(/except for (?:Air|Steadfast), Miniboss,? and Boss enemies/gi, 'sauf les ennemis Imperturbables, Miniboss et Boss');
+
+  // 15. Buffs d'équipe et de portée
+  fr = fr.replace(/Buffs all units? within (?:his|her|their) range by (\d+)%(?:\s*\(or \d+x\))?\s*as well as buffing their range by (\d+)%/gi, 'Augmente l\'attaque de toutes les unités à portée de $1% et leur portée de $2%');
+  fr = fr.replace(/This ability lasts for (\d+) seconds with a cooldown of (\d+) seconds/gi, 'Cette capacité dure $1 secondes avec un temps de recharge de $2 secondes');
+  fr = fr.replace(/Units in the\s+['"]?([^'"]+?)['"]?\s+Category gain AttackBoost \+(\d+)%/gi, 'Les unités de la catégorie $1 bénéficient d\'un bonus d\'attaque de +$2%');
+
+  // 16. Termes et vocabulaire général de combat ASTD
+  fr = fr.replace(/\bSpecial Enemies\b/gi, 'ennemis spéciaux');
+  fr = fr.replace(/\bSpecial Enemy\b/gi, 'ennemi spécial');
+  fr = fr.replace(/\bElemental enemies\b/gi, 'ennemis élémentaires');
+  fr = fr.replace(/\bElemental enemy\b/gi, 'ennemi élémentaire');
+  fr = fr.replace(/\bEnchant enemies\b/gi, 'ennemis enchantés');
+  fr = fr.replace(/\bregular enemies\b/gi, 'ennemis normaux');
+  fr = fr.replace(/\bregular enemy\b/gi, 'ennemi normal');
+  fr = fr.replace(/\bair enemies\b/gi, 'ennemis aériens');
+  fr = fr.replace(/\bground enemies\b/gi, 'ennemis terrestres');
+  fr = fr.replace(/\bair units\b/gi, 'unités aériennes');
+  fr = fr.replace(/\bground units\b/gi, 'unités terrestres');
+  fr = fr.replace(/\bcannot hit airs?\b/gi, 'ne peut pas toucher les unités aériennes');
+  fr = fr.replace(/\bcannot hit ground\b/gi, 'ne peut pas toucher les unités terrestres');
+  fr = fr.replace(/\bcan only hit air\b/gi, 'ne peut toucher que les unités aériennes');
+  fr = fr.replace(/\bcan hit air\b/gi, 'peut toucher les unités aériennes');
+  fr = fr.replace(/\bcan hit elementals\b/gi, 'peut toucher les élémentaires');
+  fr = fr.replace(/\bdamage boost\b/gi, 'bonus de dégâts');
+  fr = fr.replace(/\bdamage buff\b/gi, 'bonus de dégâts');
+  fr = fr.replace(/\bAttack Boost\b/gi, 'bonus d\'attaque');
+  fr = fr.replace(/\bAttackBoost\b/gi, 'bonus d\'attaque');
+  fr = fr.replace(/\bAttack\b/g, 'Attaque');
+  fr = fr.replace(/\bDamage\b/g, 'Dégâts');
+  fr = fr.replace(/\bdamage\b/g, 'dégâts');
+  fr = fr.replace(/\benemies\b/g, 'ennemis');
+  fr = fr.replace(/\benemy\b/g, 'ennemi');
+  fr = fr.replace(/\bcooldown\b/gi, 'temps de recharge');
+  fr = fr.replace(/\bglobal cooldown\b/gi, 'temps de recharge global');
+  fr = fr.replace(/\bseconds\b/gi, 'secondes');
+  fr = fr.replace(/\bminutes\b/gi, 'minutes');
+  fr = fr.replace(/\bBleed\b/gi, 'Saignement');
+  fr = fr.replace(/\bJudgement\b/gi, 'Jugement');
+  fr = fr.replace(/\bRupture\b/gi, 'Rupture');
+  fr = fr.replace(/\bElectric\b/gi, 'Électrique');
+  fr = fr.replace(/\bFire\b/gi, 'Feu');
+  fr = fr.replace(/\bWater\b/gi, 'Eau');
+  fr = fr.replace(/\bDark\b/gi, 'Ténèbres');
+  fr = fr.replace(/\bLight\b/gi, 'Lumière');
+  fr = fr.replace(/\bBillion\b/gi, 'milliards');
+  fr = fr.replace(/\bMillion\b/gi, 'millions');
+  fr = fr.replace(/\bThis ability\b/gi, 'Cette capacité');
+  fr = fr.replace(/\bthis ability\b/gi, 'cette capacité');
+  fr = fr.replace(/\bAt max upgrade\b/gi, 'Au palier maximum');
+  fr = fr.replace(/\blast upgrade\b/gi, 'dernier palier');
+  fr = fr.replace(/\bUpon attack\b/gi, 'À l\'attaque');
+  fr = fr.replace(/\bupon attack\b/gi, 'à l\'impact');
+  fr = fr.replace(/Lowers All Enemies to (\d+)% of their Maximum HP and Executes All Enemies Under (\d+)% of their Maximum HP/gi, 'Réduit tous les ennemis à $1% de leurs PV max et exécute tous les ennemis ayant moins de $2% de leurs PV max.');
+  fr = fr.replace(/Activating this will collect the stored money\./gi, 'Activer cette aptitude collecte l\'argent stocké.');
+  fr = fr.replace(/After collection, money generation is cancelled, so it should only be done when there is enough money to place all remaining troops\./gi, 'Après la collecte, la génération d\'argent est interrompue; cela ne doit être fait que lorsqu\'il y a assez d\'argent pour déployer toutes les troupes restantes.');
+  fr = fr.replace(/Also, if collected before upgrading, the total amount of income will decrease depending on how much the ability is used\./gi, 'De plus, si collecté avant d\'améliorer, le revenu total diminuera selon la fréquence d\'utilisation de la capacité.');
+  fr = fr.replace(/Ice Beam is a manual activation skill that does nothing\./gi, 'Ice Beam est une aptitude manuelle sans effet.');
+  fr = fr.replace(/It also lacks a picture, having a transparent icon instead\./gi, 'Elle ne possède pas d\'illustration, utilisant une icône transparente.');
 
   return fr;
 }
