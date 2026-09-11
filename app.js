@@ -310,9 +310,9 @@ function updateNavActiveState(tabId) {
   document.querySelectorAll('.nav-link').forEach(btn => {
     const isTarget = btn.getAttribute('data-tab') === tabId || btn.id === `nav-${tabId}`;
     if (isTarget) {
-      btn.className = 'nav-link whitespace-nowrap shrink-0 px-3 py-1.5 rounded-lg text-xs xl:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 transition';
+      btn.className = 'nav-link whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg text-xs xl:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale';
     } else {
-      btn.className = 'nav-link whitespace-nowrap shrink-0 px-3 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 transition';
+      btn.className = 'nav-link whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale';
     }
   });
 
@@ -320,9 +320,9 @@ function updateNavActiveState(tabId) {
   document.querySelectorAll('.mobile-chip-btn').forEach(btn => {
     const isTarget = btn.getAttribute('data-tab') === tabId;
     if (isTarget) {
-      btn.className = 'mobile-chip-btn whitespace-nowrap shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 transition';
+      btn.className = 'mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale';
     } else {
-      btn.className = 'mobile-chip-btn whitespace-nowrap shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5 transition';
+      btn.className = 'mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5 tap-scale';
     }
   });
 
@@ -330,9 +330,9 @@ function updateNavActiveState(tabId) {
   document.querySelectorAll('.drawer-link').forEach(btn => {
     const isTarget = btn.getAttribute('data-tab') === tabId;
     if (isTarget) {
-      btn.className = 'drawer-link p-2.5 rounded-lg text-xs font-semibold bg-sky-500/20 text-sky-200 border border-sky-500/40 flex items-center gap-2 transition';
+      btn.className = 'drawer-link p-2.5 rounded-lg text-xs font-semibold bg-sky-500/20 text-sky-200 border border-sky-500/40 flex items-center gap-2 tap-scale';
     } else {
-      btn.className = 'drawer-link p-2.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 hover:bg-slate-800 transition';
+      btn.className = 'drawer-link p-2.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 hover:bg-slate-800 tap-scale';
     }
   });
 }
@@ -389,16 +389,16 @@ function setViewMode(mode) {
     tableContainer?.classList.remove('hidden');
     loadMoreBtn?.classList.add('hidden');
 
-    btnTable.className = 'flex-1 py-1 px-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 transition';
-    btnGrid.className = 'flex-1 py-1 px-2.5 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center justify-center space-x-1 transition';
+    btnTable.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 tap-scale';
+    btnGrid.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center justify-center space-x-1 tap-scale';
 
     renderUnitsTable();
   } else {
     gridEl?.classList.remove('hidden');
     tableContainer?.classList.add('hidden');
 
-    btnGrid.className = 'flex-1 py-1 px-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 transition';
-    btnTable.className = 'flex-1 py-1 px-2.5 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center justify-center space-x-1 transition';
+    btnGrid.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 tap-scale';
+    btnTable.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center justify-center space-x-1 tap-scale';
 
     renderUnitsList();
   }
@@ -551,10 +551,10 @@ function renderUnitsTable() {
   const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
 
   tbody.innerHTML = FILTERED_UNITS.slice(0, 150).map(u => `
-    <tr class="hover:bg-slate-800/60 transition cursor-pointer" onclick="openUnitModal('${u.id}')">
+    <tr class="hover:bg-slate-800/60 transition-colors duration-100 cursor-pointer" onclick="openUnitModal('${u.id}')">
       <td class="p-3 flex items-center space-x-2.5">
-        <div class="w-8 h-8 rounded bg-slate-900 border border-slate-800 p-0.5 shrink-0 flex items-center justify-center">
-          <img src="${u.image || fallbackImg}" alt="" class="max-h-full max-w-full object-contain" onerror="this.src='${fallbackImg}'">
+        <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 p-0.5 shrink-0 flex items-center justify-center">
+          <img src="${u.image || fallbackImg}" alt="" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
         </div>
         <div class="min-w-0 font-sans">
           <div class="font-bold text-white truncate">${u.name}</div>
@@ -574,10 +574,10 @@ function renderUnitsTable() {
       <td class="p-3 font-bold text-amber-400" title="${u.max_dps.toLocaleString()} DPS">${formatCompactNumber(u.max_dps)}</td>
       <td class="p-3 text-emerald-400">${u.total_cost > 0 ? '$' + formatCompactNumber(u.total_cost) : '-'}</td>
       <td class="p-3 text-right space-x-1.5 font-sans" onclick="event.stopPropagation()">
-        <button onclick="openUnitModal('${u.id}')" class="px-2 py-1 rounded bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold transition">
+        <button onclick="openUnitModal('${u.id}')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale">
           Fiche
         </button>
-        <button onclick="addUnitToTeam('${u.id}')" class="px-2 py-1 rounded bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-300 text-[10px] font-semibold transition" title="Ajouter au deck">
+        <button onclick="addUnitToTeam('${u.id}')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale" title="Ajouter au deck">
           +
         </button>
       </td>
@@ -620,7 +620,7 @@ function createUnitCardHTML(unit) {
   const originLine = unit.anime_origin || unit.character_origin || 'All Star Tower Defense';
 
   return `
-    <div class="tactical-card rounded-xl p-3.5 border star-${unit.star}-card flex flex-col justify-between group cursor-pointer" onclick="openUnitModal('${unit.id}')">
+    <div class="tactical-card rounded-2xl p-3.5 border star-${unit.star}-card flex flex-col justify-between group cursor-pointer tap-scale-subtle" onclick="openUnitModal('${unit.id}')">
 
       <!-- Top Badges -->
       <div class="flex items-center justify-between z-10 mb-2">
@@ -637,16 +637,16 @@ function createUnitCardHTML(unit) {
         </div>
       </div>
 
-      <!-- Avatar Framed -->
-      <div class="w-full h-32 rounded-lg bg-[#0c1220] border border-slate-800/80 p-2 my-1 flex items-center justify-center relative overflow-hidden group-hover:border-sky-500/40 transition">
+      <!-- Avatar Framed with concentric radius & neutral outline -->
+      <div class="w-full h-32 rounded-xl bg-[#0c1220] border border-slate-800/80 p-2 my-1 flex items-center justify-center relative overflow-hidden group-hover:border-sky-500/40 transition-colors duration-150">
         <img src="${imgSrc}" alt="${unit.name}" loading="lazy"
              onerror="this.src='${fallbackImg}'"
-             class="max-h-full max-w-full object-contain filter drop-shadow group-hover:scale-105 transition duration-200">
+             class="max-h-full max-w-full object-contain filter drop-shadow img-outline rounded-lg group-hover:scale-105 transition-transform duration-150 ease-out">
       </div>
 
       <!-- Title & Origin -->
       <div class="my-2 min-w-0">
-        <div class="font-bold text-xs sm:text-sm text-white group-hover:text-sky-300 transition truncate" title="${unit.name}">
+        <div class="font-bold text-xs sm:text-sm text-white group-hover:text-sky-300 transition-colors duration-150 truncate" title="${unit.name}">
           ${unit.name}
         </div>
         <div class="text-[11px] text-slate-400 truncate" title="${originLine}">
@@ -656,19 +656,19 @@ function createUnitCardHTML(unit) {
 
       <!-- Tactical Micro-Metrics Grid -->
       <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800/80 font-mono-num text-[11px]">
-        <div class="bg-slate-900/80 px-2 py-1 rounded border border-slate-800/60">
+        <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
           <span class="text-slate-500 block text-[9px] font-sans uppercase" title="Dégâts au palier d'amélioration maximum">DMG</span>
           <span class="font-bold text-rose-400" title="${unit.max_damage.toLocaleString()}">${formatCompactNumber(unit.max_damage)}</span>
         </div>
-        <div class="bg-slate-900/80 px-2 py-1 rounded border border-slate-800/60">
+        <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
           <span class="text-slate-500 block text-[9px] font-sans uppercase" title="Dégâts Par Seconde au palier maximum">DPS</span>
           <span class="font-bold text-amber-400" title="${unit.max_dps.toLocaleString()}">${formatCompactNumber(unit.max_dps)}</span>
         </div>
-        <div class="bg-slate-900/80 px-2 py-1 rounded border border-slate-800/60">
+        <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
           <span class="text-slate-500 block text-[9px] font-sans uppercase" title="Distance d'attaque maximale">Portée</span>
           <span class="font-bold text-sky-400">${unit.max_range || '-'}</span>
         </div>
-        <div class="bg-slate-900/80 px-2 py-1 rounded border border-slate-800/60">
+        <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
           <span class="text-slate-500 block text-[9px] font-sans uppercase" title="SPA : Secondes Par Attaque (délai entre deux attaques, plus c'est bas plus c'est rapide)">SPA</span>
           <span class="font-bold text-slate-300">${unit.min_spa ? unit.min_spa + 's' : '-'}</span>
         </div>
@@ -676,11 +676,11 @@ function createUnitCardHTML(unit) {
 
       <!-- Action Button -->
       <div class="mt-3 flex items-center space-x-1.5" onclick="event.stopPropagation()">
-        <button onclick="openUnitModal('${unit.id}')" class="flex-1 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 transition flex items-center justify-center space-x-1">
-          <i data-lucide="eye" class="w-3 h-3"></i>
+        <button onclick="openUnitModal('${unit.id}')" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1">
+          <i data-lucide="eye" class="w-3 h-3" stroke-width="2"></i>
           <span>Fiche</span>
         </button>
-        <button onclick="addUnitToTeam('${unit.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-emerald-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 transition" title="Ajouter au deck">
+        <button onclick="addUnitToTeam('${unit.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-emerald-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center" title="Ajouter au deck">
           +
         </button>
       </div>
@@ -796,12 +796,12 @@ function renderModalAbilities(unit) {
     }).join('');
 
     return `
-      <div id="ability-card-${idx}" class="bg-slate-950/80 border ${cfg.cardBorder} rounded-xl p-3.5 flex flex-col sm:flex-row gap-3.5 transition">
+      <div id="ability-card-${idx}" class="bg-slate-950/80 border ${cfg.cardBorder} rounded-xl p-3.5 flex flex-col sm:flex-row gap-3.5 transition-colors">
         <!-- Ability Icon or Fallback -->
         <div class="shrink-0 flex sm:flex-col items-center justify-center">
           <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center justify-center overflow-hidden p-1 shadow-md">
             ${ab.icon_url ? `
-              <img src="${ab.icon_url}" alt="${ab.name}" class="max-w-full max-h-full object-contain"
+              <img src="${ab.icon_url}" alt="${ab.name}" class="max-w-full max-h-full object-contain img-outline rounded-lg"
                    onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
               <i data-lucide="${cfg.icon}" class="w-6 h-6 ${cfg.iconColor} hidden"></i>
             ` : `
@@ -1000,15 +1000,15 @@ function openUnitModal(unitId) {
         <div class="flex flex-wrap gap-1.5">
           ${preEvos.map(p => `
             <button onclick="openUnitModal('${p.id}')"
-                    class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-violet-400/60 hover:bg-slate-800 transition">
-              <span class="w-8 h-8 rounded bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0">
-                <img src="${p.image || fallbackImg}" class="max-h-full max-w-full object-contain" alt="" onerror="this.src='${fallbackImg}'">
+                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-violet-400/60 hover:bg-slate-800 tap-scale transition-colors shadow-sm">
+              <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="${p.image || fallbackImg}" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
               </span>
               <span class="text-left min-w-0">
                 <span class="block text-[11px] font-bold text-white truncate max-w-[150px]" title="${p.name}">${p.name}</span>
                 <span class="inline-block text-[10px] font-mono-num font-bold star-${p.star}-badge px-1 rounded mt-0.5">${p.star}★</span>
               </span>
-              <i data-lucide="chevron-right" class="w-3 h-3 text-slate-500 shrink-0"></i>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 shrink-0" stroke-width="2"></i>
             </button>
           `).join('')}
         </div>
@@ -1023,7 +1023,12 @@ function openUnitModal(unitId) {
 
   // Upgrades table & level toggle state are (re)rendered by setLevelView(1) above
 
-  modal.classList.remove('hidden');
+  const dialog = document.getElementById('unit-modal-dialog');
+  modal.classList.remove('hidden', 'closing');
+  if (dialog) {
+    dialog.classList.remove('modal-exit');
+    dialog.classList.add('modal-enter');
+  }
   document.body.style.overflow = 'hidden';
   if (window.lucide) lucide.createIcons();
 }
@@ -1037,8 +1042,8 @@ function setLevelView(level) {
   const btn175 = document.getElementById('btn-level-175');
   const activeCls = 'bg-sky-600 text-white border-sky-500';
   const idleCls = 'bg-slate-900 text-slate-300 border-slate-700 hover:border-sky-500/50 hover:text-sky-300';
-  if (btn1) btn1.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border transition flex items-center gap-1 ${level === 1 ? activeCls : idleCls}`;
-  if (btn175) btn175.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border transition flex items-center gap-1 ${level === 175 ? activeCls : idleCls}`;
+  if (btn1) btn1.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border tap-scale transition-colors flex items-center gap-1 shadow-sm ${level === 1 ? activeCls : idleCls}`;
+  if (btn175) btn175.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border tap-scale transition-colors flex items-center gap-1 shadow-sm ${level === 175 ? activeCls : idleCls}`;
 
   const note = document.getElementById('modal-level-note');
   if (note) note.classList.toggle('hidden', level !== 175);
@@ -1220,10 +1225,28 @@ function renderUpgradesTable() {
 
 function closeUnitModal() {
   const modal = document.getElementById('unit-modal');
-  if (modal) modal.classList.add('hidden');
-  document.body.style.overflow = '';
-  if (window.location.hash.startsWith('#unit/')) {
-    window.location.hash = currentTab;
+  const dialog = document.getElementById('unit-modal-dialog');
+  if (!modal || modal.classList.contains('hidden')) return;
+
+  if (dialog) {
+    dialog.classList.remove('modal-enter');
+    dialog.classList.add('modal-exit');
+    modal.classList.add('closing');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      modal.classList.remove('closing');
+      dialog.classList.remove('modal-exit');
+      document.body.style.overflow = '';
+      if (window.location.hash.startsWith('#unit/')) {
+        window.location.hash = currentTab;
+      }
+    }, 150);
+  } else {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    if (window.location.hash.startsWith('#unit/')) {
+      window.location.hash = currentTab;
+    }
   }
 }
 
@@ -1291,7 +1314,7 @@ function renderTierList() {
     }
 
     return `
-      <div class="tactical-card rounded-xl p-4 border border-slate-800 space-y-3">
+      <div class="tactical-card rounded-2xl p-4 border border-slate-800 space-y-3">
         <div class="flex items-center justify-between border-b border-slate-800 pb-2">
           <div class="flex items-center space-x-2.5">
             <span class="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border ${badgeColor}">
@@ -1307,9 +1330,9 @@ function renderTierList() {
             if (!unitMatch) {
               return `
                 <button onclick="openUnitByName('${name.replace(/'/g, "\\'")}')"
-                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 transition">
+                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale">
                   <span>${name}</span>
-                  <i data-lucide="external-link" class="w-3 h-3 text-slate-500"></i>
+                  <i data-lucide="external-link" class="w-3 h-3 text-slate-500" stroke-width="1.75"></i>
                 </button>
               `;
             }
@@ -1318,20 +1341,20 @@ function renderTierList() {
             if (!thumb) {
               return `
                 <button onclick="openUnitModal('${unitMatch.id}')"
-                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 transition">
+                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale">
                   <span class="text-[10px] font-mono-num px-1 rounded star-${star}-badge">${star}★</span>
                   <span>${name}</span>
-                  <i data-lucide="chevron-right" class="w-3 h-3 text-slate-500"></i>
+                  <i data-lucide="chevron-right" class="w-3 h-3 text-slate-500" stroke-width="2"></i>
                 </button>
               `;
             }
             return `
               <button onclick="openUnitModal('${unitMatch.id}')"
-                      class="w-[92px] rounded-lg bg-slate-900 border border-slate-800 star-${star}-card p-1.5 flex flex-col items-center gap-1 group transition hover:-translate-y-0.5">
-                <div class="w-full h-[76px] rounded-md bg-[#0c1220] border border-slate-800/80 flex items-center justify-center overflow-hidden">
+                      class="w-[92px] rounded-xl bg-slate-900 border border-slate-800 star-${star}-card p-1.5 flex flex-col items-center gap-1 group tap-scale">
+                <div class="w-full h-[76px] rounded-lg bg-[#0c1220] border border-slate-800/80 flex items-center justify-center overflow-hidden">
                   <img src="${thumb}" alt="${name}" loading="lazy"
                        onerror="this.onerror=null;this.closest('div').classList.add('tier-img-fallback');this.style.display='none'"
-                       class="max-h-full max-w-full object-contain group-hover:scale-110 transition duration-200">
+                       class="max-h-full max-w-full object-contain img-outline rounded group-hover:scale-105 transition-transform duration-150 ease-out">
                 </div>
                 <span class="text-[9px] font-mono-num font-bold px-1 rounded star-${star}-badge">${star}★</span>
                 <span class="text-[10px] font-bold text-white leading-tight text-center line-clamp-2 w-full" title="${name}">${name}</span>
@@ -1375,23 +1398,23 @@ function renderCodes() {
 
   if (activeGrid) {
     activeGrid.innerHTML = CODES_DATA.active.map(c => `
-      <div class="tactical-card rounded-xl p-4 border border-emerald-500/30 flex flex-col justify-between space-y-3 hover:border-emerald-500/60 transition">
+      <div class="tactical-card rounded-2xl p-4 border border-emerald-500/30 flex flex-col justify-between space-y-3 hover:border-emerald-500/60 transition-colors duration-150">
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <span class="px-2 py-0.2 text-[10px] font-bold uppercase rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
               Vérifié & Actif
             </span>
             <span class="text-[11px] text-slate-400 font-mono-num">${c.date || 'Récent'}</span>
           </div>
-          <div class="font-mono-num text-base font-bold text-white tracking-wide my-2 select-all bg-slate-900 px-3 py-2 rounded-lg border border-slate-800">
+          <div class="font-mono-num text-base font-bold text-white tracking-wide my-2 select-all bg-slate-900/90 px-3 py-2 rounded-xl border border-slate-800">
             ${c.code}
           </div>
-          <div class="text-xs text-slate-300 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
-            <strong class="text-amber-400">Récompenses :</strong> ${c.reward}
+          <div class="text-xs text-slate-300 bg-slate-900/70 p-2.5 rounded-xl border border-slate-800/80">
+            <strong class="text-amber-400 font-sans">Récompenses :</strong> ${c.reward}
           </div>
         </div>
-        <button onclick="copyCodeText('${c.code}')" class="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs tracking-wide transition flex items-center justify-center space-x-1.5">
-          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+        <button onclick="copyCodeText('${c.code}', this)" class="w-full ps-3 pe-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs tracking-wide tap-scale flex items-center justify-center space-x-1.5">
+          <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i>
           <span>COPIER LE CODE</span>
         </button>
       </div>
@@ -1434,18 +1457,39 @@ function copyLatestCode() {
   }
 }
 
-function copyCodeText(text) {
-  navigator.clipboard.writeText(text).then(() => {
+function copyCodeText(text, btnElement) {
+  const btn = btnElement || (window.event && window.event.currentTarget);
+  const doFeedback = () => {
     showToast(`Code "${text}" copié !`);
-  }).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast(`Code "${text}" copié !`);
-  });
+    if (btn) {
+      const origHTML = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i><span>COPIÉ !</span>`;
+      if (window.lucide) lucide.createIcons();
+      setTimeout(() => {
+        btn.innerHTML = origHTML;
+        if (window.lucide) lucide.createIcons();
+      }, 1800);
+    }
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(doFeedback).catch(() => {
+      fallbackCopyText(text);
+      doFeedback();
+    });
+  } else {
+    fallbackCopyText(text);
+    doFeedback();
+  }
+}
+
+function fallbackCopyText(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
 }
 
 // ==========================================
@@ -1456,11 +1500,11 @@ function renderOrbCard(o) {
   const fallback = 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
   const isUniversal = /toutes les unit|all units/i.test(o.require || '');
   return `
-    <div class="tactical-card rounded-xl p-4 border border-slate-800 flex flex-col justify-between space-y-3 hover:border-cyan-500/40 transition">
+    <div class="tactical-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between space-y-3 hover:border-cyan-500/40 tap-scale-subtle">
       <div>
         <div class="flex items-center space-x-3 mb-2.5">
-          <div class="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 p-1 flex items-center justify-center shrink-0">
-            <img src="${o.image || fallback}" alt="${o.name}" class="max-h-full max-w-full object-contain"
+          <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 p-1 flex items-center justify-center shrink-0">
+            <img src="${o.image || fallback}" alt="${o.name}" class="max-h-full max-w-full object-contain img-outline rounded-lg"
                  onerror="this.src='${fallback}'">
           </div>
           <div class="min-w-0">
@@ -1473,16 +1517,16 @@ function renderOrbCard(o) {
         </div>
 
         <div class="space-y-1.5 text-xs">
-          <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+          <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
             <strong class="text-amber-400 block text-[10px] uppercase font-sans">Bonus statistique :</strong>
             <span class="text-slate-200 font-medium font-mono-num text-[11px]">${o.effect || 'Bonus spécial'}</span>
           </div>
           <div class="text-[11px] text-slate-400">
-            <strong class="text-slate-300">Obtention :</strong> ${o.obtain || 'Trial / Raid'}
+            <strong class="text-slate-300 font-sans">Obtention :</strong> ${o.obtain || 'Trial / Raid'}
           </div>
           ${!isUniversal ? `
           <div class="text-[11px] text-slate-400">
-            <strong class="text-slate-300">Compatible :</strong> <span class="text-cyan-300">${o.require}</span>
+            <strong class="text-slate-300 font-sans">Compatible :</strong> <span class="text-cyan-300">${o.require}</span>
           </div>` : ''}
         </div>
       </div>
@@ -1521,13 +1565,13 @@ function renderGameModes() {
   if (!grid) return;
 
   grid.innerHTML = GAMEMODES_DATA.map(mode => `
-    <div class="tactical-card rounded-xl p-5 border border-slate-800 space-y-3 hover:border-rose-500/40 transition">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+    <div class="tactical-card rounded-2xl p-5 border border-slate-800/80 space-y-3 hover:border-rose-500/40 transition-colors tap-scale-subtle">
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i data-lucide="swords" class="w-4 h-4 text-rose-400"></i>
+          <i data-lucide="swords" class="w-4 h-4 text-rose-400" stroke-width="2"></i>
           <span>${mode.name}</span>
         </h3>
-        <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">
+        <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30">
           ${mode.type}
         </span>
       </div>
@@ -1536,8 +1580,8 @@ function renderGameModes() {
         ${mode.description}
       </p>
 
-      <div class="bg-slate-900/90 p-2.5 rounded-lg border border-slate-800 text-[11px]">
-        <strong class="text-amber-400">Récompenses :</strong> ${mode.rewards}
+      <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800/80 text-[11px]">
+        <strong class="text-amber-400 font-semibold">Récompenses :</strong> ${mode.rewards}
       </div>
     </div>
   `).join('');
@@ -1556,12 +1600,12 @@ function renderTeamBuilder() {
   slotsContainer.innerHTML = teamSlots.map((unit, idx) => {
     if (unit) {
       return `
-        <div class="tactical-card rounded-xl p-3 border star-${unit.star}-card relative flex flex-col items-center text-center group">
-          <button onclick="removeUnitFromTeam(${idx})" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center transition">
-            <i data-lucide="x" class="w-3 h-3"></i>
+        <div class="tactical-card rounded-2xl p-3 border star-${unit.star}-card relative flex flex-col items-center text-center group tap-scale-subtle">
+          <button onclick="removeUnitFromTeam(${idx})" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-600/90 hover:bg-rose-500 text-white flex items-center justify-center tap-scale transition-colors shadow-sm" title="Retirer de l'équipe">
+            <i data-lucide="x" class="w-3.5 h-3.5" stroke-width="2.5"></i>
           </button>
-          <div class="w-16 h-16 rounded-lg bg-slate-900 p-1 flex items-center justify-center my-1">
-            <img src="${unit.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain">
+          <div class="w-16 h-16 rounded-xl bg-slate-900/90 border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
+            <img src="${unit.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded-lg" alt="${unit.name}">
           </div>
           <div class="font-bold text-xs text-white truncate w-full" title="${unit.name}">
             ${unit.name}
@@ -1574,10 +1618,10 @@ function renderTeamBuilder() {
       `;
     } else {
       return `
-        <div class="border border-dashed border-slate-700/80 rounded-xl p-4 flex flex-col items-center justify-center text-slate-500 h-36 hover:border-sky-500/50 hover:text-sky-400 transition cursor-pointer" onclick="focusTeamSearch()">
-          <i data-lucide="plus-circle" class="w-6 h-6 mb-1.5"></i>
-          <span class="text-[11px] font-bold">SLOT ${idx + 1}</span>
-          <span class="text-[9px] text-slate-500">Ajouter une tour</span>
+        <div class="border border-dashed border-slate-700/80 rounded-2xl p-4 flex flex-col items-center justify-center text-slate-400 h-36 hover:border-sky-500/50 hover:text-sky-400 tap-scale transition-colors cursor-pointer group" onclick="focusTeamSearch()">
+          <i data-lucide="plus-circle" class="w-6 h-6 mb-1.5 text-slate-500 group-hover:text-sky-400 transition-colors" stroke-width="2"></i>
+          <span class="text-[11px] font-bold text-slate-300 group-hover:text-white transition-colors">SLOT ${idx + 1}</span>
+          <span class="text-[9px] text-slate-500 group-hover:text-slate-400 transition-colors">Ajouter une tour</span>
         </div>
       `;
     }
@@ -1617,21 +1661,21 @@ function updateTeamStats() {
   const checklistEl = document.getElementById('team-checklist');
   if (checklistEl) {
     checklistEl.innerHTML = `
-      <div class="p-2.5 rounded-lg ${hasGround ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
-        <i data-lucide="${hasGround ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5"></i>
-        <span>Anti-Sol (Ground)</span>
+      <div class="p-2.5 rounded-xl ${hasGround ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
+        <i data-lucide="${hasGround ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
+        <span class="font-medium">Anti-Sol (Ground)</span>
       </div>
-      <div class="p-2.5 rounded-lg ${hasAir ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
-        <i data-lucide="${hasAir ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5"></i>
-        <span>Anti-Aérien (Air)</span>
+      <div class="p-2.5 rounded-xl ${hasAir ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
+        <i data-lucide="${hasAir ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
+        <span class="font-medium">Anti-Aérien (Air)</span>
       </div>
-      <div class="p-2.5 rounded-lg ${hasMoney ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
-        <i data-lucide="${hasMoney ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5"></i>
-        <span>Économie / Farm</span>
+      <div class="p-2.5 rounded-xl ${hasMoney ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
+        <i data-lucide="${hasMoney ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
+        <span class="font-medium">Économie / Farm</span>
       </div>
-      <div class="p-2.5 rounded-lg ${hasSlowOrSupport ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
-        <i data-lucide="${hasSlowOrSupport ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5"></i>
-        <span>Support / Contrôle</span>
+      <div class="p-2.5 rounded-xl ${hasSlowOrSupport ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border border-slate-800 text-slate-500'} flex items-center space-x-2">
+        <i data-lucide="${hasSlowOrSupport ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5" stroke-width="2"></i>
+        <span class="font-medium">Support / Contrôle</span>
       </div>
     `;
   }
@@ -1648,13 +1692,13 @@ function renderTeamPicker() {
   }).slice(0, 18);
 
   pickerGrid.innerHTML = filtered.map(u => `
-    <div class="tactical-card p-2 rounded-lg border star-${u.star}-card text-center flex flex-col items-center justify-between group">
-      <div class="w-12 h-12 rounded bg-slate-900 p-1 flex items-center justify-center my-1">
-        <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain">
+    <div class="tactical-card p-2.5 rounded-xl border star-${u.star}-card text-center flex flex-col items-center justify-between group">
+      <div class="w-12 h-12 rounded-lg bg-slate-900/90 border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
+        <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded-md" alt="${u.name}">
       </div>
       <div class="text-[11px] font-bold text-white truncate w-full" title="${u.name}">${u.name}</div>
-      <span class="text-[10px] star-${u.star}-badge px-1 rounded my-1 font-mono-num font-bold">${u.star}★</span>
-      <button onclick="addUnitToTeam('${u.id}')" class="w-full py-1 rounded bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold transition">
+      <span class="text-[10px] star-${u.star}-badge px-1.5 py-0.5 rounded my-1 font-mono-num font-bold">${u.star}★</span>
+      <button onclick="addUnitToTeam('${u.id}')" class="w-full py-1 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-[10px] font-bold tap-scale transition-colors shadow-sm">
         + Ajouter
       </button>
     </div>
@@ -1717,12 +1761,19 @@ function showToast(message) {
   if (!toast || !toastMsg) return;
 
   toastMsg.textContent = message;
-  toast.classList.remove('hidden', 'translate-y-2');
-  toast.classList.add('translate-y-0');
+  toast.classList.remove('hidden', 'toast-animate-out');
+  toast.classList.add('toast-animate-in');
 
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
-    toast.classList.add('hidden', 'translate-y-2');
+    toast.classList.remove('toast-animate-in');
+    toast.classList.add('toast-animate-out');
+    setTimeout(() => {
+      if (toast.classList.contains('toast-animate-out')) {
+        toast.classList.add('hidden');
+        toast.classList.remove('toast-animate-out');
+      }
+    }, 150);
   }, 2200);
 
   if (window.lucide) lucide.createIcons();

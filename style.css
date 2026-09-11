@@ -13,6 +13,18 @@
   --amber-accent: #f59e0b;
   --rose-accent: #f43f5e;
   --purple-accent: #8b5cf6;
+
+  /* better-ui: Exact curves, durations and elevation tokens */
+  --ease-fluid: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out-fast: cubic-bezier(0, 0, 0.2, 1);
+  --duration-interactive: 150ms;
+  --duration-enter: 250ms;
+
+  /* better-ui: Dark mode layered depth shadows instead of stark borders */
+  --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
+  --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.15), 0 12px 28px -6px rgba(0, 0, 0, 0.65);
+  --shadow-elevation-1: 0 0 0 1px oklch(1 0 0 / 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.5);
+  --shadow-elevation-2: 0 0 0 1px oklch(1 0 0 / 0.12), 0 16px 36px -8px rgba(0, 0, 0, 0.8);
 }
 
 body {
@@ -52,28 +64,67 @@ body {
   scrollbar-width: none;
 }
 
-/* Tactical Cards */
+/* better-ui: Concentric border radius token helpers */
+.radius-outer-card {
+  border-radius: 18px; /* 10px inner + 8px padding = 18px */
+}
+.radius-inner-media {
+  border-radius: 10px;
+}
+
+/* better-ui: Neutral 1px Image Outlines in dark mode (oklch(1 0 0 / 0.1)) */
+.img-outline {
+  outline: 1px solid oklch(1 0 0 / 0.1);
+  outline-offset: -1px;
+}
+
+/* better-ui: Scale on press tactile feedback (exact 0.96 scale, 150ms ease-out) */
+.tap-scale {
+  transition-property: transform, opacity, box-shadow, background-color, border-color, color;
+  transition-duration: var(--duration-interactive);
+  transition-timing-function: var(--ease-fluid);
+  will-change: transform;
+}
+.tap-scale:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.tap-scale-subtle {
+  transition-property: transform, opacity, box-shadow, background-color, border-color;
+  transition-duration: var(--duration-interactive);
+  transition-timing-function: var(--ease-fluid);
+  will-change: transform;
+}
+.tap-scale-subtle:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* Tactical Surface Cards - Shadows for elevation, specific transitions */
 .tactical-card {
   background: var(--bg-card);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-border);
   border: 1px solid var(--border-subtle);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: transform, box-shadow, border-color, background-color;
+  transition-duration: var(--duration-interactive);
+  transition-timing-function: var(--ease-fluid);
 }
 
 .tactical-card:hover {
-  border-color: rgba(56, 189, 248, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(6, 182, 212, 0.15);
+  box-shadow: var(--shadow-border-hover);
+  border-color: rgba(56, 189, 248, 0.35);
 }
 
-/* Star Rarity Indicators (Sleek Tactical Borders & Badges) */
+/* Star Rarity Indicators (Layered shadows and subtle tinted glow) */
 .star-7-card {
   border-color: rgba(244, 63, 94, 0.35);
+  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
 }
 .star-7-card:hover {
   border-color: rgba(244, 63, 94, 0.7);
-  box-shadow: 0 0 20px rgba(244, 63, 94, 0.15);
+  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.3), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 20px -2px rgba(244, 63, 94, 0.2);
 }
 .star-7-badge {
   background: linear-gradient(135deg, #e11d48, #9f1239);
@@ -82,10 +133,11 @@ body {
 
 .star-6-card {
   border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
 }
 .star-6-card:hover {
   border-color: rgba(245, 158, 11, 0.7);
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 20px -2px rgba(245, 158, 11, 0.2);
 }
 .star-6-badge {
   background: linear-gradient(135deg, #f59e0b, #b45309);
@@ -94,52 +146,112 @@ body {
 
 .star-5-card {
   border-color: rgba(139, 92, 246, 0.35);
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
 }
 .star-5-card:hover {
   border-color: rgba(139, 92, 246, 0.7);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 20px -2px rgba(139, 92, 246, 0.2);
 }
 .star-5-badge {
   background: linear-gradient(135deg, #8b5cf6, #5b21b6);
   color: #ffffff;
 }
 
-.star-4-card { border-color: rgba(59, 130, 246, 0.3); }
+.star-4-card {
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
+}
+.star-4-card:hover {
+  border-color: rgba(59, 130, 246, 0.65);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 18px -2px rgba(59, 130, 246, 0.2);
+}
 .star-4-badge { background: #2563eb; color: #ffffff; }
 
-.star-3-card { border-color: rgba(16, 185, 129, 0.25); }
+.star-3-card {
+  border-color: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.1), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
+}
+.star-3-card:hover {
+  border-color: rgba(16, 185, 129, 0.6);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 16px -2px rgba(16, 185, 129, 0.18);
+}
 .star-3-badge { background: #059669; color: #ffffff; }
 
-.star-2-card { border-color: rgba(100, 116, 139, 0.25); }
+.star-2-card {
+  border-color: rgba(100, 116, 139, 0.25);
+  box-shadow: 0 0 0 1px rgba(100, 116, 139, 0.1), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
+}
+.star-2-card:hover {
+  border-color: rgba(100, 116, 139, 0.5);
+  box-shadow: 0 0 0 1px rgba(100, 116, 139, 0.2), 0 12px 28px -6px rgba(0, 0, 0, 0.65);
+}
 .star-2-badge { background: #475569; color: #ffffff; }
 
 /* Tactical Data Table styling */
 .tactical-table th {
   user-select: none;
+  transition: color 150ms ease-out;
 }
 .tactical-table th:hover {
   color: #38bdf8;
+}
+.tactical-table tr td {
+  transition-property: background-color;
+  transition-duration: 100ms;
+  transition-timing-function: ease-out;
 }
 .tactical-table tr:hover td {
   background-color: rgba(30, 41, 59, 0.7);
 }
 
-/* Modal animation */
+/* better-ui: Interruptible Modal Enter & Subtle Exit animations */
 @keyframes modal-enter {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
-}
-.modal-enter {
-  animation: modal-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  0% {
+    opacity: 0;
+    transform: scale(0.98) translateY(8px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
 }
 
-/* Tactical Pill Button */
+.modal-enter {
+  animation: modal-enter var(--duration-enter) var(--ease-fluid) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.modal-exit {
+  opacity: 0 !important;
+  transform: translateY(-12px) scale(0.98) !important;
+  filter: blur(4px) !important;
+  transition: opacity 150ms ease-out, transform 150ms ease-out, filter 150ms ease-out !important;
+}
+
+.modal-backdrop {
+  transition-property: opacity, backdrop-filter;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-fluid);
+}
+.modal-backdrop.closing {
+  opacity: 0 !important;
+}
+
+/* Tactical Pill Button - Specific transitions */
 .btn-pill {
-  transition: all 0.15s ease;
+  transition-property: transform, background-color, border-color, box-shadow, color;
+  transition-duration: var(--duration-interactive);
+  transition-timing-function: var(--ease-fluid);
+  will-change: transform;
 }
 .btn-pill:hover {
   background-color: #1e293b;
   border-color: #475569;
+}
+.btn-pill:active {
+  transform: scale(0.96);
 }
 .btn-pill.active {
   background-color: #0284c7;
@@ -148,16 +260,16 @@ body {
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
 }
 
-/* Pulse animation for active verification */
+/* Pulse beacon */
 @keyframes tactical-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.9); }
 }
 .pulse-beacon {
   animation: tactical-pulse 2s infinite ease-in-out;
 }
 
-/* Tier list : silhouette en repli si l'image Fandom ne charge pas */
+/* Tier list fallback */
 .tier-img-fallback::before {
   content: '';
   display: block;
@@ -166,4 +278,41 @@ body {
   background: var(--border-subtle);
   clip-path: polygon(50% 0%, 90% 12%, 100% 38%, 88% 52%, 84% 100%, 16% 100%, 12% 52%, 0% 38%, 10% 12%);
   opacity: 0.5;
+}
+
+/* better-ui: Toast Notification Enter & Exit */
+@keyframes toast-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+.toast-animate-in {
+  animation: toast-enter 200ms var(--ease-fluid) forwards;
+}
+.toast-animate-out {
+  opacity: 0 !important;
+  transform: translateY(-8px) scale(0.96) !important;
+  filter: blur(4px) !important;
+  transition: opacity 150ms ease-out, transform 150ms ease-out, filter 150ms ease-out !important;
+}
+
+/* better-ui: Contextual icon cross-fade transitions */
+.icon-swap-enter {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0px);
+  transition: opacity 200ms var(--ease-fluid), transform 200ms var(--ease-fluid), filter 200ms var(--ease-fluid);
+}
+.icon-swap-exit {
+  opacity: 0;
+  transform: scale(0.25);
+  filter: blur(4px);
+  transition: opacity 200ms var(--ease-fluid), transform 200ms var(--ease-fluid), filter 200ms var(--ease-fluid);
 }
