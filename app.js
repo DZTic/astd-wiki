@@ -3514,20 +3514,30 @@ function setCompareLevel(lvl) {
     btn175.className = `px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors ${lvl === 175 ? 'bg-sky-600 text-white border border-sky-500' : 'bg-slate-900 text-slate-300 border border-slate-800 hover:border-sky-500/50 hover:text-white'}`;
     btn175.setAttribute('aria-pressed', lvl === 175 ? 'true' : 'false');
   }
+  updateCompareIdolToggleUI();
+  renderCompareView();
+}
+
+function updateCompareIdolToggleUI() {
   const pctEl = document.getElementById('compare-idol-pct');
   if (pctEl) {
     pctEl.textContent = `+${getCompareIdolMaxPercent()}%`;
   }
-  renderCompareView();
+  const label = document.querySelector('label[for="compare-idol-buff-toggle"]');
+  if (label) {
+    label.classList.toggle('bg-sky-500/20', compareIdolBuff);
+    label.classList.toggle('border-sky-500/50', compareIdolBuff);
+    label.classList.toggle('text-sky-200', compareIdolBuff);
+    label.classList.toggle('bg-[#090e1c]', !compareIdolBuff);
+    label.classList.toggle('border-slate-800', !compareIdolBuff);
+    label.classList.toggle('text-slate-300', !compareIdolBuff);
+  }
 }
 
 function toggleCompareIdolBuff() {
   const cb = document.getElementById('compare-idol-buff-toggle');
   compareIdolBuff = cb ? cb.checked : !compareIdolBuff;
-  const pctEl = document.getElementById('compare-idol-pct');
-  if (pctEl) {
-    pctEl.textContent = `+${getCompareIdolMaxPercent()}%`;
-  }
+  updateCompareIdolToggleUI();
   renderCompareView();
 }
 
