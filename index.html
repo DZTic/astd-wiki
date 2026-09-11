@@ -44,7 +44,7 @@
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
   <!-- Skip link for keyboard accessibility -->
-  <a href="#main-content" class="skip-to-content">Aller au contenu principal</a>
+  <a href="#main-content" class="skip-to-content" data-i18n="skip_to_content">Aller au contenu principal</a>
 
   <!-- TOP HEADER / NAVBAR -->
   <header id="app-header" class="sticky top-0 z-40 bg-[#0d1424]/95 backdrop-blur-md border-b border-slate-800/80">
@@ -52,7 +52,7 @@
       <div class="flex items-center justify-between h-16 gap-2 sm:gap-4">
         
         <!-- Brand / Logo -->
-        <button type="button" class="flex items-center space-x-2.5 cursor-pointer shrink-0 tap-scale text-left" onclick="switchTab('units')" aria-label="ASTD Database Pro - Retourner à l'encyclopédie des unités">
+        <button type="button" class="flex items-center space-x-2.5 cursor-pointer shrink-0 tap-scale text-left" onclick="switchTab('units')" aria-label="ASTD Database - Retourner à l'encyclopédie des unités" data-i18n-aria="brand_aria">
           <div class="w-9 h-9 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center shrink-0">
             <i data-lucide="shield" class="w-4 h-4 text-sky-400" stroke-width="2"></i>
           </div>
@@ -60,65 +60,79 @@
             <div class="flex items-center space-x-1.5">
               <span class="text-base font-bold tracking-tight text-white whitespace-nowrap">ASTD</span>
               <span class="text-base font-bold tracking-tight text-sky-400 whitespace-nowrap">DATABASE</span>
-              <span class="px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700 text-[10px] font-semibold text-slate-300 uppercase tracking-widest hidden sm:inline-block">PRO</span>
             </div>
-            <div class="text-[10px] text-slate-400 -mt-0.5 hidden sm:block whitespace-nowrap">
+            <div class="text-[10px] text-slate-400 -mt-0.5 hidden sm:block whitespace-nowrap" data-i18n="brand_subtitle">
               Roblox All Star Tower Defense Wiki
             </div>
           </div>
         </button>
 
         <!-- Desktop Navigation Tabs (lg: 1024px) -->
-        <nav aria-label="Navigation principale" class="hidden lg:flex items-center gap-1 font-medium">
+        <nav aria-label="Navigation principale" data-i18n-aria="nav_main_aria" class="hidden lg:flex items-center gap-1 font-medium">
           <button onclick="switchTab('units')" id="nav-units" data-tab="units" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale">
             <i data-lucide="swords" class="w-4 h-4 shrink-0" stroke-width="2"></i>
-            <span>Unités</span>
+            <span data-i18n="nav_units">Unités</span>
           </button>
           <button onclick="switchTab('tierlist')" id="nav-tierlist" data-tab="tierlist" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="crown" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
-            <span>Tier List</span>
+            <span data-i18n="nav_tierlist">Tier List</span>
           </button>
           <button onclick="switchTab('codes')" id="nav-codes" data-tab="codes" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale relative">
             <i data-lucide="gift" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
-            <span>Codes</span>
+            <span data-i18n="nav_codes">Codes</span>
             <span id="badge-active-codes" class="ml-1 px-1.5 py-0.2 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-mono-num">
               ...
             </span>
           </button>
           <button onclick="switchTab('orbs')" id="nav-orbs" data-tab="orbs" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="sparkles" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
-            <span>Orbes</span>
+            <span data-i18n="nav_orbs">Orbes</span>
           </button>
           <button onclick="switchTab('gamemodes')" id="nav-gamemodes" data-tab="gamemodes" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="map" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
-            <span>Modes & Raids</span>
+            <span data-i18n="nav_gamemodes">Modes & Raids</span>
           </button>
           <button onclick="switchTab('teambuilder')" id="nav-teambuilder" data-tab="teambuilder" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="layout-grid" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
-            <span>Deck Builder</span>
+            <span data-i18n="nav_teambuilder">Deck Builder</span>
           </button>
           <button onclick="switchTab('compare')" id="nav-compare" data-tab="compare" class="nav-link whitespace-nowrap shrink-0 ps-3 pe-3.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent flex items-center gap-1.5 tap-scale">
             <i data-lucide="arrow-left-right" class="w-4 h-4 shrink-0 text-slate-400" stroke-width="2"></i>
-            <span>Comparateur</span>
+            <span data-i18n="nav_compare">Comparateur</span>
           </button>
         </nav>
 
         <!-- Right Quick Actions -->
         <div class="flex items-center space-x-2 shrink-0">
           <div class="relative hidden sm:block">
-            <label for="quick-search" class="sr-only">Recherche rapide d'unité ou anime</label>
+            <label for="quick-search" class="sr-only" data-i18n="quick_search_sr">Recherche rapide d'unité ou anime</label>
             <input type="text" id="quick-search" placeholder="Recherche rapide (Ctrl + K)..." 
+                   data-i18n-placeholder="quick_search_placeholder"
                    aria-label="Recherche rapide par nom d'unité ou anime"
-                   class="w-36 md:w-48 xl:w-56 bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 pl-8 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors duration-150">
+                   data-i18n-aria="quick_search_aria"
+                   class="w-32 sm:w-40 xl:w-52 bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 pl-8 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors duration-150">
             <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" stroke-width="1.5"></i>
           </div>
+
+          <!-- Language Switcher (Desktop) -->
+          <div class="lang-switcher-wrap" role="group" aria-label="Sélection de langue / Language Selection">
+            <button type="button" onclick="setLanguage('fr')" id="lang-btn-fr" class="lang-btn active" title="Français" aria-pressed="true">
+              <span>🇫🇷</span> <span>FR</span>
+            </button>
+            <button type="button" onclick="setLanguage('en')" id="lang-btn-en" class="lang-btn" title="English" aria-pressed="false">
+              <span>🇬🇧</span> <span>EN</span>
+            </button>
+          </div>
+
           <a href="https://allstartd.fandom.com/wiki/Roblox:_All_Star_Tower_Defense_Wiki" target="_blank" rel="noopener noreferrer" 
              aria-label="Consulter le wiki Fandom officiel ASTD (nouvelle fenêtre)"
+             data-i18n-aria="wiki_link_aria"
+             data-i18n-title="wiki_link_title"
              class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white tap-scale flex items-center justify-center" title="Wiki Fandom Original">
             <i data-lucide="external-link" class="w-4 h-4" stroke-width="1.75"></i>
           </a>
           <!-- Mobile Menu Hamburger Button -->
-          <button id="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-expanded="false" aria-controls="mobile-drawer" class="lg:hidden p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 tap-scale flex items-center justify-center" aria-label="Menu de navigation">
+          <button id="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-expanded="false" aria-controls="mobile-drawer" class="lg:hidden p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 tap-scale flex items-center justify-center" aria-label="Menu de navigation" data-i18n-aria="menu_toggle_aria">
             <i data-lucide="menu" id="hamburger-icon" class="w-4 h-4" stroke-width="2"></i>
           </button>
         </div>
@@ -126,74 +140,89 @@
     </div>
 
     <!-- Mobile Horizontal Tabs Bar (Always available on < lg screens) -->
-    <div aria-label="Navigation mobile" class="lg:hidden flex overflow-x-auto no-scrollbar px-3 py-2 space-x-1.5 bg-[#080c14] border-t border-slate-800/80 text-xs font-semibold whitespace-nowrap">
+    <div aria-label="Navigation mobile" data-i18n-aria="nav_mobile_aria" class="lg:hidden flex overflow-x-auto no-scrollbar px-3 py-2 space-x-1.5 bg-[#080c14] border-t border-slate-800/80 text-xs font-semibold whitespace-nowrap">
       <button onclick="switchTab('units')" data-tab="units" class="mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 tap-scale">
         <i data-lucide="swords" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span>Unités</span>
+        <span data-i18n="nav_units">Unités</span>
       </button>
       <button onclick="switchTab('tierlist')" data-tab="tierlist" class="mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5 tap-scale">
         <i data-lucide="crown" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span>Tier List</span>
+        <span data-i18n="nav_tierlist">Tier List</span>
       </button>
       <button onclick="switchTab('codes')" data-tab="codes" class="mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5 tap-scale">
         <i data-lucide="gift" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span>Codes</span>
+        <span data-i18n="nav_codes">Codes</span>
       </button>
       <button onclick="switchTab('orbs')" data-tab="orbs" class="mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5 tap-scale">
         <i data-lucide="sparkles" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span>Orbes</span>
+        <span data-i18n="nav_orbs">Orbes</span>
       </button>
       <button onclick="switchTab('gamemodes')" data-tab="gamemodes" class="mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5 tap-scale">
         <i data-lucide="map" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span>Raids</span>
+        <span data-i18n="nav_gamemodes_short">Raids</span>
       </button>
       <button onclick="switchTab('teambuilder')" data-tab="teambuilder" class="mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5 tap-scale">
         <i data-lucide="layout-grid" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span>Deck</span>
+        <span data-i18n="nav_deck_short">Deck</span>
       </button>
       <button onclick="switchTab('compare')" data-tab="compare" class="mobile-chip-btn whitespace-nowrap shrink-0 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5 tap-scale">
         <i data-lucide="arrow-left-right" class="w-3.5 h-3.5" stroke-width="2"></i>
-        <span>Comparer</span>
+        <span data-i18n="nav_compare_short">Comparer</span>
       </button>
     </div>
 
     <!-- Mobile Drawer Dropdown -->
     <div id="mobile-drawer" class="hidden lg:hidden bg-[#0a0f1d] border-b border-slate-800 px-4 py-4 space-y-3">
+      <!-- Mobile Language Switcher -->
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <span class="text-xs text-slate-400 font-semibold" data-i18n="lang_choice">Langue / Language :</span>
+        <div class="lang-switcher-wrap" role="group" aria-label="Sélection de langue mobile">
+          <button type="button" onclick="setLanguage('fr')" id="lang-btn-mob-fr" class="lang-btn active">
+            <span>🇫🇷</span> <span>FR</span>
+          </button>
+          <button type="button" onclick="setLanguage('en')" id="lang-btn-mob-en" class="lang-btn">
+            <span>🇬🇧</span> <span>EN</span>
+          </button>
+        </div>
+      </div>
+
       <div class="relative sm:hidden">
-        <label for="mobile-search-input" class="sr-only">Rechercher une unité ou un anime</label>
+        <label for="mobile-search-input" class="sr-only" data-i18n="quick_search_sr">Rechercher une unité ou un anime</label>
         <input type="text" id="mobile-search-input" placeholder="Rechercher unité, anime..." 
+               data-i18n-placeholder="mobile_search_placeholder"
                aria-label="Recherche mobile par unité ou anime"
+               data-i18n-aria="quick_search_aria"
                class="w-full bg-[#080c14] border border-slate-800 rounded-lg px-3.5 py-2 pl-9 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 transition-colors duration-150">
         <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" stroke-width="1.5"></i>
       </div>
       <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
         <button onclick="switchTabAndCloseDrawer('units')" data-tab="units" class="drawer-link p-2.5 rounded-lg bg-sky-500/20 text-sky-200 border border-sky-500/40 flex items-center gap-2 tap-scale">
           <i data-lucide="swords" class="w-4 h-4 text-sky-400" stroke-width="2"></i>
-          <span>Encyclopédie Unités</span>
+          <span data-i18n="drawer_units">Encyclopédie Unités</span>
         </button>
         <button onclick="switchTabAndCloseDrawer('tierlist')" data-tab="tierlist" class="drawer-link p-2.5 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 tap-scale">
           <i data-lucide="crown" class="w-4 h-4" stroke-width="2"></i>
-          <span>Tier List Méta</span>
+          <span data-i18n="drawer_tierlist">Tier List Méta</span>
         </button>
         <button onclick="switchTabAndCloseDrawer('codes')" data-tab="codes" class="drawer-link p-2.5 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 tap-scale">
           <i data-lucide="gift" class="w-4 h-4" stroke-width="2"></i>
-          <span>Codes Promotionnels</span>
+          <span data-i18n="drawer_codes">Codes Promotionnels</span>
         </button>
         <button onclick="switchTabAndCloseDrawer('orbs')" data-tab="orbs" class="drawer-link p-2.5 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 tap-scale">
           <i data-lucide="sparkles" class="w-4 h-4" stroke-width="2"></i>
-          <span>Compendium Orbes</span>
+          <span data-i18n="drawer_orbs">Compendium Orbes</span>
         </button>
         <button onclick="switchTabAndCloseDrawer('gamemodes')" data-tab="gamemodes" class="drawer-link p-2.5 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 tap-scale">
           <i data-lucide="map" class="w-4 h-4" stroke-width="2"></i>
-          <span>Modes & Raids</span>
+          <span data-i18n="drawer_gamemodes">Modes & Raids</span>
         </button>
         <button onclick="switchTabAndCloseDrawer('teambuilder')" data-tab="teambuilder" class="drawer-link p-2.5 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 tap-scale">
           <i data-lucide="layout-grid" class="w-4 h-4" stroke-width="2"></i>
-          <span>Simulateur Deck</span>
+          <span data-i18n="drawer_teambuilder">Simulateur Deck</span>
         </button>
         <button onclick="switchTabAndCloseDrawer('compare')" data-tab="compare" class="drawer-link p-2.5 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 flex items-center gap-2 tap-scale col-span-2">
           <i data-lucide="arrow-left-right" class="w-4 h-4 text-sky-400" stroke-width="2"></i>
-          <span>Comparateur de Personnages</span>
+          <span data-i18n="drawer_compare">Comparateur de Personnages</span>
         </button>
       </div>
     </div>
@@ -206,28 +235,28 @@
       <div class="flex items-center space-x-5 text-slate-400">
         <div class="flex items-center space-x-2">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Base de données :</span>
+          <span data-i18n="db_label">Base de données :</span>
           <strong id="stat-units-count" class="text-slate-100 font-mono-num font-semibold">1 239</strong>
-          <span>unités</span>
+          <span data-i18n="units_label">unités</span>
         </div>
         <div class="hidden sm:flex items-center space-x-2 border-l border-slate-800 pl-5">
-          <span>Orbes :</span>
+          <span data-i18n="orbs_label">Orbes :</span>
           <strong id="stat-orbs-count" class="text-slate-100 font-mono-num font-semibold">49</strong>
         </div>
         <div class="hidden md:flex items-center space-x-2 border-l border-slate-800 pl-5">
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-500" stroke-width="1.5"></i>
-          <span>Synchro wiki :</span>
+          <span data-i18n="wiki_sync_label">Synchro wiki :</span>
           <span id="stat-last-updated" class="text-slate-300 font-mono-num">...</span>
         </div>
       </div>
 
       <!-- Quick Active Code Ticker -->
       <div class="flex items-center space-x-2.5 bg-[#0e1526] border border-slate-800 px-2.5 py-1 rounded-lg text-xs">
-        <span class="text-slate-400 hidden sm:inline text-[11px]">Dernier code :</span>
+        <span class="text-slate-400 hidden sm:inline text-[11px]" data-i18n="latest_code_label">Dernier code :</span>
         <code id="hero-code-name" class="font-mono-num font-bold text-emerald-400 select-all text-[11px]">Chargement...</code>
-        <button onclick="copyLatestCode()" aria-label="Copier le dernier code promo actif" class="ps-2 pe-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-[11px] rounded tap-scale inline-flex items-center gap-1">
+        <button onclick="copyLatestCode()" aria-label="Copier le dernier code promo actif" data-i18n-aria="copy_code_aria" class="ps-2 pe-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-[11px] rounded tap-scale inline-flex items-center gap-1">
           <i data-lucide="copy" class="w-3 h-3" stroke-width="2"></i>
-          <span>Copier</span>
+          <span data-i18n="copy_btn">Copier</span>
         </button>
       </div>
 
@@ -254,29 +283,31 @@
 
     <!-- ==================== TAB 1 : UNITES ==================== -->
     <section id="tab-units" class="tab-content space-y-4" aria-labelledby="units-section-title">
-      <h1 id="units-section-title" class="sr-only">Encyclopédie des Unités ASTD</h1>
+      <h1 id="units-section-title" class="sr-only" data-i18n="units_h1">Encyclopédie des Unités ASTD</h1>
       
       <!-- Structured Filter Toolbar -->
-      <div class="tactical-card rounded-xl p-4 border border-slate-800/90 space-y-3.5" role="search" aria-label="Filtres de recherche des unités">
+      <div class="tactical-card rounded-xl p-4 border border-slate-800/90 space-y-3.5" role="search" aria-label="Filtres de recherche des unités" data-i18n-aria="units_filter_aria">
         
         <!-- Row 1: Search Input + Star Pills + View Switcher -->
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           
           <!-- Search input -->
           <div class="relative flex-1 max-w-xl">
-            <label for="filter-search" class="sr-only">Rechercher une unité ou un anime</label>
+            <label for="filter-search" class="sr-only" data-i18n="filter_search_sr">Rechercher une unité ou un anime</label>
             <input type="text" id="filter-search" placeholder="Rechercher par nom d'unité ou franchise (Goku, Nanami, Bleach...)" 
+                   data-i18n-placeholder="filter_search_placeholder"
                    aria-label="Rechercher par nom d'unité ou franchise anime"
+                   data-i18n-aria="filter_search_aria"
                    class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3.5 py-2 pl-9 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 transition-colors duration-150">
             <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" stroke-width="1.5"></i>
-            <button id="clear-search" onclick="clearSearch()" aria-label="Effacer le champ de recherche" class="hidden absolute right-3 top-2 text-slate-400 hover:text-white tap-scale">
+            <button id="clear-search" onclick="clearSearch()" aria-label="Effacer le champ de recherche" data-i18n-aria="clear_search_aria" class="hidden absolute right-3 top-2 text-slate-400 hover:text-white tap-scale">
               <i data-lucide="x" class="w-3.5 h-3.5" stroke-width="2"></i>
             </button>
           </div>
 
           <!-- Star Filter Segmented Group -->
-          <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 font-medium" role="group" aria-label="Filtrer par rareté">
-            <button onclick="setStarFilter('all')" class="star-btn active tap-scale px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 text-white border border-sky-500" aria-pressed="true">Tous</button>
+          <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 font-medium" role="group" aria-label="Filtrer par rareté" data-i18n-aria="filter_star_aria">
+            <button onclick="setStarFilter('all')" class="star-btn active tap-scale px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 text-white border border-sky-500" aria-pressed="true" data-i18n="star_all">Tous</button>
             <button onclick="setStarFilter(7)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800" aria-pressed="false">7★</button>
             <button onclick="setStarFilter(6)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800" aria-pressed="false">6★</button>
             <button onclick="setStarFilter(5)" class="star-btn tap-scale px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800" aria-pressed="false">5★</button>
@@ -286,14 +317,14 @@
           </div>
 
           <!-- View Mode Toggle (Grid vs Table) -->
-          <div class="flex items-center space-x-1 bg-[#0a0f1d] p-1 rounded-lg border border-slate-800 shrink-0" role="group" aria-label="Mode d'affichage">
-            <button id="btn-view-grid" onclick="setViewMode('grid')" aria-pressed="true" class="px-2.5 py-1 rounded text-xs font-semibold text-white bg-sky-600 flex items-center space-x-1.5 tap-scale" title="Vue Grille" aria-label="Affichage en grille">
+          <div class="flex items-center space-x-1 bg-[#0a0f1d] p-1 rounded-lg border border-slate-800 shrink-0" role="group" aria-label="Mode d'affichage" data-i18n-aria="view_mode_aria">
+            <button id="btn-view-grid" onclick="setViewMode('grid')" aria-pressed="true" class="px-2.5 py-1 rounded text-xs font-semibold text-white bg-sky-600 flex items-center space-x-1.5 tap-scale" title="Vue Grille" data-i18n-title="view_grid_title" aria-label="Affichage en grille" data-i18n-aria="view_grid_aria">
               <i data-lucide="grid" class="w-3.5 h-3.5" stroke-width="2"></i>
-              <span>Grille</span>
+              <span data-i18n="view_grid">Grille</span>
             </button>
-            <button id="btn-view-table" onclick="setViewMode('table')" aria-pressed="false" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center space-x-1.5 tap-scale" title="Vue Tableau" aria-label="Affichage en tableau">
+            <button id="btn-view-table" onclick="setViewMode('table')" aria-pressed="false" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center space-x-1.5 tap-scale" title="Vue Tableau" data-i18n-title="view_table_title" aria-label="Affichage en tableau" data-i18n-aria="view_table_aria">
               <i data-lucide="list" class="w-3.5 h-3.5" stroke-width="2"></i>
-              <span>Tableau</span>
+              <span data-i18n="view_table">Tableau</span>
             </button>
           </div>
 
@@ -305,48 +336,48 @@
           <div class="flex flex-wrap items-center gap-2.5">
             <!-- Type filter -->
             <div class="min-w-[160px]">
-              <label for="filter-tower-type" class="sr-only">Filtrer par type de tour</label>
-              <select id="filter-tower-type" aria-label="Filtrer par type de tour (Sol, Aérien, Colline, Hybride)" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
-                <option value="all">Tous types (Sol/Air/Colline/Hybride)</option>
-                <option value="ground">Sol (Ground)</option>
-                <option value="air">Aérien (Air)</option>
-                <option value="hill">Colline (Hill)</option>
-                <option value="hybrid">Hybride</option>
+              <label for="filter-tower-type" class="sr-only" data-i18n="filter_tower_type_sr">Filtrer par type de tour</label>
+              <select id="filter-tower-type" aria-label="Filtrer par type de tour (Sol, Aérien, Colline, Hybride)" data-i18n-aria="filter_tower_type_aria" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+                <option value="all" data-i18n="filter_type_all">Tous types (Sol/Air/Colline/Hybride)</option>
+                <option value="ground" data-i18n="filter_type_ground">Sol (Ground)</option>
+                <option value="air" data-i18n="filter_type_air">Aérien (Air)</option>
+                <option value="hill" data-i18n="filter_type_hill">Colline (Hill)</option>
+                <option value="hybrid" data-i18n="filter_type_hybrid">Hybride</option>
               </select>
             </div>
 
             <!-- Anime filter -->
             <div class="min-w-[180px]">
-              <label for="filter-anime" class="sr-only">Filtrer par anime ou franchise</label>
-              <select id="filter-anime" aria-label="Filtrer par anime ou franchise" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
-                <option value="all">Toutes franchises anime</option>
+              <label for="filter-anime" class="sr-only" data-i18n="filter_anime_sr">Filtrer par anime ou franchise</label>
+              <select id="filter-anime" aria-label="Filtrer par anime ou franchise" data-i18n-aria="filter_anime_aria" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+                <option value="all" data-i18n="filter_anime_all">Toutes franchises anime</option>
               </select>
             </div>
 
             <!-- Sort selection -->
             <div class="min-w-[150px]">
-              <label for="filter-sort" class="sr-only">Trier les unités</label>
-              <select id="filter-sort" aria-label="Trier les unités par critère" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
-                <option value="recent-desc">Nouveautés d'abord</option>
-                <option value="star-desc">Rareté : 7★ vers 2★</option>
-                <option value="star-asc">Rareté : 2★ vers 7★</option>
-                <option value="dmg-desc">Dégâts Max ↓</option>
-                <option value="dps-desc">DPS Max ↓</option>
-                <option value="cost-asc">Coût Total ↑</option>
-                <option value="name-asc">Nom (A - Z)</option>
+              <label for="filter-sort" class="sr-only" data-i18n="filter_sort_sr">Trier les unités</label>
+              <select id="filter-sort" aria-label="Trier les unités par critère" data-i18n-aria="filter_sort_aria" class="w-full bg-[#0a0f1d] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+                <option value="recent-desc" data-i18n="sort_recent_desc">Nouveautés d'abord</option>
+                <option value="star-desc" data-i18n="sort_star_desc">Rareté : 7★ vers 2★</option>
+                <option value="star-asc" data-i18n="sort_star_asc">Rareté : 2★ vers 7★</option>
+                <option value="dmg-desc" data-i18n="sort_dmg_desc">Dégâts Max ↓</option>
+                <option value="dps-desc" data-i18n="sort_dps_desc">DPS Max ↓</option>
+                <option value="cost-asc" data-i18n="sort_cost_asc">Coût Total ↑</option>
+                <option value="name-asc" data-i18n="sort_name_asc">Nom (A - Z)</option>
               </select>
             </div>
 
             <!-- Obtainable toggle -->
-            <label class="flex items-center space-x-2 cursor-pointer text-slate-300 hover:text-white ml-1 select-none" title="Masque les unités retirées du jeu (bannières expirées, événements passés)">
+            <label class="flex items-center space-x-2 cursor-pointer text-slate-300 hover:text-white ml-1 select-none" title="Masque les unités retirées du jeu (bannières expirées, événements passés)" data-i18n-title="filter_obtainable_title">
               <input type="checkbox" id="filter-obtainable" class="rounded bg-[#0a0f1d] border-slate-800 text-sky-600 focus:ring-0 cursor-pointer">
-              <span class="text-xs">Obtenables uniquement</span>
+              <span class="text-xs" data-i18n="filter_obtainable">Obtenables uniquement</span>
             </label>
           </div>
 
           <!-- Result counter -->
           <div class="flex items-center space-x-1.5 text-xs">
-            <span class="text-slate-400">Résultat :</span>
+            <span class="text-slate-400" data-i18n="results_label">Résultat :</span>
             <span id="results-count" class="font-mono-num font-bold text-slate-100" role="status" aria-live="polite">...</span>
           </div>
 
@@ -355,25 +386,25 @@
       </div>
 
       <!-- VIEW 1: Grid Mode -->
-      <div id="units-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" role="region" aria-label="Liste des cartes d'unités">
+      <div id="units-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" role="region" aria-label="Liste des cartes d'unités" data-i18n-aria="units_grid_aria">
         <!-- Dynamic Cards -->
       </div>
 
       <!-- VIEW 2: Pro Table Mode -->
-      <div id="units-table-container" class="hidden tactical-card rounded-2xl border border-slate-800 overflow-hidden" role="region" aria-label="Tableau comparatif des unités">
+      <div id="units-table-container" class="hidden tactical-card rounded-2xl border border-slate-800 overflow-hidden" role="region" aria-label="Tableau comparatif des unités" data-i18n-aria="units_table_aria">
         <div class="overflow-x-auto max-h-[75vh]">
           <table class="w-full text-left text-xs tactical-table">
             <thead class="bg-[#0e1526] sticky top-0 z-10 text-slate-400 uppercase font-semibold border-b border-slate-800">
               <tr>
-                <th class="p-3" scope="col">Unité</th>
-                <th class="p-3 cursor-pointer" scope="col" onclick="sortTableBy('star')">Rareté ↕</th>
-                <th class="p-3" scope="col">Type</th>
-                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('max_damage')" title="Dégâts au palier d'amélioration maximum">Dégâts Max ↕</th>
-                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('max_range')" title="Distance d'attaque maximale (hauteur = portée accrue)">Portée ↕</th>
-                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('min_spa')" title="SPA : Secondes Par Attaque (délai entre deux attaques, plus c'est bas plus c'est rapide)">SPA ↕</th>
-                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('max_dps')" title="DPS : Dégâts Par Seconde au palier maximum">DPS Max ↕</th>
-                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('total_cost')" title="Somme du déploiement et de toutes les améliorations">Coût Total ↕</th>
-                <th class="p-3 text-right" scope="col">Action</th>
+                <th class="p-3" scope="col" data-i18n="th_unit">Unité</th>
+                <th class="p-3 cursor-pointer" scope="col" onclick="sortTableBy('star')" data-i18n="th_rarity">Rareté ↕</th>
+                <th class="p-3" scope="col" data-i18n="th_type">Type</th>
+                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('max_damage')" title="Dégâts au palier d'amélioration maximum" data-i18n="th_max_damage">Dégâts Max ↕</th>
+                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('max_range')" title="Distance d'attaque maximale (hauteur = portée accrue)" data-i18n="th_range">Portée ↕</th>
+                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('min_spa')" title="SPA : Secondes Par Attaque (délai entre deux attaques, plus c'est bas plus c'est rapide)" data-i18n="th_spa">SPA ↕</th>
+                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('max_dps')" title="DPS : Dégâts Par Seconde au palier maximum" data-i18n="th_max_dps">DPS Max ↕</th>
+                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('total_cost')" title="Somme du déploiement et de toutes les améliorations" data-i18n="th_total_cost">Coût Total ↕</th>
+                <th class="p-3 text-right" scope="col" data-i18n="th_action">Action</th>
               </tr>
             </thead>
             <tbody id="units-table-tbody" class="divide-y divide-slate-800/60 font-mono-num">
@@ -385,8 +416,8 @@
 
       <!-- Pagination / Load more button (Grid view) -->
       <div class="mt-6 text-center" id="load-more-container">
-        <button id="load-more-btn" onclick="loadMoreUnits()" aria-label="Charger plus d'unités dans la liste" class="ps-4 pe-3.5 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200 tap-scale inline-flex items-center space-x-2">
-          <span>Charger plus d'unités</span>
+        <button id="load-more-btn" onclick="loadMoreUnits()" aria-label="Charger plus d'unités dans la liste" data-i18n-aria="load_more_aria" class="ps-4 pe-3.5 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200 tap-scale inline-flex items-center space-x-2">
+          <span data-i18n="load_more_units">Charger plus d'unités</span>
           <i data-lucide="chevron-down" class="w-3.5 h-3.5" stroke-width="2"></i>
         </button>
       </div>
@@ -400,15 +431,15 @@
         <div>
           <h2 id="tierlist-heading" class="text-lg font-bold text-white flex items-center gap-2 text-balance">
             <i data-lucide="crown" class="w-5 h-5 text-amber-400"></i>
-            <span>Tier list méta ASTD</span>
+            <span data-i18n="tierlist_heading">Tier list méta ASTD</span>
           </h2>
-          <p class="text-xs text-slate-400 text-pretty mt-0.5">
+          <p class="text-xs text-slate-400 text-pretty mt-0.5" data-i18n="tierlist_subheading">
             Unités classées par efficacité méta (DPS, Support, Farming, Nukes). Cliquez sur une unité pour inspecter ses statistiques.
           </p>
         </div>
       </div>
 
-      <div id="tierlist-container" class="space-y-4" role="region" aria-label="Catégories méta">
+      <div id="tierlist-container" class="space-y-4" role="region" aria-label="Catégories méta" data-i18n-aria="tierlist_region_aria">
         <!-- Rendered via JS -->
       </div>
 
@@ -421,20 +452,20 @@
         <div>
           <h2 id="codes-heading" class="text-lg font-bold text-white flex items-center gap-2 text-balance">
             <i data-lucide="gift" class="w-5 h-5 text-emerald-400"></i>
-            <span>Codes promo actifs ASTD</span>
+            <span data-i18n="codes_heading">Codes promo actifs ASTD</span>
           </h2>
-          <p class="text-xs text-slate-400 text-pretty mt-0.5">
+          <p class="text-xs text-slate-400 text-pretty mt-0.5" data-i18n="codes_subheading">
             Codes vérifiés pour Roblox All Star Tower Defense. Cliquez sur « Copier le code » pour l'utiliser en jeu.
           </p>
         </div>
         <div class="text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded flex items-center">
           <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1.5 pulse-beacon"></span>
-          <span>Codes mis à jour automatiquement</span>
+          <span data-i18n="codes_autoupdate">Codes mis à jour automatiquement</span>
         </div>
       </div>
 
       <!-- Active Codes Grid -->
-      <div id="active-codes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" role="region" aria-label="Liste des codes promo actifs">
+      <div id="active-codes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" role="region" aria-label="Liste des codes promo actifs" data-i18n-aria="codes_active_aria">
         <!-- Populated by JS -->
       </div>
 
@@ -443,17 +474,19 @@
         <button type="button" id="toggle-expired-btn" class="w-full flex items-center justify-between cursor-pointer text-left focus:outline-none tap-scale-subtle" onclick="toggleExpiredCodes()" aria-expanded="false" aria-controls="expired-codes-wrapper">
           <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
             <i data-lucide="history" class="w-4 h-4"></i>
-            <span>Anciens codes archivés (<span id="expired-codes-count">0</span>)</span>
+            <span><span data-i18n="codes_expired_heading">Anciens codes archivés</span> (<span id="expired-codes-count">0</span>)</span>
           </h3>
           <i id="expired-arrow" data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200"></i>
         </button>
         
         <div id="expired-codes-wrapper" class="hidden mt-3 pt-3 border-t border-slate-800">
-          <label for="search-expired-codes" class="sr-only">Filtrer les anciens codes expirés</label>
+          <label for="search-expired-codes" class="sr-only" data-i18n="codes_filter_expired_sr">Filtrer les anciens codes expirés</label>
           <input type="text" id="search-expired-codes" oninput="filterExpiredCodes()" placeholder="Filtrer les anciens codes..." 
+                 data-i18n-placeholder="codes_filter_expired_placeholder"
                  aria-label="Filtrer les anciens codes expirés"
+                 data-i18n-aria="codes_filter_expired_aria"
                  class="w-full sm:w-64 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white mb-3 focus:outline-none focus:border-sky-500">
-          <div id="expired-codes-list" class="flex flex-wrap gap-1.5 max-h-60 overflow-y-auto pr-2" role="region" aria-label="Liste des codes expirés">
+          <div id="expired-codes-list" class="flex flex-wrap gap-1.5 max-h-60 overflow-y-auto pr-2" role="region" aria-label="Liste des codes expirés" data-i18n-aria="codes_expired_region_aria">
             <!-- Populated by JS -->
           </div>
         </div>
@@ -468,22 +501,24 @@
         <div>
           <h2 id="orbs-heading" class="text-lg font-bold text-white flex items-center gap-2 text-balance">
             <i data-lucide="sparkles" class="w-5 h-5 text-cyan-400"></i>
-            <span>Compendium des orbes</span>
+            <span data-i18n="orbs_heading">Compendium des orbes</span>
           </h2>
-          <p class="text-xs text-slate-400 text-pretty mt-0.5">
+          <p class="text-xs text-slate-400 text-pretty mt-0.5" data-i18n="orbs_subheading">
             Bonus de statistiques, méthodes de drop (Trials, Raids) et compatibilité des unités.
           </p>
         </div>
         <div class="w-full sm:w-64">
-          <label for="search-orbs" class="sr-only">Rechercher un orbe ou un effet</label>
+          <label for="search-orbs" class="sr-only" data-i18n="search_orbs_sr">Rechercher un orbe ou un effet</label>
           <input type="text" id="search-orbs" oninput="filterOrbs()" placeholder="Rechercher un orbe ou un effet..." 
+                 data-i18n-placeholder="search_orbs_placeholder"
                  aria-label="Rechercher un orbe ou un effet"
+                 data-i18n-aria="search_orbs_aria"
                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
         </div>
       </div>
 
       <!-- Orbs Grid -->
-      <div id="orbs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" role="region" aria-label="Liste des orbes">
+      <div id="orbs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" role="region" aria-label="Liste des orbes" data-i18n-aria="orbs_grid_aria">
         <!-- Rendered via JS -->
       </div>
 
@@ -495,14 +530,14 @@
       <div class="tactical-card p-4 rounded-xl border border-slate-800">
         <h2 id="gamemodes-heading" class="text-lg font-bold text-white flex items-center gap-2 text-balance">
           <i data-lucide="map" class="w-5 h-5 text-sky-400"></i>
-          <span>Modes de jeu & Raids</span>
+          <span data-i18n="gamemodes_heading">Modes de jeu & Raids</span>
         </h2>
-        <p class="text-xs text-slate-400 text-pretty mt-0.5">
+        <p class="text-xs text-slate-400 text-pretty mt-0.5" data-i18n="gamemodes_subheading">
           Guides des différents modes de jeu pour farmer les gemmes, les stardust et les orbes légendaires.
         </p>
       </div>
 
-      <div id="gamemodes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4" role="region" aria-label="Guides des modes de jeu">
+      <div id="gamemodes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4" role="region" aria-label="Guides des modes de jeu" data-i18n-aria="gamemodes_grid_aria">
         <!-- Rendered via JS -->
       </div>
 
@@ -515,20 +550,20 @@
         <div>
           <h2 id="teambuilder-heading" class="text-lg font-bold text-white flex items-center gap-2 text-balance">
             <i data-lucide="layout-grid" class="w-5 h-5 text-sky-400" stroke-width="2"></i>
-            <span>Simulateur de deck (6 slots)</span>
+            <span data-i18n="teambuilder_heading">Simulateur de deck (6 slots)</span>
           </h2>
-          <p class="text-xs text-slate-400 text-pretty mt-0.5">
+          <p class="text-xs text-slate-400 text-pretty mt-0.5" data-i18n="teambuilder_subheading">
             Composez votre équipe de 6 unités pour calculer le coût total, le DPS combiné et vérifier la couverture tactique.
           </p>
         </div>
-        <button onclick="clearTeam()" aria-label="Vider toutes les unités de l'équipe" class="ps-3 pe-3.5 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/50 text-rose-300 text-xs font-semibold tap-scale flex items-center gap-1.5">
+        <button onclick="clearTeam()" aria-label="Vider toutes les unités de l'équipe" data-i18n-aria="clear_team_aria" class="ps-3 pe-3.5 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/50 text-rose-300 text-xs font-semibold tap-scale flex items-center gap-1.5">
           <i data-lucide="trash-2" class="w-3.5 h-3.5" stroke-width="2"></i>
-          <span>Vider l'équipe</span>
+          <span data-i18n="clear_team_btn">Vider l'équipe</span>
         </button>
       </div>
 
       <!-- 6 Slots Display -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="team-slots-container" role="region" aria-label="Emplacements du deck">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="team-slots-container" role="region" aria-label="Emplacements du deck" data-i18n-aria="team_slots_aria">
         <!-- 6 Slots rendered by JS -->
       </div>
 
@@ -536,25 +571,25 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         <div class="tactical-card p-4 rounded-2xl border border-slate-800">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Économie de l'Équipe</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3" data-i18n="team_economy_title">Économie de l'Équipe</h3>
           <div class="space-y-2.5 text-xs font-mono-num">
             <div class="flex justify-between items-center">
-              <span class="text-slate-400 font-sans">Déploiement Initial :</span>
+              <span class="text-slate-400 font-sans" data-i18n="team_stat_deploy_label">Déploiement Initial :</span>
               <span id="team-stat-deploy" class="font-bold text-slate-200">$0</span>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-slate-400 font-sans">Amélioration Max Totale :</span>
+              <span class="text-slate-400 font-sans" data-i18n="team_stat_total_label">Amélioration Max Totale :</span>
               <span id="team-stat-total" class="font-bold text-slate-200">$0</span>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-slate-400 font-sans">DPS Combiné Estimé :</span>
+              <span class="text-slate-400 font-sans" data-i18n="team_stat_dps_label">DPS Combiné Estimé :</span>
               <span id="team-stat-dps" class="font-bold text-amber-300">0</span>
             </div>
           </div>
         </div>
 
         <div class="tactical-card p-4 rounded-2xl border border-slate-800 md:col-span-2">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Couverture Tactique</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3" data-i18n="team_coverage_title">Couverture Tactique</h3>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs" id="team-checklist">
             <!-- Checklist items -->
           </div>
@@ -564,12 +599,14 @@
 
       <!-- Quick Unit Picker -->
       <div class="tactical-card p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400">Ajouter des unités au deck</h3>
-        <label for="team-search-input" class="sr-only">Rechercher une unité à ajouter au deck</label>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400" data-i18n="team_picker_title">Ajouter des unités au deck</h3>
+        <label for="team-search-input" class="sr-only" data-i18n="team_picker_sr">Rechercher une unité à ajouter au deck</label>
         <input type="text" id="team-search-input" oninput="renderTeamPicker()" placeholder="Rechercher une unité à ajouter..." 
+               data-i18n-placeholder="team_picker_placeholder"
                aria-label="Rechercher une unité à ajouter au deck"
+               data-i18n-aria="team_picker_aria"
                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-500 transition-colors duration-150">
-        <div id="team-picker-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2.5 max-h-80 overflow-y-auto pr-1" role="region" aria-label="Unités suggérées pour le deck">
+        <div id="team-picker-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2.5 max-h-80 overflow-y-auto pr-1" role="region" aria-label="Unités suggérées pour le deck" data-i18n-aria="team_picker_grid_aria">
           <!-- Picker cards -->
         </div>
       </div>
@@ -584,9 +621,9 @@
         <div>
           <h2 id="compare-heading" class="text-lg font-bold text-white flex items-center gap-2 text-balance">
             <i data-lucide="arrow-left-right" class="w-5 h-5 text-sky-400" stroke-width="2"></i>
-            <span>Comparateur de Personnages</span>
+            <span data-i18n="compare_heading">Comparateur de Personnages</span>
           </h2>
-          <p class="text-xs text-slate-400 text-pretty mt-0.5">
+          <p class="text-xs text-slate-400 text-pretty mt-0.5" data-i18n="compare_subheading">
             Confrontez deux unités face à face : DPS, portée, cadence, efficacité économique et aptitudes.
           </p>
         </div>
@@ -594,7 +631,7 @@
         <!-- Global Compare Settings: Level 1 vs 175 & Idol Buff -->
         <div class="flex items-center flex-wrap gap-2">
           <!-- Level view toggle -->
-          <div class="flex items-center gap-1 bg-[#090e1c] p-1 rounded-lg border border-slate-800" role="group" aria-label="Niveau de carte pour la comparaison">
+          <div class="flex items-center gap-1 bg-[#090e1c] p-1 rounded-lg border border-slate-800" role="group" aria-label="Niveau de carte pour la comparaison" data-i18n-aria="compare_level_group_aria">
             <button id="btn-compare-lvl-1" onclick="setCompareLevel(1)" aria-pressed="true" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-600 text-white border border-sky-500 tap-scale transition-colors shadow-sm">
               Level 1
             </button>
@@ -604,15 +641,15 @@
           </div>
 
           <!-- Idol buff toggle -->
-          <label for="compare-idol-buff-toggle" class="cursor-pointer select-none px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-[#090e1c] border border-slate-800 hover:border-sky-500/40 text-slate-300 flex items-center gap-1.5 tap-scale transition-colors" title="Simuler avec le buff de dégâts d'Idol (aptitude Shine au palier max)">
+          <label for="compare-idol-buff-toggle" class="cursor-pointer select-none px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-[#090e1c] border border-slate-800 hover:border-sky-500/40 text-slate-300 flex items-center gap-1.5 tap-scale transition-colors" title="Simuler avec le buff de dégâts d'Idol (aptitude Shine au palier max)" data-i18n-title="compare_idol_buff_title">
             <input type="checkbox" id="compare-idol-buff-toggle" onchange="toggleCompareIdolBuff()" class="rounded bg-slate-900 border-slate-700 text-sky-600 focus:ring-0 cursor-pointer">
             <i data-lucide="music" class="w-3.5 h-3.5 text-sky-400" stroke-width="2"></i>
-            <span>Buff Idol</span>
+            <span data-i18n="buff_idol_label">Buff Idol</span>
             <span id="compare-idol-pct" class="font-mono-num text-sky-300 font-bold text-[10px]">+130%</span>
           </label>
 
           <!-- Reset button -->
-          <button onclick="clearCompare()" class="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-700/50 text-slate-400 hover:text-rose-300 tap-scale transition-colors" title="Réinitialiser la comparaison" aria-label="Réinitialiser le comparateur">
+          <button onclick="clearCompare()" class="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-700/50 text-slate-400 hover:text-rose-300 tap-scale transition-colors" title="Réinitialiser la comparaison" data-i18n-title="compare_reset_title" aria-label="Réinitialiser le comparateur" data-i18n-aria="compare_reset_aria">
             <i data-lucide="rotate-ccw" class="w-4 h-4" stroke-width="2"></i>
           </button>
         </div>
@@ -626,16 +663,18 @@
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1.5">
               <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-              <span class="text-xs font-bold text-sky-300 uppercase tracking-wider">Personnage 1</span>
+              <span class="text-xs font-bold text-sky-300 uppercase tracking-wider" data-i18n="compare_slot_a_title">Personnage 1</span>
             </div>
-            <button id="compare-clear-a" onclick="clearCompareSlot('a')" class="text-[10px] text-slate-500 hover:text-rose-400 font-medium transition-colors hidden">
+            <button id="compare-clear-a" onclick="clearCompareSlot('a')" class="text-[10px] text-slate-500 hover:text-rose-400 font-medium transition-colors hidden" data-i18n="compare_remove_btn">
               Retirer
             </button>
           </div>
           <div class="relative">
-            <label for="compare-search-a" class="sr-only">Rechercher le premier personnage</label>
+            <label for="compare-search-a" class="sr-only" data-i18n="compare_slot_a_sr">Rechercher le premier personnage</label>
             <input type="text" id="compare-search-a" oninput="handleCompareSearch('a')" onfocus="handleCompareSearch('a')" placeholder="Choisir une unité (ex: Demon Of Emotion)..."
+                   data-i18n-placeholder="compare_slot_a_placeholder"
                    aria-label="Rechercher le premier personnage"
+                   data-i18n-aria="compare_slot_a_sr"
                    autocomplete="off"
                    class="w-full bg-[#070b14] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors">
             <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute right-3 top-2.5 pointer-events-none" stroke-width="1.75"></i>
@@ -646,7 +685,7 @@
 
         <!-- Central Swap Button (⇄) -->
         <div class="md:col-span-2 flex justify-center py-1 md:py-0 relative z-20">
-          <button onclick="swapCompareUnits()" aria-label="Inverser les deux personnages" class="w-10 h-10 rounded-full bg-[#090e1c] hover:bg-sky-600 hover:text-white border border-slate-700/80 text-sky-400 flex items-center justify-center tap-scale transition-colors shadow-md group" title="Inverser A ⇄ B">
+          <button onclick="swapCompareUnits()" aria-label="Inverser les deux personnages" data-i18n-aria="compare_swap_aria" class="w-10 h-10 rounded-full bg-[#090e1c] hover:bg-sky-600 hover:text-white border border-slate-700/80 text-sky-400 flex items-center justify-center tap-scale transition-colors shadow-md group" title="Inverser A ⇄ B" data-i18n-title="compare_swap_title">
             <i data-lucide="arrow-left-right" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" stroke-width="2.5"></i>
           </button>
         </div>
@@ -656,16 +695,18 @@
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1.5">
               <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-              <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Personnage 2</span>
+              <span class="text-xs font-bold text-amber-300 uppercase tracking-wider" data-i18n="compare_slot_b_title">Personnage 2</span>
             </div>
-            <button id="compare-clear-b" onclick="clearCompareSlot('b')" class="text-[10px] text-slate-500 hover:text-rose-400 font-medium transition-colors hidden">
+            <button id="compare-clear-b" onclick="clearCompareSlot('b')" class="text-[10px] text-slate-500 hover:text-rose-400 font-medium transition-colors hidden" data-i18n="compare_remove_btn">
               Retirer
             </button>
           </div>
           <div class="relative">
-            <label for="compare-search-b" class="sr-only">Rechercher le second personnage</label>
+            <label for="compare-search-b" class="sr-only" data-i18n="compare_slot_b_sr">Rechercher le second personnage</label>
             <input type="text" id="compare-search-b" oninput="handleCompareSearch('b')" onfocus="handleCompareSearch('b')" placeholder="Choisir une unité (ex: Joke Da Fool)..."
+                   data-i18n-placeholder="compare_slot_b_placeholder"
                    aria-label="Rechercher le second personnage"
+                   data-i18n-aria="compare_slot_b_sr"
                    autocomplete="off"
                    class="w-full bg-[#070b14] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors">
             <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute right-3 top-2.5 pointer-events-none" stroke-width="1.75"></i>
@@ -680,7 +721,7 @@
       <div id="compare-presets-strip" class="flex items-center flex-wrap gap-2 text-xs text-slate-400 bg-[#090e1c]/70 p-2.5 rounded-xl border border-slate-800/80 relative z-20">
         <span class="text-[11px] font-semibold text-slate-400 flex items-center gap-1 shrink-0">
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400"></i>
-          Duels populaires :
+          <span data-i18n="compare_popular_label">Duels populaires :</span>
         </span>
         <button onclick="loadComparePreset('demon_of_emotion', 'joke_da_fool')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 text-[11px] font-semibold tap-scale transition-colors">
           Demon Of Emotion vs Joke Da Fool (7★)
@@ -690,7 +731,6 @@
         </button>
         <button onclick="loadComparePreset('idol', 'metallic_king')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 text-[11px] font-semibold tap-scale transition-colors">
           Idol vs Metallic King (Buffers)
-        </button>
       </div>
 
       <!-- Dynamic Comparison Content Display -->
@@ -730,11 +770,11 @@
           <span id="modal-trade-badge" class="px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded hidden">
             Tradeable
           </span>
-          <span id="modal-unobtainable-badge" class="px-2 py-0.5 text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded hidden">
+          <span id="modal-unobtainable-badge" class="px-2 py-0.5 text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded hidden" data-i18n="badge_unobtainable">
             Introuvable
           </span>
         </div>
-        <button id="modal-close-btn" onclick="closeUnitModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center tap-scale" aria-label="Fermer la fiche d'unité">
+        <button id="modal-close-btn" onclick="closeUnitModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center tap-scale" aria-label="Fermer la fiche d'unité" data-i18n-aria="modal_close_aria">
           <i data-lucide="x" class="w-4 h-4" stroke-width="2"></i>
         </button>
       </div>
@@ -757,15 +797,15 @@
               Ajoutée le —
             </div>
             <div class="flex items-center gap-1.5 mt-3 w-full">
-              <button id="modal-add-team-btn" onclick="addCurrentModalUnitToTeam()" class="flex-1 px-2.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 whitespace-nowrap tap-scale transition-colors shadow-sm" aria-label="Ajouter cette unité au deck">
+              <button id="modal-add-team-btn" onclick="addCurrentModalUnitToTeam()" class="flex-1 px-2.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 whitespace-nowrap tap-scale transition-colors shadow-sm" aria-label="Ajouter cette unité au deck" data-i18n-aria="modal_btn_deck_aria">
                 <i data-lucide="plus-circle" class="w-3.5 h-3.5 shrink-0" stroke-width="2"></i>
-                <span>Deck</span>
+                <span data-i18n="modal_btn_deck">Deck</span>
               </button>
-              <button id="modal-compare-btn" onclick="startCompareWithModalUnit()" class="px-2.5 py-2 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-700 text-slate-300 font-semibold text-xs flex items-center justify-center gap-1 whitespace-nowrap tap-scale transition-colors" title="Comparer cette unité avec une autre" aria-label="Comparer cette unité">
+              <button id="modal-compare-btn" onclick="startCompareWithModalUnit()" class="px-2.5 py-2 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-700 text-slate-300 font-semibold text-xs flex items-center justify-center gap-1 whitespace-nowrap tap-scale transition-colors" title="Comparer cette unité avec une autre" data-i18n-title="modal_btn_compare_title" aria-label="Comparer cette unité" data-i18n-aria="modal_btn_compare_aria">
                 <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 shrink-0" stroke-width="2"></i>
-                <span class="hidden sm:inline">Comparer</span>
+                <span class="hidden sm:inline" data-i18n="modal_btn_compare">Comparer</span>
               </button>
-              <a id="modal-fandom-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white tap-scale flex items-center justify-center shrink-0" title="Fiche Fandom Wiki" aria-label="Consulter la page officielle Fandom de cette unité (nouvelle fenêtre)">
+              <a id="modal-fandom-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white tap-scale flex items-center justify-center shrink-0" title="Fiche Fandom Wiki" data-i18n-title="modal_fandom_title" aria-label="Consulter la page officielle Fandom de cette unité (nouvelle fenêtre)" data-i18n-aria="modal_fandom_aria">
                 <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0" stroke-width="1.75"></i>
               </a>
             </div>
@@ -781,7 +821,7 @@
             <div id="modal-obtain-source" class="hidden text-xs bg-amber-950/30 border border-amber-500/30 rounded-lg px-3 py-2 flex items-start gap-2">
               <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" stroke-width="2"></i>
               <div class="min-w-0">
-                <span class="text-amber-400 font-bold text-[10px] uppercase tracking-wider block">Source d'obtention</span>
+                <span class="text-amber-400 font-bold text-[10px] uppercase tracking-wider block" data-i18n="modal_obtain_title">Source d'obtention</span>
                 <span id="modal-obtain-source-text" class="text-amber-100/90 leading-snug block"></span>
                 <span id="modal-obtain-chain" class="text-[10px] text-slate-400 block mt-0.5"></span>
               </div>
@@ -789,27 +829,27 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono-num">
               <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold">Type de Tour</span>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_tower_type">Type de Tour</span>
                 <span id="modal-tower-type" class="font-bold text-slate-100 text-xs font-sans">Ground</span>
               </div>
               <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold">Type d'Attaque</span>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_attack_type">Type d'Attaque</span>
                 <span id="modal-attack-type" class="font-bold text-slate-200 text-xs font-sans">AoE</span>
               </div>
               <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold">Coût Déploiement</span>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_deploy_cost">Coût Déploiement</span>
                 <span id="modal-deploy-cost" class="font-bold text-slate-200 text-xs">$0</span>
               </div>
               <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold">Coût Total Max</span>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_total_cost">Coût Total Max</span>
                 <span id="modal-total-cost" class="font-bold text-slate-200 text-xs">$0</span>
               </div>
               <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold">Dégâts Max</span>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_max_dmg">Dégâts Max</span>
                 <span id="modal-max-damage" class="font-bold text-slate-100 text-xs">0</span>
               </div>
               <div class="bg-[#0a0f1d] border border-slate-800 p-2.5 rounded-lg">
-                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold">DPS Max Estimé</span>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold" data-i18n="hud_max_dps">DPS Max Estimé</span>
                 <span id="modal-max-dps" class="font-bold text-amber-300 text-xs">0</span>
               </div>
             </div>
@@ -817,7 +857,7 @@
             <!-- Visual Damage Progression Bar -->
             <div id="modal-dmg-bar-container" class="bg-[#0a0f1d] border border-slate-800 p-3 rounded-lg space-y-1.5">
               <div class="flex justify-between items-center text-[11px]">
-                <span class="text-slate-400 font-sans">Échelle de Dégâts (Base → Max) :</span>
+                <span class="text-slate-400 font-sans" data-i18n="hud_dmg_scale">Échelle de Dégâts (Base → Max) :</span>
                 <span id="modal-dmg-range-label" class="font-mono-num font-bold text-slate-200">0 → 0</span>
               </div>
               <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
@@ -833,7 +873,7 @@
         <div id="modal-evolution-section" class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-2">
           <div class="font-semibold text-slate-300 flex items-center gap-1.5">
             <i data-lucide="git-branch" class="w-3.5 h-3.5 text-sky-400" stroke-width="2"></i>
-            <span>Recette d'Évolution</span>
+            <span data-i18n="modal_evo_title">Recette d'Évolution</span>
           </div>
           <div id="modal-evolution-content">
             <!-- Dynamic evolution materials -->
@@ -847,10 +887,10 @@
                   class="w-full flex items-center justify-between text-left font-semibold text-slate-300 hover:text-white tap-scale group">
             <span class="flex items-center gap-1.5">
               <i data-lucide="history" class="w-3.5 h-3.5 text-sky-400" stroke-width="2"></i>
-              <span>Pré-évolutions <span id="modal-preevo-count" class="text-sky-300 font-mono-num"></span></span>
+              <span><span data-i18n="modal_preevo_title">Pré-évolutions</span> <span id="modal-preevo-count" class="text-sky-300 font-mono-num"></span></span>
             </span>
             <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-300 group-hover:border-sky-500/50 group-hover:text-sky-300 transition-colors duration-150 flex items-center gap-1">
-              <span id="modal-preevo-btn-label">Afficher</span>
+              <span id="modal-preevo-btn-label" data-i18n="btn_show">Afficher</span>
               <i data-lucide="chevron-down" id="modal-preevo-chevron" class="w-3 h-3 transition-transform duration-200" stroke-width="2"></i>
             </span>
           </button>
@@ -866,11 +906,11 @@
                   class="w-full flex items-center justify-between flex-wrap gap-2 text-left border-b border-slate-800/80 pb-2.5 tap-scale group">
             <div class="font-semibold text-slate-200 flex items-center gap-2 text-xs sm:text-sm">
               <i data-lucide="zap" class="w-4 h-4 text-amber-300" stroke-width="2"></i>
-              <span>Capacités Spéciales, Passifs & Leader</span>
+              <span data-i18n="modal_abilities_title">Capacités Spéciales, Passifs & Leader</span>
               <span id="modal-abilities-count" class="px-1.5 py-0.5 rounded text-[10px] font-mono-num font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">0</span>
             </div>
             <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-300 group-hover:border-amber-400/50 group-hover:text-amber-300 transition-colors duration-150 flex items-center gap-1">
-              <span id="modal-abilities-btn-label">Afficher</span>
+              <span id="modal-abilities-btn-label" data-i18n="btn_show">Afficher</span>
               <i data-lucide="chevron-down" id="modal-abilities-chevron" class="w-3 h-3 transition-transform duration-200" stroke-width="2"></i>
             </span>
           </button>
@@ -886,11 +926,11 @@
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div class="font-semibold text-slate-300 flex items-center gap-1.5">
               <i data-lucide="trending-up" class="w-3.5 h-3.5 text-sky-400" stroke-width="2"></i>
-              <span>Progression des Paliers d'Amélioration (Upgrades)</span>
+              <span data-i18n="modal_upgrades_title">Progression des Paliers d'Amélioration (Upgrades)</span>
             </div>
             <!-- Niveau de carte : Level 1 / Level 175 -->
-            <div class="flex items-center gap-1.5" role="group" aria-label="Niveau de carte sélectionné">
-              <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider hidden sm:inline">Niveau de carte</span>
+            <div class="flex items-center gap-1.5" role="group" aria-label="Niveau de carte sélectionné" data-i18n-aria="modal_level_group_aria">
+              <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider hidden sm:inline" data-i18n="modal_card_level">Niveau de carte</span>
               <button id="btn-level-1" onclick="setLevelView(1)" aria-pressed="true"
                       class="ps-2.5 pe-3 py-1 rounded-lg text-[11px] font-bold border transition-colors duration-150 flex items-center gap-1 tap-scale">
                 Level 1
@@ -902,10 +942,10 @@
               </button>
               <!-- Simulation : dégâts de cette unité avec le buff Shine d'Idol au palier max -->
               <label id="idol-buff-toggle-wrap" for="idol-buff-toggle" class="hidden cursor-pointer select-none ps-2.5 pe-3 py-1 rounded-lg text-[11px] font-bold border transition-colors duration-150 flex items-center gap-1.5 tap-scale"
-                     title="Cochez pour afficher les dégâts et le DPS de cette unité avec le buff de dégâts d'Idol (aptitude Shine) au palier maximum d'Idol pour le niveau de carte sélectionné">
+                     title="Cochez pour afficher les dégâts et le DPS de cette unité avec le buff de dégâts d'Idol (aptitude Shine) au palier maximum d'Idol pour le niveau de carte sélectionné" data-i18n-title="modal_idol_toggle_title">
                 <input type="checkbox" id="idol-buff-toggle" onchange="toggleIdolBuff()" class="rounded bg-slate-900 border-slate-700 text-sky-600 focus:ring-0 cursor-pointer">
                 <i data-lucide="music" class="w-3 h-3" stroke-width="2"></i>
-                <span>Buff Idol</span>
+                <span data-i18n="buff_idol_label">Buff Idol</span>
                 <span id="idol-buff-pct" class="font-mono-num text-sky-300">+130%</span>
               </label>
             </div>
@@ -921,14 +961,14 @@
             <table class="w-full text-left font-mono-num">
               <thead class="bg-[#141d33] text-slate-400 uppercase font-sans font-semibold text-[11px]">
                 <tr>
-                  <th class="p-2.5" scope="col">Niveau</th>
-                  <th class="p-2.5" scope="col">Coût</th>
-                  <th class="p-2.5" scope="col">Dégâts</th>
-                  <th class="p-2.5" scope="col">Portée</th>
+                  <th class="p-2.5" scope="col" data-i18n="th_level">Niveau</th>
+                  <th class="p-2.5" scope="col" data-i18n="th_cost">Coût</th>
+                  <th class="p-2.5" scope="col" data-i18n="th_damage">Dégâts</th>
+                  <th class="p-2.5" scope="col" data-i18n="th_range">Portée</th>
                   <th class="p-2.5" scope="col">SPA</th>
                   <th class="p-2.5" scope="col">DPS</th>
-                  <th id="upg-buff-th" class="p-2.5 hidden" scope="col" title="Pourcentage de buff de dégâts fourni à ce palier (aptitude Shine) — suit le niveau de carte sélectionné (Level 1 / Level 175)">Buff</th>
-                  <th class="p-2.5 font-sans" scope="col">Effet / Capacité</th>
+                  <th id="upg-buff-th" class="p-2.5 hidden" scope="col" title="Pourcentage de buff de dégâts fourni à ce palier (aptitude Shine) — suit le niveau de carte sélectionné (Level 1 / Level 175)" data-i18n-title="th_buff_title" data-i18n="th_buff">Buff</th>
+                  <th class="p-2.5 font-sans" scope="col" data-i18n="th_effect">Effet / Capacité</th>
                 </tr>
               </thead>
               <tbody id="modal-upgrades-tbody" class="divide-y divide-slate-800/60 text-xs">
@@ -947,9 +987,9 @@
   <footer class="bg-[#0a0e1a] border-t border-slate-800 py-6 px-4 text-xs text-slate-400 text-center space-y-1 mt-auto">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
       <div>
-        <span class="text-slate-200 font-semibold">ASTD Database Pro</span> • Base de données et encyclopédie Roblox All Star Tower Defense.
+        <span class="text-slate-200 font-semibold">ASTD Database Pro</span> • <span data-i18n="footer_desc">Base de données et encyclopédie Roblox All Star Tower Defense.</span>
       </div>
-      <div id="footer-last-updated" class="text-slate-400 font-mono-num">
+      <div id="footer-last-updated" class="text-slate-400 font-mono-num" data-i18n="footer_sync">
         Synchro wiki...
       </div>
     </div>
@@ -962,6 +1002,7 @@
   </div>
 
   <!-- Application Logic -->
-  <script src="app.js?v=compare-v4"></script>
+  <script src="app.js?v=i18n-v1"></script>
 </body>
 </html>
+

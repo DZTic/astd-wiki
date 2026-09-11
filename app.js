@@ -23,6 +23,891 @@ let teamSlots = [null, null, null, null, null, null];
 let currentLevelView = 1; // 1 | 175 : niveau de carte affiché dans la fiche unité
 let lastFocusedElement = null;
 
+// ==========================================
+// INTERNATIONALIZATION (I18N) - FR & EN
+// ==========================================
+let currentLang = localStorage.getItem('astd_lang') || 'fr';
+
+const I18N = {
+  fr: {
+    // Header, brand & nav
+    skip_to_content: "Aller au contenu principal",
+    brand_subtitle: "Base de Données & Meta Hub",
+    brand_aria: "Accueil ASTD Wiki",
+    quick_search_placeholder: "Rechercher une unité (Ctrl+K)...",
+    quick_search_aria: "Rechercher une unité",
+    quick_search_sr: "Rechercher une unité",
+    wiki_sync_label: "Synchro wiki :",
+    units_label: "Unités",
+    orbs_label: "Orbes",
+    codes_autoupdate: "Actifs",
+    latest_code_label: "Dernier code :",
+    copy_btn: "Copier",
+    copy_code_aria: "Copier le dernier code",
+    lang_choice: "Langue",
+    wiki_link_title: "Consulter le wiki Fandom officiel d'All Star Tower Defense",
+    wiki_link_aria: "Ouvrir le wiki officiel Fandom dans un nouvel onglet",
+    menu_toggle_aria: "Ouvrir le menu de navigation",
+    nav_main_aria: "Navigation principale",
+    nav_units: "Tours & Unités",
+    nav_tierlist: "Tier List",
+    nav_codes: "Codes Cadeaux",
+    nav_orbs: "Orbes & Reliques",
+    nav_gamemodes: "Modes & Raids",
+    nav_gamemodes_short: "Modes",
+    nav_teambuilder: "Deck Builder",
+    nav_deck_short: "Deck",
+    nav_compare: "Comparateur",
+    nav_compare_short: "Versus",
+    nav_mobile_aria: "Menu mobile",
+    mobile_search_placeholder: "Rechercher une unité...",
+    drawer_units: "Tours & Unités",
+    drawer_tierlist: "Tier List Officielle",
+    drawer_codes: "Codes Actifs",
+    drawer_orbs: "Compendium des Orbes",
+    drawer_gamemodes: "Modes de Jeu & Raids",
+    drawer_teambuilder: "Deck Builder (6 Slots)",
+    drawer_compare: "Comparateur Tactique Pro",
+
+    // Units Tab & Filters
+    units_h1: "Base de Données des Tours & Unités ASTD",
+    units_filter_aria: "Filtres de recherche des unités",
+    filter_search_sr: "Rechercher une unité par nom",
+    filter_search_placeholder: "Nom ou franchise de l'unité...",
+    clear_search_aria: "Effacer la recherche",
+    filter_sort_sr: "Trier les unités",
+    filter_sort_aria: "Critère de tri des unités",
+    sort_recent_desc: "Plus Récentes d'abord",
+    sort_star_desc: "Rareté (Décroissant)",
+    sort_star_asc: "Rareté (Croissant)",
+    sort_dps_desc: "DPS Max (Décroissant)",
+    sort_dmg_desc: "Dégâts Max (Décroissant)",
+    sort_cost_asc: "Coût Total (Plus bas)",
+    sort_name_asc: "Nom (A → Z)",
+    filter_tower_type_sr: "Filtrer par type de tour",
+    filter_tower_type_aria: "Type de placement de la tour",
+    filter_type_all: "Tous les types",
+    filter_type_ground: "Sol (Ground)",
+    filter_type_air: "Aérien (Air)",
+    filter_type_hill: "Colline (Hill)",
+    filter_type_hybrid: "Hybride (Sol & Air)",
+    filter_anime_sr: "Filtrer par franchise",
+    filter_anime_aria: "Franchise ou anime de provenance",
+    filter_anime_all: "Toutes les franchises",
+    filter_obtainable_title: "Masquer les unités bannies ou introuvables",
+    filter_obtainable: "Obtenables uniquement",
+    view_mode_aria: "Mode d'affichage de la liste",
+    view_grid_title: "Affichage en cartes tactiques",
+    view_grid_aria: "Afficher en grille de cartes tactiques",
+    view_grid: "Grille",
+    view_table_title: "Affichage en tableau détaillé",
+    view_table_aria: "Afficher en tableau détaillé style Pro",
+    view_table: "Tableau",
+    filter_star_aria: "Filtrer par rareté d'étoiles",
+    star_all: "Toutes",
+    results_label: "Résultats :",
+    units_grid_aria: "Grille des unités de défense",
+    load_more_aria: "Charger les unités suivantes",
+    load_more_units: "Charger plus d'unités",
+    units_table_aria: "Tableau comparatif des unités de défense",
+    th_unit: "Unité & Franchise",
+    th_rarity: "Rareté",
+    th_type: "Type",
+    th_max_damage: "Dégâts Max",
+    th_range: "Portée",
+    th_spa: "SPA",
+    th_max_dps: "DPS Max",
+    th_total_cost: "Coût Max",
+    th_action: "Actions",
+
+    // Dynamic strings - Units List & Cards
+    unit_singular: "unité",
+    unit_plural: "unités",
+    badge_new: "Nouveau",
+    badge_unobtainable: "Introuvable",
+    btn_card: "Fiche",
+    btn_compare_title: "Comparer cette unité",
+    btn_add_deck_title: "Ajouter au deck",
+    no_matching_units: "Aucune unité ne correspond à vos filtres",
+    no_results_for: "Aucun résultat pour « {searchVal} ».",
+    no_results_combo: "Aucune unité disponible avec la combinaison de rareté et type sélectionnés.",
+    reset_filters: "Réinitialiser les filtres",
+    table_view_sheet: "Voir la fiche.",
+    card_click_inspect: "Cliquer pour inspecter.",
+    wiki_page_created_on: "Fiche wiki créée le",
+    dmg_max_tooltip: "Dégâts au palier d'amélioration maximum",
+    dps_max_tooltip: "Dégâts Par Seconde au palier maximum",
+    range_max_tooltip: "Distance d'attaque maximale",
+    spa_tooltip: "SPA : Secondes Par Attaque (délai entre deux attaques)",
+    hud_range_short: "Portée",
+
+    // Modal Unit Details
+    modal_close_aria: "Fermer la fiche de l'unité",
+    modal_card_level: "Niveau de carte :",
+    modal_level_group_aria: "Niveau de carte pour les statistiques",
+    modal_idol_toggle_title: "Simuler le buff de dégâts fourni par Idol (aptitude Shine)",
+    buff_idol_label: "Buff Idol",
+    hud_max_dmg: "Dégâts Max",
+    hud_dmg_scale: "Échelle de dégâts du palier initial au palier max",
+    hud_max_dps: "DPS Max Estimé",
+    hud_tower_type: "Type de Placement",
+    hud_attack_type: "Zone d'Attaque",
+    hud_deploy_cost: "Déploiement",
+    hud_total_cost: "Coût Total Max",
+    modal_fandom_title: "Ouvrir la page Fandom officielle de cette unité",
+    modal_fandom_aria: "Consulter la fiche officielle sur le wiki Fandom (nouvel onglet)",
+    modal_btn_deck: "Ajouter au Deck",
+    modal_btn_deck_aria: "Ajouter cette unité à votre équipe",
+    modal_btn_compare: "Comparer",
+    modal_btn_compare_title: "Comparer cette unité avec un autre personnage",
+    modal_btn_compare_aria: "Ouvrir le comparateur avec cette unité",
+    modal_obtain_title: "Source d'obtention",
+    modal_evo_title: "Évolution de l'Unité",
+    modal_preevo_title: "Pré-évolutions",
+    btn_show: "Afficher",
+    btn_hide: "Masquer",
+    modal_abilities_title: "Capacités Spéciales, Passifs & Leader",
+    modal_upgrades_title: "Progression des Améliorations (Paliers de Jeu)",
+    th_level: "Palier",
+    th_cost: "Coût",
+    th_damage: "Dégâts",
+    th_buff: "Buff",
+    th_buff_title: "Buff de dégâts fourni aux unités alliées à portée (aptitude Shine)",
+    th_effect: "Effets / Capacités",
+    attack_type_tooltip: "AoE : Area of Effect (zone touchée par chaque attaque : cercle, cône, ligne...)",
+    unknown: "Inconnu",
+    anime_prefix: "Anime :",
+    char_prefix: "Personnage :",
+    origin_all_star: "Origine : Personnage All Star",
+    added_on: "Ajoutée le",
+    added_on_tooltip: "Fiche wiki créée le {date} — le badge Nouveau s'affiche pendant 30 jours",
+    no_overview: "Aucune description détaillée enregistrée pour cette unité.",
+    evolution_of: "Évolution de :",
+    can_evolve_into: "Peut évoluer en",
+    evolves_into: "Évolue en :",
+    required_materials: "Matériaux requis :",
+    units_evolving_into: "Unité{s} qui évolue{nt} en",
+    ability_manual: "Aptitude Manuelle",
+    ability_passive: "Passif Spécial",
+    ability_leader: "Leader",
+    ability_default: "Capacité",
+    upgrade_effects_prefix: "Effets du palier",
+    view_full_ability: "Voir la fiche complète de l'aptitude",
+    upgrades_empty: "Statistiques de paliers détaillées non documentées pour cette unité.",
+    tag_lvl175: "niveau de carte 175",
+    tag_idol: "buff Idol +{pct}%",
+    upg_buff_tooltip: "Buff de dégâts fourni aux unités à portée (aptitude Shine) — {lvl}",
+    upg_buff_none: "Aucun buff à ce palier (Your Star remplace Shine)",
+    click_read_ability: "Cliquer pour lire les effets et détails de capacité",
+    lvl_175_card: "niveau de carte 175",
+    lvl_1_card: "niveau de carte 1",
+
+    // Tier List
+    tierlist_heading: "Tier List Officielle ASTD",
+    tierlist_subheading: "Classement officiel des meilleures unités par catégorie compétitive.",
+    tierlist_region_aria: "Tier List Officielle ASTD",
+    tierlist_loading: "Tier list en cours de chargement...",
+
+    // Codes
+    codes_heading: "Codes Cadeaux Actifs & Vérifiés",
+    codes_subheading: "Tous les codes sont testés en jeu régulièrement. Cliquez sur Copier pour récupérer les récompenses.",
+    codes_active_aria: "Codes cadeaux actifs",
+    codes_expired_heading: "Codes Expirés / Inactifs",
+    codes_filter_expired_sr: "Filtrer les codes expirés",
+    codes_filter_expired_placeholder: "Rechercher un code expiré...",
+    codes_filter_expired_aria: "Recherche dans l'historique des codes expirés",
+    codes_expired_region_aria: "Liste des codes cadeaux expirés",
+    code_verified_active: "Vérifié & Actif",
+    code_recent: "Récent",
+    code_rewards_label: "Récompenses :",
+    btn_copy_code: "Copier le code",
+    copied: "Copié !",
+    toast_code_copied: "Code \"{code}\" copié !",
+    no_expired_codes: "Aucun code expiré ne correspond à cette recherche.",
+
+    // Orbs
+    orbs_heading: "Compendium des Orbes",
+    orbs_subheading: "Bonus de statistiques et conditions d'équipement des orbes.",
+    search_orbs_sr: "Rechercher un orbe",
+    search_orbs_placeholder: "Filtrer un orbe (nom, effet, unité compatible)...",
+    search_orbs_aria: "Filtrer les orbes par nom, effet ou unité requise",
+    orbs_grid_aria: "Compendium des orbes",
+    all_units_badge: "★ Toutes les unités",
+    universal_orb_title: "Équipable par toutes les unités",
+    restricted_orb_title: "Réservé à cette unité (ou sa famille)",
+    stat_bonus_label: "Bonus statistique :",
+    special_bonus: "Bonus spécial",
+    obtain_label: "Obtention :",
+    compatible_label: "Compatible :",
+    no_orbs_found: "Aucun orbe trouvé",
+    no_orbs_query: "Aucun orbe ne correspond à la recherche « {q} ».",
+    clear_search: "Effacer la recherche",
+
+    // Gamemodes
+    gamemodes_heading: "Modes de Jeu & Raids",
+    gamemodes_subheading: "Guides stratégiques et récompenses des différents modes de jeu.",
+    gamemodes_grid_aria: "Modes de jeu et raids",
+    mode_rewards_label: "Récompenses :",
+
+    // Team Builder
+    teambuilder_heading: "Tactical Team Builder (Deck 6 Slots)",
+    teambuilder_subheading: "Analysez la couverture, le coût et la synergie de votre composition.",
+    clear_team_btn: "Vider le deck",
+    clear_team_aria: "Retirer toutes les unités du deck",
+    team_slots_aria: "Slots du deck de l'équipe",
+    team_stat_deploy_label: "Coût Déploiement Total",
+    team_stat_total_label: "Coût Améliorations Max",
+    team_stat_dps_label: "DPS Cumulé Estimé",
+    team_coverage_title: "Couverture Stratégique",
+    team_economy_title: "Économie & Contrôle",
+    team_picker_title: "Ajouter une Unité au Deck",
+    team_picker_sr: "Rechercher une tour à ajouter au deck",
+    team_picker_placeholder: "Rechercher parmi les unités 6★ et 7★...",
+    team_picker_aria: "Champ de recherche pour ajouter une unité au deck",
+    team_picker_grid_aria: "Sélection des unités disponibles pour le deck",
+    slot_empty_sr: "Slot {n} vide. Cliquer pour rechercher une tour.",
+    slot_label: "SLOT {n}",
+    add_a_tower: "Ajouter une tour",
+    remove_from_deck: "Retirer {name} du deck",
+    dep_short: "Dép",
+    team_anti_ground: "Anti-Sol (Ground)",
+    team_anti_air: "Anti-Aérien (Air)",
+    team_economy: "Économie / Farm",
+    team_support: "Support / Contrôle",
+    btn_add: "+ Ajouter",
+    toast_team_full: "Votre deck de 6 unités est plein !",
+    toast_already_in_team: "{name} est déjà dans le deck !",
+    toast_added_to_team: "{name} ajouté au slot {slot}",
+    toast_removed_from_team: "{name} retiré du deck",
+    toast_team_cleared: "Le deck a été vidé",
+
+    // Comparator
+    compare_heading: "Comparateur Tactique Pro (Versus)",
+    compare_subheading: "Confrontez deux unités face-à-face : DPS, rentabilité ($/DPS), portée, cadence et verdict automatisé.",
+    compare_level_group_aria: "Niveau de carte pour la comparaison",
+    compare_idol_buff_title: "Simuler le buff de dégâts fourni par Idol (aptitude Shine)",
+    compare_slot_a_title: "Unité A :",
+    compare_slot_a_sr: "Rechercher l'unité A",
+    compare_slot_a_placeholder: "Rechercher l'unité A (ex. Demon of Emotion, Kura...)",
+    compare_remove_btn: "Effacer",
+    compare_swap_aria: "Intervertir unité A et unité B",
+    compare_swap_title: "Intervertir unité A et unité B",
+    compare_reset_aria: "Réinitialiser les deux unités sélectionnées",
+    compare_reset_title: "Réinitialiser la comparaison",
+    compare_slot_b_title: "Unité B :",
+    compare_slot_b_sr: "Rechercher l'unité B",
+    compare_slot_b_placeholder: "Rechercher l'unité B (ex. Stampede, Joke Da Fool...)",
+    compare_popular_label: "Duels populaires :",
+    compare_empty_title: "Sélectionnez 2 personnages pour comparer",
+    compare_empty_desc: "Utilisez les champs de recherche ci-dessus pour désigner les deux unités à confronter, ou lancez un duel populaire en un clic.",
+    compare_choose_second: "— choisissez la 2nde unité",
+    compare_no_unit: "Aucune unité sélectionnée pour le moment.",
+    loading_units: "Chargement des unités en cours...",
+    no_units_found: "Aucune unité trouvée",
+    toast_added_to_compare: "« {name} » ajouté au comparateur",
+    dps_max_a: "DPS Max (A)",
+    dmg_max_a: "Dégâts Max (A)",
+    dps_max_b: "DPS Max (B)",
+    dmg_max_b: "Dégâts Max (B)",
+    verdict_title: "Verdict & Synthèse Tactique",
+    verdict_subtitle: "Analyse comparative automatisée",
+    pillar_dps: "💥 DPS Brut",
+    pillar_spa: "⚡ Cadence (SPA)",
+    pillar_range: "🎯 Portée",
+    pillar_cost: "💰 Rentabilité ($/DPS)",
+    verdict_diff: "d'écart",
+    verdict_faster: "plus rapide",
+    verdict_radius: "de rayon",
+    verdict_ratio: "meilleur ratio",
+    tie: "Égalité",
+    compare_table_title: "Tableau Comparatif des Statistiques (Palier Max)",
+    compare_abilities_title: "Capacités Spéciales, Passifs & Leader",
+    no_abilities_documented: "Aucune capacité spéciale documentée.",
+    metric_dmg_max: "Dégâts Max",
+    metric_dps_max: "DPS Max Estimé",
+    metric_range: "Portée d'Attaque (Range)",
+    metric_spa: "SPA (Cadence d'attaque)",
+    metric_deploy_cost: "Coût de Déploiement",
+    metric_total_cost: "Coût Total d'Amélioration",
+    metric_cost_per_dps: "Coût par point de DPS ($/DPS)",
+    metric_upgrades_count: "Paliers d'Amélioration",
+    note_spa: "Plus bas = plus rapide",
+    note_deploy: "Plus bas = plus facile à poser",
+    note_total: "Plus bas = maxé plus tôt",
+    note_efficiency: "Plus bas = plus rentable",
+    note_upgrades: "Moins de paliers = maxé plus rapidement",
+    tiers_word: "paliers",
+
+    // Footer
+    footer_desc: "Base de données non officielle et hub stratégique pour All Star Tower Defense sur Roblox.",
+    footer_sync: "Synchro automatique avec le wiki Fandom officiel.",
+    db_label: "Données :",
+    footer_last_updated_tpl: "Dernière synchro wiki : {date} ({count} unités)"
+  },
+  en: {
+    // Header, brand & nav
+    skip_to_content: "Skip to main content",
+    brand_subtitle: "Database & Meta Hub",
+    brand_aria: "ASTD Wiki Home",
+    quick_search_placeholder: "Search unit (Ctrl+K)...",
+    quick_search_aria: "Search unit",
+    quick_search_sr: "Search unit",
+    wiki_sync_label: "Wiki sync:",
+    units_label: "Units",
+    orbs_label: "Orbs",
+    codes_autoupdate: "Active",
+    latest_code_label: "Latest code:",
+    copy_btn: "Copy",
+    copy_code_aria: "Copy latest code",
+    lang_choice: "Language",
+    wiki_link_title: "Visit official All Star Tower Defense Fandom wiki",
+    wiki_link_aria: "Open official Fandom wiki in a new tab",
+    menu_toggle_aria: "Open navigation menu",
+    nav_main_aria: "Main navigation",
+    nav_units: "Towers & Units",
+    nav_tierlist: "Tier List",
+    nav_codes: "Gift Codes",
+    nav_orbs: "Orbs & Relics",
+    nav_gamemodes: "Modes & Raids",
+    nav_gamemodes_short: "Modes",
+    nav_teambuilder: "Deck Builder",
+    nav_deck_short: "Deck",
+    nav_compare: "Comparator",
+    nav_compare_short: "Versus",
+    nav_mobile_aria: "Mobile menu",
+    mobile_search_placeholder: "Search unit...",
+    drawer_units: "Towers & Units",
+    drawer_tierlist: "Official Tier List",
+    drawer_codes: "Active Codes",
+    drawer_orbs: "Orbs Compendium",
+    drawer_gamemodes: "Game Modes & Raids",
+    drawer_teambuilder: "Deck Builder (6 Slots)",
+    drawer_compare: "Tactical Pro Comparator",
+
+    // Units Tab & Filters
+    units_h1: "ASTD Towers & Units Database",
+    units_filter_aria: "Unit search filters",
+    filter_search_sr: "Search unit by name",
+    filter_search_placeholder: "Unit name or franchise...",
+    clear_search_aria: "Clear search",
+    filter_sort_sr: "Sort units",
+    filter_sort_aria: "Unit sorting criteria",
+    sort_recent_desc: "Newest first",
+    sort_star_desc: "Rarity (Descending)",
+    sort_star_asc: "Rarity (Ascending)",
+    sort_dps_desc: "Max DPS (Descending)",
+    sort_dmg_desc: "Max Damage (Descending)",
+    sort_cost_asc: "Total Cost (Lowest)",
+    sort_name_asc: "Name (A → Z)",
+    filter_tower_type_sr: "Filter by tower type",
+    filter_tower_type_aria: "Tower placement type",
+    filter_type_all: "All types",
+    filter_type_ground: "Ground",
+    filter_type_air: "Air",
+    filter_type_hill: "Hill",
+    filter_type_hybrid: "Hybrid (Ground & Air)",
+    filter_anime_sr: "Filter by franchise",
+    filter_anime_aria: "Franchise or anime origin",
+    filter_anime_all: "All franchises",
+    filter_obtainable_title: "Hide unobtainable or expired units",
+    filter_obtainable: "Obtainable only",
+    view_mode_aria: "List display mode",
+    view_grid_title: "Tactical cards view",
+    view_grid_aria: "Show tactical cards grid",
+    view_grid: "Grid",
+    view_table_title: "Detailed table view",
+    view_table_aria: "Show Pro style detailed table",
+    view_table: "Table",
+    filter_star_aria: "Filter by star rarity",
+    star_all: "All",
+    results_label: "Results:",
+    units_grid_aria: "Defense units grid",
+    load_more_aria: "Load next units",
+    load_more_units: "Load more units",
+    units_table_aria: "Comparative defense units table",
+    th_unit: "Unit & Franchise",
+    th_rarity: "Rarity",
+    th_type: "Type",
+    th_max_damage: "Max Damage",
+    th_range: "Range",
+    th_spa: "SPA",
+    th_max_dps: "Max DPS",
+    th_total_cost: "Max Cost",
+    th_action: "Actions",
+
+    // Dynamic strings - Units List & Cards
+    unit_singular: "unit",
+    unit_plural: "units",
+    badge_new: "New",
+    badge_unobtainable: "Unobtainable",
+    btn_card: "Details",
+    btn_compare_title: "Compare this unit",
+    btn_add_deck_title: "Add to deck",
+    no_matching_units: "No units match your filters",
+    no_results_for: "No results for \"{searchVal}\".",
+    no_results_combo: "No units available with the selected rarity and type.",
+    reset_filters: "Reset filters",
+    table_view_sheet: "View unit details.",
+    card_click_inspect: "Click to inspect.",
+    wiki_page_created_on: "Wiki page created on",
+    dmg_max_tooltip: "Damage at maximum upgrade tier",
+    dps_max_tooltip: "Damage Per Second at maximum tier",
+    range_max_tooltip: "Maximum attack range",
+    spa_tooltip: "SPA: Seconds Per Attack (delay between attacks)",
+    hud_range_short: "Range",
+
+    // Modal Unit Details
+    modal_close_aria: "Close unit sheet",
+    modal_card_level: "Card level:",
+    modal_level_group_aria: "Card level for statistics",
+    modal_idol_toggle_title: "Simulate damage buff provided by Idol (Shine ability)",
+    buff_idol_label: "Idol Buff",
+    hud_max_dmg: "Max Damage",
+    hud_dmg_scale: "Damage scale from initial to max tier",
+    hud_max_dps: "Max Estimated DPS",
+    hud_tower_type: "Placement Type",
+    hud_attack_type: "Attack Area",
+    hud_deploy_cost: "Deployment",
+    hud_total_cost: "Total Max Cost",
+    modal_fandom_title: "Open official Fandom page for this unit",
+    modal_fandom_aria: "View official wiki page on Fandom (new tab)",
+    modal_btn_deck: "Add to Deck",
+    modal_btn_deck_aria: "Add this unit to your squad",
+    modal_btn_compare: "Compare",
+    modal_btn_compare_title: "Compare this unit with another character",
+    modal_btn_compare_aria: "Open comparator with this unit",
+    modal_obtain_title: "Obtainment Source",
+    modal_evo_title: "Unit Evolution",
+    modal_preevo_title: "Pre-evolutions",
+    btn_show: "Show",
+    btn_hide: "Hide",
+    modal_abilities_title: "Special Abilities, Passives & Leader",
+    modal_upgrades_title: "Upgrade Progression (In-Game Tiers)",
+    th_level: "Tier",
+    th_cost: "Cost",
+    th_damage: "Damage",
+    th_buff: "Buff",
+    th_buff_title: "Damage buff provided to allied units in range (Shine ability)",
+    th_effect: "Effects / Abilities",
+    attack_type_tooltip: "AoE: Area of Effect (area damaged per attack: circle, cone, line...)",
+    unknown: "Unknown",
+    anime_prefix: "Anime:",
+    char_prefix: "Character:",
+    origin_all_star: "Origin: All Star Character",
+    added_on: "Added on",
+    added_on_tooltip: "Wiki page created on {date} — New badge displayed for 30 days",
+    no_overview: "No detailed description recorded for this unit.",
+    evolution_of: "Evolution of:",
+    can_evolve_into: "Can evolve into",
+    evolves_into: "Evolves into:",
+    required_materials: "Required materials:",
+    units_evolving_into: "Unit{s} evolving into",
+    ability_manual: "Manual Ability",
+    ability_passive: "Special Passive",
+    ability_leader: "Leader",
+    ability_default: "Ability",
+    upgrade_effects_prefix: "Upgrade effects for tier",
+    view_full_ability: "View full ability details",
+    upgrades_empty: "Detailed upgrade stats not documented for this unit.",
+    tag_lvl175: "card level 175",
+    tag_idol: "Idol buff +{pct}%",
+    upg_buff_tooltip: "Damage buff provided to units in range (Shine ability) — {lvl}",
+    upg_buff_none: "No buff at this tier (Your Star replaces Shine)",
+    click_read_ability: "Click to read effects and ability details",
+    lvl_175_card: "card level 175",
+    lvl_1_card: "card level 1",
+
+    // Tier List
+    tierlist_heading: "Official ASTD Tier List",
+    tierlist_subheading: "Official ranking of top units by competitive category.",
+    tierlist_region_aria: "Official ASTD Tier List",
+    tierlist_loading: "Loading tier list...",
+
+    // Codes
+    codes_heading: "Active & Verified Gift Codes",
+    codes_subheading: "All codes are regularly tested in-game. Click Copy to claim rewards.",
+    codes_active_aria: "Active gift codes",
+    codes_expired_heading: "Expired / Inactive Codes",
+    codes_filter_expired_sr: "Filter expired codes",
+    codes_filter_expired_placeholder: "Search expired code...",
+    codes_filter_expired_aria: "Search expired codes history",
+    codes_expired_region_aria: "Expired gift codes list",
+    code_verified_active: "Verified & Active",
+    code_recent: "Recent",
+    code_rewards_label: "Rewards:",
+    btn_copy_code: "Copy code",
+    copied: "Copied!",
+    toast_code_copied: "Code \"{code}\" copied!",
+    no_expired_codes: "No expired codes match this search.",
+
+    // Orbs
+    orbs_heading: "Orbs Compendium",
+    orbs_subheading: "Stat bonuses and equip requirements for orbs.",
+    search_orbs_sr: "Search an orb",
+    search_orbs_placeholder: "Filter an orb (name, effect, compatible unit)...",
+    search_orbs_aria: "Filter orbs by name, effect or required unit",
+    orbs_grid_aria: "Orbs compendium",
+    all_units_badge: "★ All units",
+    universal_orb_title: "Equippable by all units",
+    restricted_orb_title: "Reserved for this unit (or its family)",
+    stat_bonus_label: "Stat bonus:",
+    special_bonus: "Special bonus",
+    obtain_label: "Obtainment:",
+    compatible_label: "Compatible:",
+    no_orbs_found: "No orbs found",
+    no_orbs_query: "No orbs match the search \"{q}\".",
+    clear_search: "Clear search",
+
+    // Gamemodes
+    gamemodes_heading: "Game Modes & Raids",
+    gamemodes_subheading: "Strategic guides and rewards for different game modes.",
+    gamemodes_grid_aria: "Game modes and raids",
+    mode_rewards_label: "Rewards:",
+
+    // Team Builder
+    teambuilder_heading: "Tactical Team Builder (6-Slot Deck)",
+    teambuilder_subheading: "Analyze coverage, cost and synergy of your squad.",
+    clear_team_btn: "Clear deck",
+    clear_team_aria: "Remove all units from deck",
+    team_slots_aria: "Team deck slots",
+    team_stat_deploy_label: "Total Deploy Cost",
+    team_stat_total_label: "Max Upgrade Cost",
+    team_stat_dps_label: "Total Estimated DPS",
+    team_coverage_title: "Strategic Coverage",
+    team_economy_title: "Economy & Control",
+    team_picker_title: "Add a Unit to Deck",
+    team_picker_sr: "Search a tower to add to deck",
+    team_picker_placeholder: "Search among 6★ and 7★ units...",
+    team_picker_aria: "Search field to add a unit to deck",
+    team_picker_grid_aria: "Available units selection for deck",
+    slot_empty_sr: "Slot {n} is empty. Click to search a tower.",
+    slot_label: "SLOT {n}",
+    add_a_tower: "Add a tower",
+    remove_from_deck: "Remove {name} from deck",
+    dep_short: "Dep",
+    team_anti_ground: "Anti-Ground",
+    team_anti_air: "Anti-Air",
+    team_economy: "Economy / Farm",
+    team_support: "Support / Control",
+    btn_add: "+ Add",
+    toast_team_full: "Your 6-unit deck is full!",
+    toast_already_in_team: "{name} is already in the deck!",
+    toast_added_to_team: "{name} added to slot {slot}",
+    toast_removed_from_team: "{name} removed from deck",
+    toast_team_cleared: "Deck has been cleared",
+
+    // Comparator
+    compare_heading: "Tactical Pro Comparator (Versus)",
+    compare_subheading: "Compare two units face-to-face: DPS, cost efficiency ($/DPS), range, attack rate, and automated verdict.",
+    compare_level_group_aria: "Card level for comparison",
+    compare_idol_buff_title: "Simulate damage buff provided by Idol (Shine ability)",
+    compare_slot_a_title: "Unit A:",
+    compare_slot_a_sr: "Search unit A",
+    compare_slot_a_placeholder: "Search unit A (e.g. Demon of Emotion, Kura...)",
+    compare_remove_btn: "Clear",
+    compare_swap_aria: "Swap unit A and unit B",
+    compare_swap_title: "Swap unit A and unit B",
+    compare_reset_aria: "Reset both selected units",
+    compare_reset_title: "Reset comparison",
+    compare_slot_b_title: "Unit B:",
+    compare_slot_b_sr: "Search unit B",
+    compare_slot_b_placeholder: "Search unit B (e.g. Stampede, Joke Da Fool...)",
+    compare_popular_label: "Popular duels:",
+    compare_empty_title: "Select 2 characters to compare",
+    compare_empty_desc: "Use the search inputs above to choose two units to compare, or start a popular duel in one click.",
+    compare_choose_second: "— select the 2nd unit",
+    compare_no_unit: "No unit selected yet.",
+    loading_units: "Loading units...",
+    no_units_found: "No units found",
+    toast_added_to_compare: "\"{name}\" added to comparator",
+    dps_max_a: "Max DPS (A)",
+    dmg_max_a: "Max Damage (A)",
+    dps_max_b: "Max DPS (B)",
+    dmg_max_b: "Max Damage (B)",
+    verdict_title: "Tactical Verdict & Summary",
+    verdict_subtitle: "Automated comparative analysis",
+    pillar_dps: "💥 Raw DPS",
+    pillar_spa: "⚡ Attack Rate (SPA)",
+    pillar_range: "🎯 Range",
+    pillar_cost: "💰 Efficiency ($/DPS)",
+    verdict_diff: "difference",
+    verdict_faster: "faster",
+    verdict_radius: "radius advantage",
+    verdict_ratio: "better ratio",
+    tie: "Tie",
+    compare_table_title: "Comparative Stats Table (Max Tier)",
+    compare_abilities_title: "Special Abilities, Passives & Leader",
+    no_abilities_documented: "No special abilities documented.",
+    metric_dmg_max: "Max Damage",
+    metric_dps_max: "Estimated Max DPS",
+    metric_range: "Attack Range",
+    metric_spa: "SPA (Attack Rate)",
+    metric_deploy_cost: "Deployment Cost",
+    metric_total_cost: "Total Upgrade Cost",
+    metric_cost_per_dps: "Cost per DPS point ($/DPS)",
+    metric_upgrades_count: "Upgrade Tiers",
+    note_spa: "Lower = faster",
+    note_deploy: "Lower = easier to place",
+    note_total: "Lower = maxed earlier",
+    note_efficiency: "Lower = more cost effective",
+    note_upgrades: "Fewer tiers = maxed faster",
+    tiers_word: "tiers",
+
+    // Footer
+    footer_desc: "Unofficial database and tactical meta hub for All Star Tower Defense on Roblox.",
+    footer_sync: "Automatic synchronization with the official Fandom wiki.",
+    db_label: "Data:",
+    footer_last_updated_tpl: "Last wiki sync: {date} ({count} units)"
+  }
+};
+
+function t(key, fallback = '') {
+  if (I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+    return I18N[currentLang][key];
+  }
+  if (I18N['en'] && I18N['en'][key] !== undefined) {
+    return I18N[currentLang][key];
+  }
+  return fallback || key;
+}
+
+function setLanguage(lang) {
+  currentLang = (lang === 'en') ? 'en' : 'fr';
+  try {
+    localStorage.setItem('astd_lang', currentLang);
+  } catch (e) {}
+
+  document.documentElement.lang = currentLang;
+
+  // Active state on language switcher buttons
+  const btnFr = document.getElementById('lang-btn-fr');
+  const btnEn = document.getElementById('lang-btn-en');
+  const btnMobFr = document.getElementById('lang-btn-mob-fr');
+  const btnMobEn = document.getElementById('lang-btn-mob-en');
+
+  if (btnFr) {
+    btnFr.classList.toggle('active', currentLang === 'fr');
+    btnFr.setAttribute('aria-pressed', currentLang === 'fr' ? 'true' : 'false');
+  }
+  if (btnEn) {
+    btnEn.classList.toggle('active', currentLang === 'en');
+    btnEn.setAttribute('aria-pressed', currentLang === 'en' ? 'true' : 'false');
+  }
+  if (btnMobFr) {
+    btnMobFr.classList.toggle('active', currentLang === 'fr');
+    btnMobFr.setAttribute('aria-pressed', currentLang === 'fr' ? 'true' : 'false');
+  }
+  if (btnMobEn) {
+    btnMobEn.classList.toggle('active', currentLang === 'en');
+    btnMobEn.setAttribute('aria-pressed', currentLang === 'en' ? 'true' : 'false');
+  }
+
+  // Update all DOM elements with data-i18n attributes
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key && I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+      el.textContent = I18N[currentLang][key];
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key && I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+      el.setAttribute('placeholder', I18N[currentLang][key]);
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    if (key && I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+      el.setAttribute('title', I18N[currentLang][key]);
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria');
+    if (key && I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+      el.setAttribute('aria-label', I18N[currentLang][key]);
+    }
+  });
+
+  // Dynamic meta / footer texts
+  if (META_DATA && META_DATA.last_updated) {
+    const footerUpdated = document.getElementById('footer-last-updated');
+    if (footerUpdated) {
+      const tpl = t('footer_last_updated_tpl', 'Dernière synchro wiki : {date} ({count} unités)');
+      footerUpdated.textContent = tpl.replace('{date}', META_DATA.last_updated).replace('{count}', META_DATA.total_units || ALL_UNITS.length);
+    }
+  }
+
+  // Star filter button tooltips
+  document.querySelectorAll('.star-btn').forEach(btn => {
+    const val = (btn.getAttribute('onclick') || '').match(/setStarFilter\((\d)\)/);
+    if (!val) return;
+    const star = parseInt(val[1]);
+    const count = ALL_UNITS.filter(u => u.star === star).length;
+    const unitLabel = currentLang === 'en' ? (count > 1 ? 'units' : 'unit') : (count > 1 ? 'unités' : 'unité');
+    btn.title = `${count} ${unitLabel} ${star}★`;
+  });
+
+  // Refresh active views if data has already been loaded
+  if (ALL_UNITS && ALL_UNITS.length > 0) {
+    applyUnitFilters();
+    renderTierList();
+    renderCodes();
+    renderOrbs();
+    renderGameModes();
+    renderTeamBuilder();
+    if (currentTab === 'compare') {
+      renderCompareView();
+    }
+    if (currentModalUnit) {
+      openUnitModal(currentModalUnit.id);
+    }
+  }
+}
+
+// Data translation helpers
+function translateTowerType(type) {
+  if (!type) return currentLang === 'fr' ? 'Sol' : 'Ground';
+  const t = type.toLowerCase();
+  if (t.includes('hybrid')) return currentLang === 'fr' ? 'Hybride' : 'Hybrid';
+  if (t.includes('hill')) return currentLang === 'fr' ? 'Colline' : 'Hill';
+  if (t.includes('air')) return currentLang === 'fr' ? 'Aérien' : 'Air';
+  return currentLang === 'fr' ? 'Sol' : 'Ground';
+}
+
+function towerTypeTooltip(type) {
+  const t = (type || 'Ground').toLowerCase();
+  if (currentLang === 'fr') {
+    if (t.includes('hybrid')) return "Hybride : peut attaquer les ennemis au sol ET aériens";
+    if (t.includes('hill')) return "Colline (Hill) : se place sur les hauteurs, attaque sol et air";
+    if (t.includes('air')) return "Aérien : n'attaque que les ennemis volants";
+    return "Sol (Ground) : n'attaque que les ennemis au sol";
+  } else {
+    if (t.includes('hybrid')) return "Hybrid: can attack both Ground and Air enemies";
+    if (t.includes('hill')) return "Hill: placed on high ground, attacks ground and air";
+    if (t.includes('air')) return "Air: attacks flying enemies only";
+    return "Ground: attacks ground enemies only";
+  }
+}
+
+function translateAttackType(type) {
+  if (!type) return 'AoE';
+  if (currentLang === 'fr') {
+    return type
+      .replace(/Circle/gi, 'Cercle')
+      .replace(/Cone/gi, 'Cône')
+      .replace(/Full/gi, 'Complet')
+      .replace(/Single Target/gi, 'Cible Unique')
+      .replace(/Single/gi, 'Unique')
+      .replace(/Line/gi, 'Ligne');
+  } else {
+    return type
+      .replace(/Cercle/gi, 'Circle')
+      .replace(/Cône/gi, 'Cone')
+      .replace(/Complet/gi, 'Full')
+      .replace(/Cible Unique/gi, 'Single Target')
+      .replace(/Unique/gi, 'Single');
+  }
+}
+
+function translateAbilityName(name) {
+  if (!name) return '';
+  if (currentLang === 'en') {
+    return name
+      .replace(/Compétence de Leader/gi, 'Leader Skill')
+      .replace(/Chef d'équipe/gi, 'Team Leader');
+  } else {
+    return name
+      .replace(/Leader Skill/gi, 'Compétence de Leader')
+      .replace(/Team Leader/gi, "Chef d'équipe");
+  }
+}
+
+function translateUnlock(unlock) {
+  if (!unlock) return '';
+  if (currentLang === 'fr') {
+    return unlock
+      .replace(/Available upon deployment/gi, 'Disponible dès le déploiement')
+      .replace(/(\d+)(?:st|nd|rd|th) Upgrade/gi, '$1e Amélioration')
+      .replace(/Upgrade (\d+)/gi, 'Palier $1');
+  } else {
+    return unlock
+      .replace(/Disponible dès le déploiement/gi, 'Available upon deployment')
+      .replace(/(\d+)e Amélioration/gi, '$1th Upgrade')
+      .replace(/Palier (\d+)/gi, 'Upgrade $1');
+  }
+}
+
+function translateObtain(text) {
+  if (!text) return '';
+  if (currentLang === 'fr') {
+    return text
+      .replace(/Summon Banner/gi, "Bannière d'invocation")
+      .replace(/Hero Summon/gi, "Invocation Héros")
+      .replace(/Special Summon/gi, "Invocation Spéciale")
+      .replace(/Story Mode/gi, "Mode Histoire")
+      .replace(/Infinite Mode/gi, "Mode Infini")
+      .replace(/Trial/gi, "Épreuve")
+      .replace(/Raid/gi, "Raid")
+      .replace(/Traveling Merchant/gi, "Marchand ambulant")
+      .replace(/Evolve from/gi, "Évolution de")
+      .replace(/Evolves into/gi, "Évolue en");
+  } else {
+    return text
+      .replace(/Bannière d'invocation/gi, "Summon Banner")
+      .replace(/Invocation Héros/gi, "Hero Summon")
+      .replace(/Invocation Spéciale/gi, "Special Summon")
+      .replace(/Mode Histoire/gi, "Story Mode")
+      .replace(/Mode Infini/gi, "Infinite Mode")
+      .replace(/Épreuve/gi, "Trial")
+      .replace(/Marchand ambulant/gi, "Traveling Merchant")
+      .replace(/Évolution de/gi, "Evolve from")
+      .replace(/Évolue en/gi, "Evolves into");
+  }
+}
+
+function translateReward(text) {
+  if (!text) return '';
+  if (currentLang === 'fr') {
+    return text
+      .replace(/\bGems\b/gi, 'Gemmes')
+      .replace(/\bStardust\b/gi, "Poussière d'étoiles")
+      .replace(/Required\s*:\s*Level/gi, 'Requis : Niveau')
+      .replace(/Level\s*(\d+)\+/gi, 'Niveau $1+')
+      .replace(/and/gi, 'et')
+      .replace(/Supplies/gi, 'Ravitaillement');
+  } else {
+    return text
+      .replace(/\bGemmes\b/gi, 'Gems')
+      .replace(/Poussières? d'étoiles/gi, 'Stardust')
+      .replace(/Requis\s*:\s*(?:Niveau|Level)/gi, 'Required: Level')
+      .replace(/Niveau\s*(\d+)\+/gi, 'Level $1+')
+      .replace(/\bet\b/gi, 'and')
+      .replace(/Ravitaillement/gi, 'Supplies');
+  }
+}
+
+function translateOrbEffect(eff) {
+  if (!eff) return '';
+  if (currentLang === 'fr') {
+    return eff
+      .replace(/Increase(?:s)? Damage by/gi, "Augmente les dégâts de")
+      .replace(/Increase(?:s)? Range by/gi, "Augmente la portée de")
+      .replace(/Decrease(?:s)? (?:SPA|Cooldown) by/gi, "Réduit le SPA de")
+      .replace(/Allows unit to hit Air/gi, "Permet de toucher les unités aériennes")
+      .replace(/All units/gi, "Toutes les unités");
+  } else {
+    return eff
+      .replace(/Augmente les dégâts de/gi, "Increases Damage by")
+      .replace(/Augmente la portée de/gi, "Increases Range by")
+      .replace(/Réduit le SPA de/gi, "Decreases SPA by")
+      .replace(/Permet de toucher les unités aériennes/gi, "Allows unit to hit Air")
+      .replace(/Toutes les unités/gi, "All units");
+  }
+}
+
 // Multiplicateurs officiels du wiki (template "Stats Box", section Level 175) :
 // dégâts ×2.142, portée ×1.2, SPA inchangé. Vérifiés sur Stampede (???%),
 // Joke Da Fool et Demon Of Emotion contre le HTML rendu du wiki.
@@ -232,11 +1117,6 @@ async function loadData() {
     const activeBadge = document.getElementById('badge-active-codes');
     if (activeBadge) activeBadge.textContent = CODES_DATA.active.length;
 
-    const footerUpdated = document.getElementById('footer-last-updated');
-    if (footerUpdated && META_DATA.last_updated) {
-      footerUpdated.textContent = `Dernière synchro wiki : ${META_DATA.last_updated} (${META_DATA.total_units} unités)`;
-    }
-
     const ribbonUpdated = document.getElementById('stat-last-updated');
     if (ribbonUpdated && META_DATA.last_updated) {
       const [datePart] = META_DATA.last_updated.split(' ');
@@ -263,14 +1143,8 @@ async function loadData() {
       animeSelect.addEventListener('change', applyUnitFilters);
     }
 
-    // Star filter pills: live unit counts per rarity in the tooltip
-    document.querySelectorAll('.star-btn').forEach(btn => {
-      const val = btn.getAttribute('onclick').match(/setStarFilter\((\d)\)/);
-      if (!val) return;
-      const star = parseInt(val[1]);
-      const count = ALL_UNITS.filter(u => u.star === star).length;
-      btn.title = `${count} unité${count > 1 ? 's' : ''} ${star}★`;
-    });
+    // Apply initial localization
+    setLanguage(currentLang);
 
     // Hero latest code
     if (CODES_DATA.active && CODES_DATA.active.length > 0) {
@@ -694,7 +1568,8 @@ function renderUnitsList() {
   const loadMoreBtn = document.getElementById('load-more-container');
 
   if (countEl) {
-    countEl.textContent = `${FILTERED_UNITS.length} unité${FILTERED_UNITS.length > 1 ? 's' : ''}`;
+    const unitWord = currentLang === 'en' ? (FILTERED_UNITS.length > 1 ? 'units' : 'unit') : (FILTERED_UNITS.length > 1 ? 'unités' : 'unité');
+    countEl.textContent = `${FILTERED_UNITS.length} ${unitWord}`;
   }
 
   if (FILTERED_UNITS.length === 0) {
@@ -704,13 +1579,13 @@ function renderUnitsList() {
         <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto mb-3 text-sky-400">
           <i data-lucide="search-x" class="w-6 h-6" stroke-width="2"></i>
         </div>
-        <h3 class="text-sm font-bold text-white text-balance">Aucune unité ne correspond à vos filtres</h3>
+        <h3 class="text-sm font-bold text-white text-balance">${t('no_matching_units', 'Aucune unité ne correspond à vos filtres')}</h3>
         <p class="text-xs text-slate-400 mt-1 text-pretty">
-          ${searchVal ? `Aucun résultat pour « <strong class="text-white">${searchVal}</strong> ».` : 'Aucune unité disponible avec la combinaison de rareté et type sélectionnés.'}
+          ${searchVal ? t('no_results_for', 'Aucun résultat pour « {searchVal} ».').replace('{searchVal}', `<strong class="text-white">${searchVal}</strong>`) : t('no_results_combo', 'Aucune unité disponible avec la combinaison de rareté et type sélectionnés.')}
         </p>
         <button onclick="clearAllFilters()" class="mt-4 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tap-scale inline-flex items-center gap-1.5 shadow-md">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5" stroke-width="2"></i>
-          <span>Réinitialiser les filtres</span>
+          <span>${t('reset_filters', 'Réinitialiser les filtres')}</span>
         </button>
       </div>
     `;
@@ -732,14 +1607,17 @@ function renderUnitsList() {
 function renderUnitsTable() {
   const tbody = document.getElementById('units-table-tbody');
   const countEl = document.getElementById('results-count');
-  if (countEl) countEl.textContent = `${FILTERED_UNITS.length} unité${FILTERED_UNITS.length > 1 ? 's' : ''}`;
+  if (countEl) {
+    const unitWord = currentLang === 'en' ? (FILTERED_UNITS.length > 1 ? 'units' : 'unit') : (FILTERED_UNITS.length > 1 ? 'unités' : 'unité');
+    countEl.textContent = `${FILTERED_UNITS.length} ${unitWord}`;
+  }
 
   if (!tbody) return;
 
   const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
 
   tbody.innerHTML = FILTERED_UNITS.slice(0, 150).map(u => `
-    <tr class="hover:bg-slate-800/60 transition-colors duration-100 cursor-pointer" onclick="openUnitModal('${u.id}')" tabindex="0" role="button" aria-label="${u.name}, unité ${u.star} étoiles. Voir la fiche." onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openUnitModal('${u.id}');}">
+    <tr class="hover:bg-slate-800/60 transition-colors duration-100 cursor-pointer" onclick="openUnitModal('${u.id}')" tabindex="0" role="button" aria-label="${u.name}, ${u.star}★. ${t('table_view_sheet', 'Voir la fiche.')}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openUnitModal('${u.id}');}">
       <td class="p-3 flex items-center space-x-2.5">
         <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 p-0.5 shrink-0 flex items-center justify-center">
           <img src="${u.image || fallbackImg}" alt="" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
@@ -751,10 +1629,10 @@ function renderUnitsTable() {
       </td>
       <td class="p-3">
         <span class="px-2 py-0.5 rounded text-[11px] font-bold star-${u.star}-badge font-mono-num">${u.star}★</span>
-        ${isNewUnit(u) ? `<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="Fiche wiki créée le ${new Date(u.created_at).toLocaleDateString('fr-FR')}">Nouveau</span>` : ''}
+        ${isNewUnit(u) ? `<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="${t('wiki_page_created_on', 'Fiche wiki créée le')} ${new Date(u.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'fr-FR')}">${t('badge_new', 'Nouveau')}</span>` : ''}
       </td>
       <td class="p-3 font-sans">
-        <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 text-[10px] font-semibold">${u.tower_type || 'Ground'}</span>
+        <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 text-[10px] font-semibold">${translateTowerType(u.tower_type)}</span>
       </td>
       <td class="p-3 font-bold text-slate-100 font-mono-num" title="${u.max_damage.toLocaleString()} DMG">${formatCompactNumber(u.max_damage)}</td>
       <td class="p-3 text-slate-300 font-mono-num">${u.max_range || '-'}</td>
@@ -762,13 +1640,13 @@ function renderUnitsTable() {
       <td class="p-3 font-bold text-amber-300 font-mono-num" title="${u.max_dps.toLocaleString()} DPS">${formatCompactNumber(u.max_dps)}</td>
       <td class="p-3 text-slate-300 font-mono-num">${u.total_cost > 0 ? '$' + formatCompactNumber(u.total_cost) : '-'}</td>
       <td class="p-3 text-right space-x-1.5 font-sans" onclick="event.stopPropagation()">
-        <button onclick="openUnitModal('${u.id}')" aria-label="Consulter la fiche de ${u.name}" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale transition-colors">
-          Fiche
+        <button onclick="openUnitModal('${u.id}')" aria-label="${t('btn_card', 'Fiche')} : ${u.name}" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale transition-colors">
+          ${t('btn_card', 'Fiche')}
         </button>
-        <button onclick="startCompareWith('${u.id}')" aria-label="Comparer ${u.name}" class="px-2 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale transition-colors" title="Comparer cette unité">
+        <button onclick="startCompareWith('${u.id}')" aria-label="${t('btn_compare_title', 'Comparer cette unité')} ${u.name}" class="px-2 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale transition-colors" title="${t('btn_compare_title', 'Comparer cette unité')}">
           ⇄
         </button>
-        <button onclick="addUnitToTeam('${u.id}')" aria-label="Ajouter ${u.name} au deck" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale transition-colors" title="Ajouter au deck">
+        <button onclick="addUnitToTeam('${u.id}')" aria-label="${t('btn_add_deck_title', 'Ajouter au deck')} ${u.name}" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale transition-colors" title="${t('btn_add_deck_title', 'Ajouter au deck')}">
           +
         </button>
       </td>
@@ -814,7 +1692,7 @@ function createUnitCardHTML(unit) {
     <article class="tactical-card rounded-xl p-3.5 border border-slate-800/80 bg-[#0f1629]/95 flex flex-col justify-between group cursor-pointer tap-scale-subtle focus-within:ring-2 focus-within:ring-sky-500"
              role="button"
              tabindex="0"
-             aria-label="${unit.name}, unité ${unit.star} étoiles, type ${unit.tower_type || 'Ground'}. Cliquer pour inspecter."
+             aria-label="${unit.name}, ${unit.star}★, ${translateTowerType(unit.tower_type)}. ${t('card_click_inspect', 'Cliquer pour inspecter.')}"
              onclick="openUnitModal('${unit.id}')"
              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openUnitModal('${unit.id}');}">
 
@@ -824,12 +1702,12 @@ function createUnitCardHTML(unit) {
           <span class="px-2 py-0.5 rounded text-[11px] font-mono-num font-bold star-${unit.star}-badge shadow-sm">
             ${unit.star}★
           </span>
-          ${isNewUnit(unit) ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="Fiche wiki créée le ${new Date(unit.created_at).toLocaleDateString('fr-FR')}">Nouveau</span>` : ''}
+          ${isNewUnit(unit) ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="${t('wiki_page_created_on', 'Fiche wiki créée le')} ${new Date(unit.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'fr-FR')}">${t('badge_new', 'Nouveau')}</span>` : ''}
         </div>
         <div class="flex items-center space-x-1">
-          ${unit.is_unobtainable ? '<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 rounded" title="Unité retirée du jeu : bannière ou événement expiré">Introuvable</span>' : ''}
+          ${unit.is_unobtainable ? `<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 rounded" title="${t('filter_obtainable_title', 'Unité retirée du jeu')}">${t('badge_unobtainable', 'Introuvable')}</span>` : ''}
           ${unit.is_tradeable ? '<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-slate-900 text-slate-300 border border-slate-800 rounded">Trade</span>' : ''}
-          <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded" title="${towerTypeTooltip(unit.tower_type)}">${unit.tower_type || 'Ground'}</span>
+          <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-300 rounded" title="${towerTypeTooltip(unit.tower_type)}">${translateTowerType(unit.tower_type)}</span>
         </div>
       </div>
 
@@ -853,48 +1731,39 @@ function createUnitCardHTML(unit) {
       <!-- Tactical Micro-Metrics Grid (Neutral, Readable, High Contrast WCAG AA) -->
       <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800/80 font-mono-num text-[11px]">
         <div class="bg-[#090e1c] px-2 py-1 rounded-md border border-slate-800/60 shadow-sm">
-          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="Dégâts au palier d'amélioration maximum">DMG</span>
+          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="${t('dmg_max_tooltip', "Dégâts au palier d'amélioration maximum")}">DMG</span>
           <span class="font-bold text-slate-100" title="${unit.max_damage.toLocaleString()}">${formatCompactNumber(unit.max_damage)}</span>
         </div>
         <div class="bg-[#090e1c] px-2 py-1 rounded-md border border-slate-800/60 shadow-sm">
-          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="Dégâts Par Seconde au palier maximum">DPS</span>
+          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="${t('dps_max_tooltip', "Dégâts Par Seconde au palier maximum")}">DPS</span>
           <span class="font-bold text-amber-300" title="${unit.max_dps.toLocaleString()}">${formatCompactNumber(unit.max_dps)}</span>
         </div>
         <div class="bg-[#090e1c] px-2 py-1 rounded-md border border-slate-800/60 shadow-sm">
-          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="Distance d'attaque maximale">Portée</span>
+          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="${t('range_max_tooltip', "Distance d'attaque maximale")}">${t('hud_range_short', 'Portée')}</span>
           <span class="font-semibold text-slate-200">${unit.max_range || '-'}</span>
         </div>
         <div class="bg-[#090e1c] px-2 py-1 rounded-md border border-slate-800/60 shadow-sm">
-          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="SPA : Secondes Par Attaque (délai entre deux attaques)">SPA</span>
+          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="${t('spa_tooltip', "SPA : Secondes Par Attaque (délai entre deux attaques)")}">SPA</span>
           <span class="font-semibold text-slate-300">${unit.min_spa ? unit.min_spa + 's' : '-'}</span>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="mt-3 flex items-center space-x-1.5" onclick="event.stopPropagation()">
-        <button onclick="openUnitModal('${unit.id}')" aria-label="Consulter la fiche de ${unit.name}" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1 transition-colors">
+        <button onclick="openUnitModal('${unit.id}')" aria-label="${t('btn_card', 'Fiche')} : ${unit.name}" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1 transition-colors">
           <i data-lucide="eye" class="w-3 h-3" stroke-width="2"></i>
-          <span>Fiche</span>
+          <span>${t('btn_card', 'Fiche')}</span>
         </button>
-        <button onclick="startCompareWith('${unit.id}')" aria-label="Comparer ${unit.name}" class="px-2 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="Comparer cette unité">
+        <button onclick="startCompareWith('${unit.id}')" aria-label="${t('btn_compare_title', 'Comparer cette unité')} ${unit.name}" class="px-2 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="${t('btn_compare_title', 'Comparer cette unité')}">
           <i data-lucide="arrow-left-right" class="w-3 h-3" stroke-width="2"></i>
         </button>
-        <button onclick="addUnitToTeam('${unit.id}')" aria-label="Ajouter ${unit.name} au deck" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="Ajouter au deck">
+        <button onclick="addUnitToTeam('${unit.id}')" aria-label="${t('btn_add_deck_title', 'Ajouter au deck')} ${unit.name}" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="${t('btn_add_deck_title', 'Ajouter au deck')}">
           +
         </button>
       </div>
 
     </article>
   `;
-}
-
-// Human-readable explanation of tower placement types
-function towerTypeTooltip(type) {
-  const t = (type || 'Ground').toLowerCase();
-  if (t.includes('hybrid')) return "Hybride : peut attaquer les ennemis au sol ET aériens";
-  if (t.includes('hill')) return "Colline (Hill) : se place sur les hauteurs, attaque sol et air";
-  if (t.includes('air')) return "Aérien : n'attaque que les ennemis volants";
-  return "Sol (Ground) : n'attaque que les ennemis au sol";
 }
 
 // Highlight numeric stats, multipliers and percentages in text for readability
@@ -926,7 +1795,7 @@ function toggleAbilities() {
   const nowHidden = content.classList.toggle('hidden');
   const btn = section ? section.querySelector('button') : null;
   if (btn) btn.setAttribute('aria-expanded', String(!nowHidden));
-  if (label) label.textContent = nowHidden ? 'Afficher' : 'Masquer';
+  if (label) label.textContent = nowHidden ? t('btn_show', 'Afficher') : t('btn_hide', 'Masquer');
   if (chevron) chevron.classList.toggle('rotate-180', !nowHidden);
 }
 
@@ -953,27 +1822,29 @@ function renderModalAbilities(unit) {
   if (btn) btn.setAttribute('aria-expanded', 'false');
   if (content) {
     content.classList.add('hidden');
-    document.getElementById('modal-abilities-btn-label').textContent = 'Afficher';
-    document.getElementById('modal-abilities-chevron').classList.remove('rotate-180');
+    const label = document.getElementById('modal-abilities-btn-label');
+    if (label) label.textContent = t('btn_show', 'Afficher');
+    const chevron = document.getElementById('modal-abilities-chevron');
+    if (chevron) chevron.classList.remove('rotate-180');
   }
 
   const typeConfig = {
     manual: {
-      label: 'Aptitude Manuelle',
+      label: t('ability_manual', 'Aptitude Manuelle'),
       badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
       icon: 'flame',
       iconColor: 'text-rose-400',
       cardBorder: 'border-rose-900/40 hover:border-rose-500/40'
     },
     passive: {
-      label: 'Passif Spécial',
+      label: t('ability_passive', 'Passif Spécial'),
       badgeClass: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
       icon: 'shield',
       iconColor: 'text-purple-400',
       cardBorder: 'border-purple-900/40 hover:border-purple-500/40'
     },
     leader: {
-      label: 'Leader',
+      label: t('ability_leader', 'Leader'),
       badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
       icon: 'crown',
       iconColor: 'text-amber-400',
@@ -983,7 +1854,7 @@ function renderModalAbilities(unit) {
 
   list.innerHTML = abilities.map((ab, idx) => {
     const cfg = typeConfig[ab.type] || {
-      label: 'Capacité',
+      label: t('ability_default', 'Capacité'),
       badgeClass: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
       icon: 'sparkles',
       iconColor: 'text-sky-400',
@@ -999,13 +1870,16 @@ function renderModalAbilities(unit) {
       return `<p class="leading-relaxed">${highlightStats(l)}</p>`;
     }).join('');
 
+    const localizedName = translateAbilityName(ab.name);
+    const localizedUnlock = translateUnlock(ab.unlock);
+
     return `
       <div id="ability-card-${idx}" class="bg-slate-950/80 border ${cfg.cardBorder} rounded-xl p-3.5 flex flex-col sm:flex-row gap-3.5 transition-colors">
         <!-- Ability Icon or Fallback -->
         <div class="shrink-0 flex sm:flex-col items-center justify-center">
           <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center justify-center overflow-hidden p-1 shadow-md">
             ${ab.icon_url ? `
-              <img src="${ab.icon_url}" alt="${ab.name}" class="max-w-full max-h-full object-contain img-outline rounded-lg"
+              <img src="${ab.icon_url}" alt="${localizedName}" class="max-w-full max-h-full object-contain img-outline rounded-lg"
                    onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
               <i data-lucide="${cfg.icon}" class="w-6 h-6 ${cfg.iconColor} hidden"></i>
             ` : `
@@ -1018,15 +1892,15 @@ function renderModalAbilities(unit) {
         <div class="flex-1 min-w-0 space-y-2">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2 flex-wrap">
-              <h4 class="font-bold text-white text-sm sm:text-base tracking-tight">${ab.name}</h4>
+              <h4 class="font-bold text-white text-sm sm:text-base tracking-tight">${localizedName}</h4>
               <span class="px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider ${cfg.badgeClass}">
                 ${cfg.label}
               </span>
             </div>
-            ${ab.unlock ? `
+            ${localizedUnlock ? `
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono-num font-semibold bg-slate-900 border border-slate-700 text-sky-300 flex items-center gap-1.5 shadow-sm">
                 <i data-lucide="unlock" class="w-3 h-3 text-sky-400"></i>
-                <span>${ab.unlock}</span>
+                <span>${localizedUnlock}</span>
               </span>
             ` : ''}
           </div>
@@ -1067,12 +1941,12 @@ function openUnitModal(unitId) {
   // Stats elements
   const towerTypeEl = document.getElementById('modal-tower-type');
   const attackTypeEl = document.getElementById('modal-attack-type');
-  towerTypeEl.textContent = unit.tower_type || 'Ground';
+  towerTypeEl.textContent = translateTowerType(unit.tower_type);
   towerTypeEl.title = towerTypeTooltip(unit.tower_type);
-  attackTypeEl.textContent = unit.attack_type || 'AoE';
-  attackTypeEl.title = "AoE : Area of Effect (zone touchée par chaque attaque : cercle, cône, ligne...)";
-  document.getElementById('modal-deploy-cost').textContent = unit.deployment_cost ? `$${unit.deployment_cost.toLocaleString()}` : 'Inconnu';
-  document.getElementById('modal-total-cost').textContent = unit.total_cost ? `$${unit.total_cost.toLocaleString()}` : 'Inconnu';
+  attackTypeEl.textContent = translateAttackType(unit.attack_type);
+  attackTypeEl.title = t('attack_type_tooltip', "AoE : Area of Effect (zone touchée par chaque attaque : cercle, cône, ligne...)");
+  document.getElementById('modal-deploy-cost').textContent = unit.deployment_cost ? `$${unit.deployment_cost.toLocaleString()}` : t('unknown', 'Inconnu');
+  document.getElementById('modal-total-cost').textContent = unit.total_cost ? `$${unit.total_cost.toLocaleString()}` : t('unknown', 'Inconnu');
   // max damage / dps per card level -> renderModalHeaderStats()
 
   // Details
@@ -1105,24 +1979,24 @@ function openUnitModal(unitId) {
   }
 
   // Origin: anime/franchise + character when both are known
-  const animePart = unit.anime_origin ? `Anime : ${unit.anime_origin}` : null;
-  const charPart = unit.character_origin ? `Personnage : ${unit.character_origin}` : null;
-  animeEl.textContent = [animePart, charPart].filter(Boolean).join('  •  ') || 'Origine : Personnage All Star';
+  const animePart = unit.anime_origin ? `${t('anime_prefix', 'Anime :')} ${unit.anime_origin}` : null;
+  const charPart = unit.character_origin ? `${t('char_prefix', 'Personnage :')} ${unit.character_origin}` : null;
+  animeEl.textContent = [animePart, charPart].filter(Boolean).join('  •  ') || t('origin_all_star', 'Origine : Personnage All Star');
 
   // Date d'ajout au wiki (création de la fiche) sous le portrait
   const addedEl = document.getElementById('modal-added-date');
   if (addedEl) {
     if (unit.created_at) {
       const d = new Date(unit.created_at);
-      addedEl.textContent = `Ajoutée le ${d.toLocaleDateString('fr-FR')}`;
-      addedEl.title = `Fiche wiki créée le ${d.toLocaleDateString('fr-FR')} — le badge Nouveau s'affiche pendant 30 jours`;
+      addedEl.textContent = `${t('added_on', 'Ajoutée le')} ${d.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'fr-FR')}`;
+      addedEl.title = t('added_on_tooltip', "Fiche wiki créée le {date} — le badge Nouveau s'affiche pendant 30 jours").replace('{date}', d.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'fr-FR'));
       addedEl.classList.remove('hidden');
     } else {
       addedEl.classList.add('hidden');
     }
   }
 
-  overviewEl.textContent = stripWikiMarkup(unit.overview) || "Aucune description détaillée enregistrée pour cette unité.";
+  overviewEl.textContent = stripWikiMarkup(unit.overview) || t('no_overview', "Aucune description détaillée enregistrée pour cette unité.");
 
   // Obtention : source racine derrière une évolution (raid, story, bannière...)
   const obtainBox = document.getElementById('modal-obtain-source');
@@ -1132,12 +2006,12 @@ function openUnitModal(unitId) {
     // source résolue depuis la chaîne d'évolution, sinon phrase directe du wiki
     const source = unit.obtain_source || (unit.obtain && !/evolv/i.test(unit.obtain) ? unit.obtain : null);
     if (source) {
-      obtainText.textContent = stripWikiMarkup(source);
+      obtainText.textContent = translateObtain(stripWikiMarkup(source));
       if (obtainChain) {
         if (unit.obtain_chain && unit.obtain_chain.length > 0) {
-          obtainChain.textContent = `Évolution de : ${unit.obtain_chain.join(' → ')}`;
+          obtainChain.textContent = `${t('evolution_of', 'Évolution de :')} ${unit.obtain_chain.join(' → ')}`;
         } else if (unit.evolution && unit.evolution.evolves_into) {
-          obtainChain.textContent = `Peut évoluer en ${unit.evolution.evolves_into}`;
+          obtainChain.textContent = `${t('can_evolve_into', 'Peut évoluer en')} ${unit.evolution.evolves_into}`;
         } else {
           obtainChain.textContent = '';
         }
@@ -1174,7 +2048,7 @@ function openUnitModal(unitId) {
     if (evoTargetUnit) {
       targetHTML = `
         <div class="flex items-center gap-2 mb-2.5 flex-wrap">
-          <span class="text-xs text-slate-400">Évolue en :</span>
+          <span class="text-xs text-slate-400">${t('evolves_into', 'Évolue en :')}</span>
           <button onclick="openUnitModal('${evoTargetUnit.id}')"
                   title="Voir la fiche de ${evoTargetUnit.name}"
                   class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-amber-500/40 hover:border-amber-400 hover:bg-slate-800 tap-scale transition-colors shadow-sm group">
@@ -1189,7 +2063,7 @@ function openUnitModal(unitId) {
       `;
     } else {
       targetHTML = `
-        <div class="text-xs mb-2">Évolue en : <strong class="text-amber-400 font-bold">${targetName}</strong></div>
+        <div class="text-xs mb-2">${t('evolves_into', 'Évolue en :')} <strong class="text-amber-400 font-bold">${targetName}</strong></div>
       `;
     }
 
@@ -1197,7 +2071,7 @@ function openUnitModal(unitId) {
     if (unit.evolution.materials && unit.evolution.materials.length > 0) {
       materialsHTML = `
         <div>
-          <div class="text-[11px] font-medium text-slate-400 mb-1.5">Matériaux requis :</div>
+          <div class="text-[11px] font-medium text-slate-400 mb-1.5">${t('required_materials', 'Matériaux requis :')}</div>
           <div class="flex flex-wrap gap-2">
             ${unit.evolution.materials.map(m => {
               const mName = (m.name || '').trim().replace(/\u200e/g, '');
@@ -1276,13 +2150,15 @@ function openUnitModal(unitId) {
       preevoContent.classList.add('hidden');
       const preevoBtn = preevoSection.querySelector('button');
       if (preevoBtn) preevoBtn.setAttribute('aria-expanded', 'false');
-      document.getElementById('modal-preevo-btn-label').textContent = 'Afficher';
+      const preevoLabel = document.getElementById('modal-preevo-btn-label');
+      if (preevoLabel) preevoLabel.textContent = t('btn_show', 'Afficher');
       document.getElementById('modal-preevo-chevron').classList.remove('rotate-180');
       document.getElementById('modal-preevo-count').textContent = `(${preEvos.length})`;
       const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
+      const preevoHeading = currentLang === 'en' ? `Unit${preEvos.length > 1 ? 's' : ''} evolving into` : `Unité${preEvos.length > 1 ? 's' : ''} qui évolue${preEvos.length > 1 ? 'nt' : ''} en`;
       preevoContent.innerHTML = `
         <div class="text-xs text-slate-400 mb-2">
-          Unité${preEvos.length > 1 ? 's' : ''} qui évolue${preEvos.length > 1 ? 'nt' : ''} en
+          ${preevoHeading}
           <strong class="text-amber-400">${unit.name}</strong> :
         </div>
         <div class="flex flex-wrap gap-1.5">
@@ -1378,21 +2254,21 @@ function renderModalHeaderStats() {
   if (maxDmgEl) {
     maxDmgEl.textContent = maxDmg ? Math.round(maxDmg).toLocaleString() : (unit.raw_damage || '0');
     const tags = [];
-    if (at175) tags.push('niveau de carte 175');
-    if (idolBuffEnabled) tags.push(`buff Idol +${buffProviderPercent() || 0}%`);
-    maxDmgEl.title = tags.length ? `Dégâts max au palier le plus élevé, ${tags.join(', ')}` : "Dégâts au palier d'amélioration maximum";
+    if (at175) tags.push(t('tag_lvl175', 'niveau de carte 175'));
+    if (idolBuffEnabled) tags.push(t('tag_idol', 'buff Idol +{pct}%').replace('{pct}', buffProviderPercent() || 0));
+    maxDmgEl.title = tags.length ? `${t('dmg_max_tooltip', "Dégâts au palier d'amélioration maximum")}, ${tags.join(', ')}` : t('dmg_max_tooltip', "Dégâts au palier d'amélioration maximum");
   }
   const maxDpsEl = document.getElementById('modal-max-dps');
   if (maxDpsEl) {
     maxDpsEl.textContent = maxDps ? Math.round(maxDps).toLocaleString() : '-';
     const tags = [];
-    if (at175) tags.push('niveau de carte 175');
-    if (idolBuffEnabled) tags.push(`buff Idol +${buffProviderPercent() || 0}%`);
-    maxDpsEl.title = tags.length ? `DPS max au palier le plus élevé, ${tags.join(', ')}` : 'DPS Max Estimé au palier maximum';
+    if (at175) tags.push(t('tag_lvl175', 'niveau de carte 175'));
+    if (idolBuffEnabled) tags.push(t('tag_idol', 'buff Idol +{pct}%').replace('{pct}', buffProviderPercent() || 0));
+    maxDpsEl.title = tags.length ? `${t('dps_max_tooltip', "DPS Max Estimé au palier maximum")}, ${tags.join(', ')}` : t('dps_max_tooltip', "DPS Max Estimé au palier maximum");
   }
   const dmgLabel = document.getElementById('modal-dmg-range-label');
   if (dmgLabel) {
-    const extra = (at175 ? ' • Lvl 175' : '') + (idolBuffEnabled ? ' • Buff Idol' : '');
+    const extra = (at175 ? ' • Lvl 175' : '') + (idolBuffEnabled ? ` • ${t('buff_idol_label', 'Buff Idol')}` : '');
     dmgLabel.textContent = `${Math.round(baseDmg * mult).toLocaleString()} DMG (Base)  →  ${Math.round(maxDmg).toLocaleString()} DMG (Max)${extra}`;
   }
 }
@@ -1446,15 +2322,17 @@ function renderUpgradesTable() {
         if (lo != null || hi != null) {
           const shown = at175 ? (hi ?? lo) : (lo ?? hi);
           const other = at175 ? (lo ?? hi) : (hi ?? lo);
-          buffCell = `<td class="p-2.5 font-bold text-sky-300 font-mono-num" title="Buff de dégâts fourni aux unités à portée (aptitude Shine) — ${at175 ? 'niveau de carte 175' : 'niveau de carte 1'}">+${shown}%${other && other !== shown ? ` <span class="text-[10px] text-slate-500 font-mono-num">(${at175 ? 'L1: ' : 'L175: '}+${other}%)</span>` : ''}</td>`;
+          const tooltip = t('upg_buff_tooltip', 'Buff de dégâts fourni aux unités à portée (aptitude Shine) — {lvl}')
+            .replace('{lvl}', at175 ? t('lvl_175_card', 'niveau de carte 175') : t('lvl_1_card', 'niveau de carte 1'));
+          buffCell = `<td class="p-2.5 font-bold text-sky-300 font-mono-num" title="${tooltip}">+${shown}%${other && other !== shown ? ` <span class="text-[10px] text-slate-500 font-mono-num">(${at175 ? 'L1: ' : 'L175: '}+${other}%)</span>` : ''}</td>`;
         } else {
-          buffCell = `<td class="p-2.5 text-slate-600 font-mono-num" title="Aucun buff à ce palier (Your Star remplace Shine)">—</td>`;
+          buffCell = `<td class="p-2.5 text-slate-600 font-mono-num" title="${t('upg_buff_none', 'Aucun buff à ce palier (Your Star remplace Shine)')}">—</td>`;
         }
       }
 
       return `
         <tr class="hover:bg-slate-800/40 transition ${(hasAbilities || hasMatched) ? 'cursor-pointer' : ''}"
-            ${(hasAbilities || hasMatched) ? `onclick="toggleUpgradeAbility(${idx})" title="Cliquer pour lire les effets et détails de capacité"` : ''}>
+            ${(hasAbilities || hasMatched) ? `onclick="toggleUpgradeAbility(${idx})" title="${t('click_read_ability', 'Cliquer pour lire les effets et détails de capacité')}"` : ''}>
           <td class="p-2.5 font-bold text-slate-200 font-mono-num">${upg.level !== undefined ? upg.level : idx}</td>
           <td class="p-2.5 font-semibold text-slate-300 font-mono-num">$${(upg.cost || 0).toLocaleString()}</td>
           <td class="p-2.5 font-bold text-slate-100 font-mono-num">${dmg.toLocaleString()}</td>
@@ -1467,7 +2345,7 @@ function renderUpgradesTable() {
               ${hasMatched ? `
                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-bold shrink-0">
                   <i data-lucide="${matchedAbilities[0].type === 'manual' ? 'flame' : 'shield'}" class="w-2.5 h-2.5"></i>
-                  <span>${matchedAbilities[0].name}</span>
+                  <span>${translateAbilityName(matchedAbilities[0].name)}</span>
                 </span>
               ` : ''}
               <span class="truncate flex-1 text-slate-300">${abilitiesText}</span>
@@ -1482,12 +2360,12 @@ function renderUpgradesTable() {
               <div class="text-[10px] uppercase tracking-wider text-sky-400 font-bold flex items-center justify-between gap-1">
                 <span class="flex items-center gap-1">
                   <i data-lucide="sparkles" class="w-3 h-3"></i>
-                  Effets du palier ${upg.level !== undefined ? upg.level : idx}
+                  ${t('upgrade_effects_prefix', 'Effets du palier')} ${upg.level !== undefined ? upg.level : idx}
                 </span>
                 ${hasMatched ? `
                   <button onclick="event.stopPropagation(); scrollToAbilitiesSection()" class="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1 underline font-semibold normal-case">
                     <i data-lucide="arrow-up-circle" class="w-3 h-3"></i>
-                    <span>Voir la fiche complète de l'aptitude</span>
+                    <span>${t('view_full_ability', "Voir la fiche complète de l'aptitude")}</span>
                   </button>
                 ` : ''}
               </div>
@@ -1503,10 +2381,10 @@ function renderUpgradesTable() {
                 <div class="mt-2.5 p-3 rounded-lg bg-slate-950/90 border border-amber-500/30 space-y-1.5">
                   <div class="flex items-center gap-2">
                     <span class="px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider ${ma.type === 'manual' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-purple-500/20 text-purple-300 border-purple-500/40'}">
-                      ${ma.type === 'manual' ? 'Aptitude Manuelle' : 'Passif'}
+                      ${ma.type === 'manual' ? t('ability_manual', 'Aptitude Manuelle') : t('ability_passive', 'Passif')}
                     </span>
-                    <strong class="text-white text-xs">${ma.name}</strong>
-                    ${ma.unlock ? `<span class="text-[10px] text-slate-400 font-mono-num">(${ma.unlock})</span>` : ''}
+                    <strong class="text-white text-xs">${translateAbilityName(ma.name)}</strong>
+                    ${ma.unlock ? `<span class="text-[10px] text-slate-400 font-mono-num">(${translateUnlock(ma.unlock)})</span>` : ''}
                   </div>
                   <div class="text-[11px] text-slate-300 font-sans leading-relaxed whitespace-pre-line bg-slate-900/60 p-2 rounded border border-slate-800/80">
                     ${highlightStats(ma.description)}
@@ -1522,7 +2400,7 @@ function renderUpgradesTable() {
     tbody.innerHTML = `
       <tr>
         <td colspan="8" class="p-4 text-center text-slate-500 font-sans">
-          Statistiques de paliers détaillées non documentées pour cette unité.
+          ${t('upgrades_empty', 'Statistiques de paliers détaillées non documentées pour cette unité.')}
         </td>
       </tr>
     `;

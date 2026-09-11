@@ -1,43 +1,83 @@
 [
   {
     "name": "Mode Histoire (Story Mode)",
+    "name_fr": "Mode Histoire",
+    "name_en": "Story Mode",
     "type": "Campagne",
+    "type_fr": "Campagne",
+    "type_en": "Campaign",
     "description": "Le mode narratif principal d'ASTD à travers les mondes anime. 6 actes par monde, jouables en difficulté Normal et Extreme, offrant des gemmes et des unités servant à l'évolution.",
+    "description_fr": "Le mode narratif principal d'ASTD à travers les mondes anime. 6 actes par monde, jouables en difficulté Normal et Extreme, offrant des gemmes et des unités servant à l'évolution.",
+    "description_en": "The main narrative mode of ASTD across anime worlds. 6 acts per world, playable in Normal and Extreme difficulties, granting gems and craft units for evolution.",
     "worlds": [
       "World 1",
       "World 2",
       "World 3"
     ],
-    "rewards": "Gemmes de complétion, unités de craft, EXP"
+    "rewards": "Gemmes de complétion, unités de craft, EXP",
+    "rewards_fr": "Gemmes de complétion, unités de craft, EXP",
+    "rewards_en": "Completion Gems, Craft Units, EXP"
   },
   {
     "name": "Mode Infini (Infinite Mode)",
+    "name_fr": "Mode Infini",
+    "name_en": "Infinite Mode",
     "type": "Survie",
+    "type_fr": "Survie",
+    "type_en": "Survival",
     "description": "Défiez des vagues infinies d'ennemis pour monter dans le classement mondial et accumuler gemmes et EXP. Difficultés : Normal, Air Only (uniquement des ennemis aériens) et Extreme.",
+    "description_fr": "Défiez des vagues infinies d'ennemis pour monter dans le classement mondial et accumuler gemmes et EXP. Difficultés : Normal, Air Only (uniquement des ennemis aériens) et Extreme.",
+    "description_en": "Challenge endless waves of enemies to climb the global leaderboard and amass gems and EXP. Difficulties: Normal, Air Only, and Extreme.",
     "difficulties": [
       "Normal",
       "Air Only",
       "Extreme"
     ],
-    "rewards": "Gemmes selon les vagues survécues, titre au Leaderboard"
+    "rewards": "Gemmes selon les vagues survécues, titre au Leaderboard",
+    "rewards_fr": "Gemmes selon les vagues survécues, titre au Leaderboard",
+    "rewards_en": "Gems based on waves survived, Leaderboard title"
   },
   {
     "name": "Raids Monde 1 & Monde 2",
+    "name_fr": "Raids Monde 1 & Monde 2",
+    "name_en": "World 1 & World 2 Raids",
     "type": "Raid Coop (8 joueurs)",
+    "type_fr": "Raid Coop (8 joueurs)",
+    "type_en": "Co-op Raid (8 players)",
     "description": "Missions coopératives à haute difficulté pour jusqu'à 8 joueurs. La rotation des raids actifs change régulièrement — consultez les pages « World 1 Raids » et « World 2 Raids » du wiki pour la liste du moment.",
+    "description_fr": "Missions coopératives à haute difficulté pour jusqu'à 8 joueurs. La rotation des raids actifs change régulièrement — consultez les pages « World 1 Raids » et « World 2 Raids » du wiki pour la liste du moment.",
+    "description_en": "High-difficulty cooperative missions for up to 8 players. The active raid rotation changes regularly — check the official wiki pages for the current roster.",
     "wiki_link": "https://allstartd.fandom.com/wiki/World_1_Raids",
-    "rewards": "Orbes rares, matériaux d'évolution 7★, capsules de raid"
+    "rewards": "Orbes rares, matériaux d'évolution 7★, capsules de raid",
+    "rewards_fr": "Orbes rares, matériaux d'évolution 7★, capsules de raid",
+    "rewards_en": "Rare Orbs, 7★ Evolution Materials, Raid Capsules"
   },
   {
     "name": "Donjons & Gauntlet",
+    "name_fr": "Donjons & Gauntlet",
+    "name_en": "Dungeons & Gauntlet",
     "type": "Défi Endgame",
+    "type_fr": "Défi Endgame",
+    "type_en": "Endgame Challenge",
     "description": "Mode de progression par paliers d'étages avec modificateurs de difficulté et des boss redoutables dotés de résistances.",
-    "rewards": "Orbes spéciaux de Boss, Stardust, monnaie de boutique Dungeons"
+    "description_fr": "Mode de progression par paliers d'étages avec modificateurs de difficulté et des boss redoutables dotés de résistances.",
+    "description_en": "Floor progression challenge mode featuring difficulty modifiers and formidable bosses with attributes and resistances.",
+    "rewards": "Orbes spéciaux de Boss, Stardust, monnaie de boutique Dungeons",
+    "rewards_fr": "Orbes spéciaux de Boss, Stardust, monnaie de boutique Dungeons",
+    "rewards_en": "Special Boss Orbs, Stardust, Dungeon Shop Currency"
   },
   {
     "name": "Trials & Missions de Farm",
+    "name_fr": "Trials & Missions de Farm",
+    "name_en": "Trials & Farm Missions",
     "type": "Craft & Orbes",
+    "type_fr": "Craft & Orbes",
+    "type_en": "Craft & Orbs",
     "description": "Zone dédiée au farm de matériaux pour fabriquer des Orbes dans la boutique de l'artisan. Inclut des variantes aériennes et terrestres avec des niveaux requis (ex. Trial Level REQ: 35/45/50).",
-    "rewards": "Matériaux de craft d'Orbes (Pierres, Fragments élémentaires)"
+    "description_fr": "Zone dédiée au farm de matériaux pour fabriquer des Orbes dans la boutique de l'artisan. Inclut des variantes aériennes et terrestres avec des niveaux requis (ex. Trial Level REQ: 35/45/50).",
+    "description_en": "Dedicated area for farming materials to craft Orbs in the Orb Shop. Includes air and ground variations with level requirements (e.g. Trial Level REQ: 35/45/50).",
+    "rewards": "Matériaux de craft d'Orbes (Pierres, Fragments élémentaires)",
+    "rewards_fr": "Matériaux de craft d'Orbes (Pierres, Fragments élémentaires)",
+    "rewards_en": "Orb Crafting Materials (Stones, Elemental Fragments)"
   }
 ]
