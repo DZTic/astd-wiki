@@ -231,8 +231,23 @@
     </div>
   </div>
 
-  <!-- MAIN CONTENT CONTAINER -->
-  <main id="main-content" tabindex="-1" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 focus:outline-none">
+  <!-- LAYOUT PRINCIPAL AVEC SKYSCRAPERS LATÉRAUX (Grands écrans >= 1680px) -->
+  <div class="w-full max-w-[1720px] mx-auto flex justify-center items-start gap-4 px-2 sm:px-4 flex-1">
+
+    <!-- SKYSCRAPER GAUCHE (160x600 px) -->
+    <aside id="ad-skyscraper-left" class="hidden min-[1680px]:block w-[180px] shrink-0 sticky top-20 z-20 py-6" aria-label="Espace Partenaire Gauche">
+      <div class="w-[180px] rounded-xl bg-[#0e1526]/90 border border-slate-800/90 p-2 text-center overflow-hidden shadow-lg">
+        <div class="text-[9px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5">
+          Partenaire
+        </div>
+        <div id="ad-skyscraper-left-content" class="w-[160px] min-h-[600px] mx-auto flex items-center justify-center bg-[#090e1c]/60 rounded-lg border border-slate-800/50">
+          <!-- Injecté dynamiquement par app.js si domaine autorisé -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main id="main-content" tabindex="-1" class="flex-1 max-w-7xl w-full min-w-0 py-6 focus:outline-none">
 
     <!-- ==================== TAB 1 : UNITES ==================== -->
     <section id="tab-units" class="tab-content space-y-4" aria-labelledby="units-section-title">
@@ -334,16 +349,6 @@
 
         </div>
 
-      </div>
-
-      <!-- Encart Partenaire / Annonce non-intrusif (activé uniquement sur le domaine officiel dztic.github.io) -->
-      <div id="ad-banner-slot" class="hidden my-2 rounded-xl bg-[#0e1526]/80 border border-slate-800/80 p-2.5 text-center overflow-hidden transition-all duration-200" role="complementary" aria-label="Espace Partenaire">
-        <div class="text-[9px] uppercase tracking-wider text-slate-500 font-semibold mb-1">
-          <span>Partenaire / Annonce</span>
-        </div>
-        <div id="ad-banner-content" class="flex items-center justify-center min-h-[90px] w-full">
-          <!-- Injecté dynamiquement par app.js si domaine autorisé -->
-        </div>
       </div>
 
       <!-- VIEW 1: Grid Mode -->
@@ -693,6 +698,20 @@
     </section>
 
   </main>
+
+    <!-- SKYSCRAPER DROIT (160x600 px) -->
+    <aside id="ad-skyscraper-right" class="hidden min-[1680px]:block w-[180px] shrink-0 sticky top-20 z-20 py-6" aria-label="Espace Partenaire Droit">
+      <div class="w-[180px] rounded-xl bg-[#0e1526]/90 border border-slate-800/90 p-2 text-center overflow-hidden shadow-lg">
+        <div class="text-[9px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5">
+          Partenaire
+        </div>
+        <div id="ad-skyscraper-right-content" class="w-[160px] min-h-[600px] mx-auto flex items-center justify-center bg-[#090e1c]/60 rounded-lg border border-slate-800/50">
+          <!-- Injecté dynamiquement par app.js si domaine autorisé -->
+        </div>
+      </div>
+    </aside>
+
+  </div>
 
   <!-- ==================== UNIT DETAILS MODAL (Tactical HUD) ==================== -->
   <div id="unit-modal" role="dialog" aria-modal="true" aria-labelledby="modal-unit-name" aria-describedby="modal-overview-text" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto modal-backdrop">
