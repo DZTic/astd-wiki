@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "last_updated": "2026-09-11T19:41:52.860883+00:00",
+  "last_updated": "2026-09-11T19:54:04.348396+00:00",
   "units": {
     "Goku_Ultra_Instinct_Custom": {
       "id": "Goku_Ultra_Instinct_Custom",
@@ -17,7 +17,7 @@
       "character_origin": null,
       "anime_origin": "Dragon Ball Super",
       "overview": "Unite creee par la communaute avec des paliers d'amelioration personnalises saisis a la main.",
-      "image": "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png",
+      "image": "data:image/png;base64,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",
       "is_tradeable": false,
       "is_unobtainable": false,
       "upgrades": [
@@ -60,7 +60,7 @@
         }
       ],
       "_community": true,
-      "created_at": "2026-09-11T19:41:49.500Z"
+      "created_at": "2026-09-11T19:54:01.060Z"
     }
   },
   "deleted_units": [],
@@ -75,6 +75,13 @@
   ],
   "tips": {
     "Goku_Ultra_Instinct_Custom": [
+      {
+        "id": "tip_1789156442998",
+        "author": "VegetaMaster",
+        "type": "raid",
+        "text": "Excellente unite en Raid 2 : placez-la en debut de chemin pour appliquer ses degats de zone.",
+        "date": "11/09/2026"
+      },
       {
         "id": "tip_1789155711517",
         "author": "VegetaMaster",

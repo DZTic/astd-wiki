@@ -95,6 +95,11 @@ const I18N = {
     comm_del_tier: "Supprimer ce palier",
     comm_tier_required: "Veuillez renseigner au moins un palier d'amélioration.",
     comm_help_desc_upgrades: "Remplissez les informations générales et saisissez chaque palier d'amélioration manuellement. Le coût total et les statistiques maximales sont calculés directement à partir de vos paliers.",
+    comm_field_image: "Image de l'Unité",
+    comm_btn_browse_pc: "📁 Importer depuis mon PC",
+    comm_or_enter_url: "ou saisissez un lien URL ci-dessous :",
+    comm_img_from_pc_loaded: "Fichier PC importé",
+    comm_img_remove: "Retirer cette image",
 
     // Units Tab & Filters
     units_h1: "Base de Données des Tours & Unités ASTD",
@@ -434,6 +439,11 @@ const I18N = {
     comm_del_tier: "Delete this tier",
     comm_tier_required: "Please provide at least one upgrade tier.",
     comm_help_desc_upgrades: "Fill in the general information and manually enter each upgrade tier. Total cost and max stats are derived directly from your tiers.",
+    comm_field_image: "Unit Image",
+    comm_btn_browse_pc: "📁 Import from PC",
+    comm_or_enter_url: "or enter a web image URL below:",
+    comm_img_from_pc_loaded: "PC file imported",
+    comm_img_remove: "Remove this image",
 
     // Units Tab & Filters
     units_h1: "ASTD Towers & Units Database",

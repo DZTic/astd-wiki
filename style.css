@@ -630,5 +630,15 @@ body {
   box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
 }
 
+/* Zone d'importation d'image locale depuis le PC */
+.comm-file-upload-btn {
+  transition: all var(--duration-interactive) var(--ease-fluid);
+}
+
+.comm-file-upload-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
 
 

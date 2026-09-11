@@ -890,6 +890,8 @@ const CommunityUI = (function() {
   let currentFormMode = 'unit'; // 'unit' | 'code' | 'tip'
   let editingUnitId = null;
   let currentUnitUpgrades = [];
+  let currentUploadedImageDataUrl = null;
+  let currentUploadedImageName = '';
 
   function openUnitModalForAdd() {
     currentFormMode = 'unit';
@@ -1156,6 +1158,105 @@ const CommunityUI = (function() {
     updateLivePreview();
   }
 
+  // --- GESTION DE L'IMPORTATION D'IMAGES LOCALES (DEPUIS LE PC) ---
+
+  function handleImageFileUpload(file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert(window.t ? window.t('comm_invalid_img_file', 'Veuillez sélectionner un fichier image valide (.png, .jpg, .webp).') : 'Veuillez sélectionner un fichier image valide (.png, .jpg, .webp).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const rawDataUrl = e.target.result;
+      const img = new Image();
+      img.onload = function() {
+        const maxDim = 350;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        currentUploadedImageDataUrl = canvas.toDataURL('image/png');
+        currentUploadedImageName = file.name;
+
+        const urlInput = document.getElementById('comm-unit-image');
+        if (urlInput) urlInput.value = '';
+
+        renderImagePreviewWidget();
+        updateLivePreview();
+      };
+      img.src = rawDataUrl;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeUploadedImage() {
+    currentUploadedImageDataUrl = null;
+    currentUploadedImageName = '';
+    const fileInput = document.getElementById('comm-unit-file-input');
+    if (fileInput) fileInput.value = '';
+    renderImagePreviewWidget();
+    updateLivePreview();
+  }
+
+  function onImageUrlInput() {
+    const urlInput = document.getElementById('comm-unit-image');
+    if (urlInput && urlInput.value.trim()) {
+      currentUploadedImageDataUrl = null;
+      currentUploadedImageName = '';
+      const fileInput = document.getElementById('comm-unit-file-input');
+      if (fileInput) fileInput.value = '';
+      renderImagePreviewWidget();
+    }
+    updateLivePreview();
+  }
+
+  function renderImagePreviewWidget() {
+    const previewWrap = document.getElementById('comm-img-preview-wrap');
+    if (!previewWrap) return;
+
+    if (currentUploadedImageDataUrl) {
+      previewWrap.innerHTML = `
+        <div class="flex items-center gap-2.5 p-2 rounded-lg bg-sky-950/50 border border-sky-500/40 mt-1">
+          <img src="${currentUploadedImageDataUrl}" class="w-10 h-10 rounded object-contain bg-slate-900 border border-slate-700 shrink-0 p-0.5" alt="Aperçu importé">
+          <div class="min-w-0 flex-1">
+            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-300 uppercase">
+              <i data-lucide="check-circle" class="w-3 h-3 text-sky-400"></i>
+              ${window.t ? window.t('comm_img_from_pc_loaded', 'Fichier PC importé') : 'Fichier PC importé'}
+            </span>
+            <div class="text-xs font-semibold text-white truncate">${escapeHtml(currentUploadedImageName || 'image_locale.png')}</div>
+          </div>
+          <button type="button" onclick="CommunityUI.removeUploadedImage()"
+                  class="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 font-semibold text-[11px] tap-scale flex items-center gap-1 shrink-0"
+                  title="${window.t ? window.t('comm_img_remove', 'Retirer cette image') : 'Retirer cette image'}">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            <span>${window.t ? window.t('delete', 'Retirer') : 'Retirer'}</span>
+          </button>
+        </div>
+      `;
+    } else {
+      previewWrap.innerHTML = '';
+    }
+
+    if (window.lucide) lucide.createIcons();
+  }
+
   // --- FORMULAIRE UNITÉ AVEC LIVE PREVIEW ---
 
   function setupUnitForm(unitId = null) {
@@ -1173,6 +1274,15 @@ const CommunityUI = (function() {
       titleEl.textContent = isEdit ?
         (window.t ? window.t('comm_title_edit_unit', 'Modifier la fiche : {name}').replace('{name}', existing.name) : `Modifier la fiche : ${existing.name}`) :
         (window.t ? window.t('comm_title_add_unit', 'Créer & Proposer une Nouvelle Unité') : 'Créer & Proposer une Nouvelle Unité');
+    }
+
+    // Initialiser l'image uploadée si l'unité en possède une en base64
+    if (existing?.image && existing.image.startsWith('data:image')) {
+      currentUploadedImageDataUrl = existing.image;
+      currentUploadedImageName = 'image_existante.png';
+    } else {
+      currentUploadedImageDataUrl = null;
+      currentUploadedImageName = '';
     }
 
     // Initialiser les paliers d'amélioration
@@ -1278,15 +1388,40 @@ const CommunityUI = (function() {
               </div>
             </div>
 
-            <!-- Image URL -->
-            <div>
-              <label class="block font-bold text-slate-200 mb-1">
-                ${window.t ? window.t('comm_field_image', 'Image (URL web ou lien Wiki)') : 'Image (URL web ou lien Wiki)'}
-              </label>
-              <input type="url" id="comm-unit-image" value="${existing?.image || ''}"
-                     placeholder="https://static.wikia.nocookie.net/... ou lien direct .png/.jpg"
-                     class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-sky-500"
-                     oninput="CommunityUI.updateLivePreview()">
+            <!-- Bloc Image : Import PC ou Lien Web -->
+            <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <label class="font-bold text-slate-200 flex items-center gap-1.5">
+                  <i data-lucide="image" class="w-3.5 h-3.5 text-sky-400"></i>
+                  <span>${window.t ? window.t('comm_field_image', 'Image de l\'Unité') : 'Image de l\'Unité'}</span>
+                </label>
+                <span class="text-[10px] text-slate-400 font-mono-num">PNG, JPG, WebP</span>
+              </div>
+
+              <!-- Zone d'importation depuis le PC -->
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <input type="file" id="comm-unit-file-input" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden"
+                       onchange="CommunityUI.handleImageFileUpload(this.files[0])">
+                
+                <button type="button" onclick="document.getElementById('comm-unit-file-input').click()"
+                        class="px-3 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-2 tap-scale shadow-sm transition-all shrink-0">
+                  <i data-lucide="folder-up" class="w-4 h-4"></i>
+                  <span>${window.t ? window.t('comm_btn_browse_pc', '📁 Importer depuis mon PC') : '📁 Importer depuis mon PC'}</span>
+                </button>
+
+                <span class="text-[11px] text-slate-400 text-center sm:text-left">${window.t ? window.t('comm_or_enter_url', 'ou saisissez un lien URL ci-dessous :') : 'ou saisissez un lien URL ci-dessous :'}</span>
+              </div>
+
+              <!-- Widget d'aperçu de l'image locale importée -->
+              <div id="comm-img-preview-wrap"></div>
+
+              <!-- Champ URL Web alternatif -->
+              <div class="relative">
+                <input type="url" id="comm-unit-image" value="${(!currentUploadedImageDataUrl && existing?.image) ? escapeHtml(existing.image) : ''}"
+                       placeholder="https://static.wikia.nocookie.net/... ou lien .png/.jpg"
+                       class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-sky-500 font-mono-num"
+                       oninput="CommunityUI.onImageUrlInput()">
+              </div>
             </div>
 
             <!-- Types : Placement et Attaque -->
@@ -1444,6 +1579,7 @@ const CommunityUI = (function() {
       </form>
     `;
 
+    renderImagePreviewWidget();
     renderUpgradeRows();
     updateLivePreview();
     if (window.lucide) lucide.createIcons();
@@ -1453,7 +1589,8 @@ const CommunityUI = (function() {
     const name = document.getElementById('comm-unit-name')?.value?.trim() || 'Nom de l\'unité';
     const star = document.getElementById('comm-unit-star')?.value || '6';
     const anime = document.getElementById('comm-unit-anime')?.value?.trim() || 'All Star Tower Defense';
-    const image = document.getElementById('comm-unit-image')?.value?.trim() || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
+    const inputUrl = document.getElementById('comm-unit-image')?.value?.trim();
+    const image = currentUploadedImageDataUrl || inputUrl || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
     const towerType = document.getElementById('comm-unit-tower-type')?.value || 'Ground';
 
     const stats = computeTierStats();
@@ -1528,6 +1665,8 @@ const CommunityUI = (function() {
     }
 
     const stats = computeTierStats();
+    const inputUrl = document.getElementById('comm-unit-image')?.value?.trim();
+    const finalImage = currentUploadedImageDataUrl || inputUrl || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
 
     const unitData = {
       id: editingUnitId,
@@ -1535,7 +1674,7 @@ const CommunityUI = (function() {
       star: parseInt(document.getElementById('comm-unit-star').value, 10),
       anime_origin: document.getElementById('comm-unit-anime').value.trim(),
       character_origin: document.getElementById('comm-unit-char').value.trim(),
-      image: document.getElementById('comm-unit-image').value.trim(),
+      image: finalImage,
       tower_type: document.getElementById('comm-unit-tower-type').value,
       attack_type: document.getElementById('comm-unit-attack-type').value,
       deployment_cost: stats.deployment_cost,
@@ -1730,7 +1869,12 @@ const CommunityUI = (function() {
     removeUpgradeRow,
     onUpgradeChange,
     renderUpgradeRows,
-    getCurrentUnitUpgrades: () => currentUnitUpgrades
+    getCurrentUnitUpgrades: () => currentUnitUpgrades,
+    handleImageFileUpload,
+    removeUploadedImage,
+    onImageUrlInput,
+    renderImagePreviewWidget,
+    getCurrentUploadedImageDataUrl: () => currentUploadedImageDataUrl
   };
 })();
 
