@@ -2070,8 +2070,10 @@ function updateCompareUrl() {
 }
 
 function loadComparePreset(idA, idB) {
-  const uA = ALL_UNITS.find(u => u.id === idA || u.name.toLowerCase().includes(idA.replace(/_/g, ' ')));
-  const uB = ALL_UNITS.find(u => u.id === idB || u.name.toLowerCase().includes(idB.replace(/_/g, ' ')));
+  const termA = idA.replace(/_/g, ' ').toLowerCase();
+  const termB = idB.replace(/_/g, ' ').toLowerCase();
+  const uA = ALL_UNITS.find(u => u.id === idA || u.id.toLowerCase() === idA.toLowerCase() || u.name.toLowerCase().includes(termA));
+  const uB = ALL_UNITS.find(u => u.id === idB || u.id.toLowerCase() === idB.toLowerCase() || u.name.toLowerCase().includes(termB));
   if (uA) setCompareUnit('a', uA);
   if (uB) setCompareUnit('b', uB);
   switchTab('compare');
@@ -2105,6 +2107,12 @@ function handleCompareSearch(slot) {
   const input = document.getElementById(`compare-search-${slot}`);
   const dropdown = document.getElementById(`compare-dropdown-${slot}`);
   if (!input || !dropdown) return;
+
+  if (!ALL_UNITS || ALL_UNITS.length === 0) {
+    dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center italic">Chargement des unités en cours...</div>`;
+    dropdown.classList.remove('hidden');
+    return;
+  }
 
   const q = input.value.trim().toLowerCase();
   const otherUnit = slot === 'a' ? compareUnitB : compareUnitA;
@@ -2587,3 +2595,63 @@ function showToast(message) {
 
   if (window.lucide) lucide.createIcons();
 }
+
+// ==========================================
+// EXPOSITION GLOBALE EXPLICITE (WINDOW)
+// ==========================================
+// Garantit que toutes les fonctions appelées par des attributs inline HTML
+// sont toujours accessibles sur window, quel que soit le contexte ou le mode de chargement.
+if (typeof window !== 'undefined') {
+  // Navigation & Vues
+  window.switchTab = switchTab;
+  window.updateNavActiveState = updateNavActiveState;
+  window.toggleMobileMenu = toggleMobileMenu;
+  window.switchTabAndCloseDrawer = switchTabAndCloseDrawer;
+  window.setViewMode = setViewMode;
+  window.setStarFilter = setStarFilter;
+  window.clearAllFilters = clearAllFilters;
+  window.sortTableBy = sortTableBy;
+  window.loadMoreUnits = loadMoreUnits;
+
+  // Modale Unité & Détails
+  window.openUnitModal = openUnitModal;
+  window.openUnitByName = openUnitByName;
+  window.closeUnitModal = closeUnitModal;
+  window.togglePreEvos = togglePreEvos;
+  window.toggleAbilities = toggleAbilities;
+  window.toggleUpgradeAbility = toggleUpgradeAbility;
+  window.scrollToAbilitiesSection = scrollToAbilitiesSection;
+  window.setLevelView = setLevelView;
+  window.toggleIdolBuff = toggleIdolBuff;
+
+  // Deck / Team Builder
+  window.clearTeam = clearTeam;
+  window.addUnitToTeam = addUnitToTeam;
+  window.addCurrentModalUnitToTeam = addCurrentModalUnitToTeam;
+  window.removeUnitFromTeam = removeUnitFromTeam;
+  window.renderTeamPicker = renderTeamPicker;
+  window.focusTeamSearch = focusTeamSearch;
+
+  // Comparateur Tactique
+  window.setCompareLevel = setCompareLevel;
+  window.toggleCompareIdolBuff = toggleCompareIdolBuff;
+  window.setCompareUnit = setCompareUnit;
+  window.clearCompareSlot = clearCompareSlot;
+  window.clearCompare = clearCompare;
+  window.swapCompareUnits = swapCompareUnits;
+  window.loadComparePreset = loadComparePreset;
+  window.startCompareWith = startCompareWith;
+  window.startCompareWithModalUnit = startCompareWithModalUnit;
+  window.handleCompareSearch = handleCompareSearch;
+  window.hideCompareDropdown = hideCompareDropdown;
+  window.renderCompareView = renderCompareView;
+
+  // Codes & Orbes & Utilitaires
+  window.toggleExpiredCodes = toggleExpiredCodes;
+  window.filterExpiredCodes = filterExpiredCodes;
+  window.copyCodeText = copyCodeText;
+  window.copyLatestCode = copyLatestCode;
+  window.filterOrbs = filterOrbs;
+  window.showToast = showToast;
+}
+
