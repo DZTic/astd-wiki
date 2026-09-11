@@ -2452,6 +2452,25 @@ const CommunityUI = (function() {
       currentUploadedOrbImageName = '';
     }
 
+    const currentRequire = existing?.require || 'All units';
+
+    const standardPresets = [
+      { val: 'All units', label: 'Toutes les unités (All units)' },
+      { val: '6 Star Units', label: 'Unités 6★ uniquement' },
+      { val: '7 Star Units', label: 'Unités 7★ uniquement' },
+      { val: 'Ground Units', label: 'Unités Sol uniquement' },
+      { val: 'Air Units', label: 'Unités Aériennes uniquement' },
+      { val: 'Hill Units', label: 'Unités Colline uniquement' }
+    ];
+
+    const orbUniqueRequires = Array.from(new Set(
+      allOrbs.map(o => (o.require || '').trim()).filter(r => r && !standardPresets.some(p => p.val.toLowerCase() === r.toLowerCase()))
+    )).sort((a, b) => a.localeCompare(b));
+
+    const isPreset = standardPresets.some(p => p.val.toLowerCase() === currentRequire.toLowerCase());
+    const isOrbSpecific = orbUniqueRequires.some(r => r.toLowerCase() === currentRequire.toLowerCase());
+    const isCustom = !isPreset && !isOrbSpecific && !!currentRequire;
+
     bodyEl.innerHTML = `
       <form id="comm-orb-form" onsubmit="event.preventDefault(); CommunityUI.submitOrbForm();" class="space-y-4">
         
@@ -2498,18 +2517,39 @@ const CommunityUI = (function() {
                 <label class="block font-bold text-slate-200 mb-1">
                   ${window.t ? window.t('comm_field_orb_require', 'Compatibilité (Condition requise) *') : 'Compatibilité (Condition requise) *'}
                 </label>
-                <input type="text" id="comm-orb-require" required value="${escapeHtml(existing?.require || 'All units')}"
-                       placeholder="Ex: All units, Goku, 6 Star Units..."
-                       list="orb-require-suggestions"
-                       class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
-                       oninput="CommunityUI.updateLiveOrbPreview()">
-                <datalist id="orb-require-suggestions">
-                  <option value="All units">Toutes les unités</option>
-                  <option value="6 Star Units">Unités 6★ uniquement</option>
-                  <option value="7 Star Units">Unités 7★ uniquement</option>
-                  <option value="Ground Units">Unités Sol</option>
-                  <option value="Air Units">Unités Aériennes</option>
-                </datalist>
+                <div class="space-y-1.5">
+                  <select id="comm-orb-require-select"
+                          class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-cyan-500 cursor-pointer"
+                          onchange="CommunityUI.onOrbRequireSelectChange(this.value)">
+                    <optgroup label="Conditions Générales">
+                      ${standardPresets.map(p => `
+                        <option value="${escapeHtml(p.val)}" ${p.val.toLowerCase() === currentRequire.toLowerCase() ? 'selected' : ''}>
+                          ${escapeHtml(p.label)}
+                        </option>
+                      `).join('')}
+                    </optgroup>
+                    ${orbUniqueRequires.length > 0 ? `
+                      <optgroup label="Unités Spécifiques (Orbes existants)">
+                        ${orbUniqueRequires.map(r => `
+                          <option value="${escapeHtml(r)}" ${r.toLowerCase() === currentRequire.toLowerCase() ? 'selected' : ''}>
+                            ${escapeHtml(r)}
+                          </option>
+                        `).join('')}
+                      </optgroup>
+                    ` : ''}
+                    <option value="__custom__" ${isCustom ? 'selected' : ''}>➕ Autre unité ou condition personnalisée...</option>
+                  </select>
+
+                  <div id="comm-orb-require-custom-wrap" class="${isCustom ? '' : 'hidden'}">
+                    <input type="text" id="comm-orb-require-custom"
+                           value="${escapeHtml(isCustom ? currentRequire : '')}"
+                           placeholder="Précisez la condition ou le nom de l'unité..."
+                           class="w-full bg-[#070b14] border border-cyan-500/60 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-400"
+                           oninput="CommunityUI.onOrbRequireCustomInput(this.value)">
+                  </div>
+
+                  <input type="hidden" id="comm-orb-require" value="${escapeHtml(currentRequire)}">
+                </div>
               </div>
 
               <div>
@@ -2704,6 +2744,32 @@ const CommunityUI = (function() {
     if (window.lucide) lucide.createIcons();
   }
 
+  function onOrbRequireSelectChange(val) {
+    const customWrap = document.getElementById('comm-orb-require-custom-wrap');
+    const customInput = document.getElementById('comm-orb-require-custom');
+    const hiddenRequire = document.getElementById('comm-orb-require');
+
+    if (val === '__custom__') {
+      if (customWrap) customWrap.classList.remove('hidden');
+      if (customInput) {
+        customInput.focus();
+        if (hiddenRequire) hiddenRequire.value = customInput.value.trim() || 'All units';
+      }
+    } else {
+      if (customWrap) customWrap.classList.add('hidden');
+      if (hiddenRequire) hiddenRequire.value = val;
+    }
+    updateLiveOrbPreview();
+  }
+
+  function onOrbRequireCustomInput(val) {
+    const hiddenRequire = document.getElementById('comm-orb-require');
+    if (hiddenRequire) {
+      hiddenRequire.value = val.trim() || 'All units';
+    }
+    updateLiveOrbPreview();
+  }
+
   function updateLiveOrbPreview() {
     const previewContainer = document.getElementById('live-preview-orb-card');
     if (!previewContainer) return;
@@ -2875,7 +2941,9 @@ const CommunityUI = (function() {
     getCurrentUploadedImageDataUrl: () => currentUploadedImageDataUrl,
     getCurrentUploadedOrbImageDataUrl: () => currentUploadedOrbImageDataUrl,
     computeUnitTowerType,
-    onTopTowerTypeChange
+    onTopTowerTypeChange,
+    onOrbRequireSelectChange,
+    onOrbRequireCustomInput
   };
 })();
 
