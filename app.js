@@ -20,6 +20,7 @@ let displayedCount = 24;
 let currentModalUnit = null;
 let teamSlots = [null, null, null, null, null, null];
 let currentLevelView = 1; // 1 | 175 : niveau de carte affiché dans la fiche unité
+let lastFocusedElement = null;
 
 // Multiplicateurs officiels du wiki (template "Stats Box", section Level 175) :
 // dégâts ×2.142, portée ×1.2, SPA inchangé. Vérifiés sur Stampede (???%),
@@ -267,11 +268,34 @@ function setupEventListeners() {
     if (e.key === 'Escape') closeUnitModal();
   });
 
-  // Modal backdrop click
+  // Modal backdrop click & focus trap
   const modal = document.getElementById('unit-modal');
+  const modalDialog = document.getElementById('unit-modal-dialog');
   if (modal) {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeUnitModal();
+    });
+  }
+
+  if (modalDialog) {
+    modalDialog.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const focusable = modalDialog.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+      const firstEl = focusable[0];
+      const lastEl = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
     });
   }
 
@@ -389,16 +413,28 @@ function setViewMode(mode) {
     tableContainer?.classList.remove('hidden');
     loadMoreBtn?.classList.add('hidden');
 
-    btnTable.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 tap-scale';
-    btnGrid.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center justify-center space-x-1 tap-scale';
+    if (btnTable) {
+      btnTable.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 tap-scale';
+      btnTable.setAttribute('aria-pressed', 'true');
+    }
+    if (btnGrid) {
+      btnGrid.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center justify-center space-x-1 tap-scale';
+      btnGrid.setAttribute('aria-pressed', 'false');
+    }
 
     renderUnitsTable();
   } else {
     gridEl?.classList.remove('hidden');
     tableContainer?.classList.add('hidden');
 
-    btnGrid.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 tap-scale';
-    btnTable.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center justify-center space-x-1 tap-scale';
+    if (btnGrid) {
+      btnGrid.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 tap-scale';
+      btnGrid.setAttribute('aria-pressed', 'true');
+    }
+    if (btnTable) {
+      btnTable.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-slate-400 hover:text-white flex items-center justify-center space-x-1 tap-scale';
+      btnTable.setAttribute('aria-pressed', 'false');
+    }
 
     renderUnitsList();
   }
@@ -430,16 +466,24 @@ function sortTableBy(field) {
 // UNIT FILTERS & RENDERING
 // ==========================================
 
-function setStarFilter(star) {
+function setStarFilter(star, btnElement) {
   currentStarFilter = star;
   document.querySelectorAll('.star-btn').forEach(btn => {
     btn.classList.remove('active', 'bg-sky-600', 'text-white');
     btn.classList.add('bg-slate-900');
+    btn.setAttribute('aria-pressed', 'false');
   });
-  
-  event.currentTarget.classList.add('active', 'bg-sky-600', 'text-white');
-  event.currentTarget.classList.remove('bg-slate-900');
-  
+
+  const targetBtn = btnElement || (window.event && window.event.currentTarget)
+    || document.querySelector(`.star-btn[onclick*="'${star}'"]`)
+    || document.querySelector(`.star-btn[onclick*="${star}"]`);
+
+  if (targetBtn) {
+    targetBtn.classList.add('active', 'bg-sky-600', 'text-white');
+    targetBtn.classList.remove('bg-slate-900');
+    targetBtn.setAttribute('aria-pressed', 'true');
+  }
+
   applyUnitFilters();
 }
 
@@ -448,6 +492,25 @@ function clearSearch() {
   if (searchInput) searchInput.value = '';
   document.getElementById('clear-search')?.classList.add('hidden');
   applyUnitFilters();
+}
+
+function clearAllFilters() {
+  const searchInput = document.getElementById('filter-search');
+  const typeSelect = document.getElementById('filter-tower-type');
+  const sortSelect = document.getElementById('filter-sort');
+  const animeSelect = document.getElementById('filter-anime');
+  const obtainableCheck = document.getElementById('filter-obtainable');
+  const quickSearch = document.getElementById('quick-search');
+
+  if (searchInput) searchInput.value = '';
+  if (quickSearch) quickSearch.value = '';
+  if (typeSelect) typeSelect.value = 'all';
+  if (sortSelect) sortSelect.value = 'recent-desc';
+  if (animeSelect) animeSelect.value = 'all';
+  if (obtainableCheck) obtainableCheck.checked = false;
+  document.getElementById('clear-search')?.classList.add('hidden');
+
+  setStarFilter('all');
 }
 
 function applyUnitFilters() {
@@ -519,11 +582,20 @@ function renderUnitsList() {
   }
 
   if (FILTERED_UNITS.length === 0) {
+    const searchVal = document.getElementById('filter-search')?.value?.trim() || '';
     grid.innerHTML = `
-      <div class="col-span-full py-14 text-center text-slate-400">
-        <i data-lucide="search-x" class="w-10 h-10 mx-auto mb-2 text-slate-500"></i>
-        <p class="text-sm font-semibold">Aucune unité ne correspond à vos filtres.</p>
-        <p class="text-xs text-slate-500 mt-0.5">Essayez de réinitialiser la recherche.</p>
+      <div class="col-span-full py-12 px-6 text-center text-slate-300 tactical-card rounded-2xl border border-slate-800 my-4 max-w-md mx-auto">
+        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto mb-3 text-sky-400">
+          <i data-lucide="search-x" class="w-6 h-6" stroke-width="2"></i>
+        </div>
+        <h3 class="text-sm font-bold text-white text-balance">Aucune unité ne correspond à vos filtres</h3>
+        <p class="text-xs text-slate-400 mt-1 text-pretty">
+          ${searchVal ? `Aucun résultat pour « <strong class="text-white">${searchVal}</strong> ».` : 'Aucune unité disponible avec la combinaison de rareté et type sélectionnés.'}
+        </p>
+        <button onclick="clearAllFilters()" class="mt-4 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tap-scale inline-flex items-center gap-1.5 shadow-md">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5" stroke-width="2"></i>
+          <span>Réinitialiser les filtres</span>
+        </button>
       </div>
     `;
     if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
@@ -551,7 +623,7 @@ function renderUnitsTable() {
   const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
 
   tbody.innerHTML = FILTERED_UNITS.slice(0, 150).map(u => `
-    <tr class="hover:bg-slate-800/60 transition-colors duration-100 cursor-pointer" onclick="openUnitModal('${u.id}')">
+    <tr class="hover:bg-slate-800/60 transition-colors duration-100 cursor-pointer" onclick="openUnitModal('${u.id}')" tabindex="0" role="button" aria-label="${u.name}, unité ${u.star} étoiles. Voir la fiche." onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openUnitModal('${u.id}');}">
       <td class="p-3 flex items-center space-x-2.5">
         <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 p-0.5 shrink-0 flex items-center justify-center">
           <img src="${u.image || fallbackImg}" alt="" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
@@ -562,22 +634,22 @@ function renderUnitsTable() {
         </div>
       </td>
       <td class="p-3">
-        <span class="px-2 py-0.5 rounded text-[11px] font-bold star-${u.star}-badge">${u.star}★</span>
+        <span class="px-2 py-0.5 rounded text-[11px] font-bold star-${u.star}-badge font-mono-num">${u.star}★</span>
         ${isNewUnit(u) ? `<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase tracking-wide" title="Fiche wiki créée le ${new Date(u.created_at).toLocaleDateString('fr-FR')}">Nouveau</span>` : ''}
       </td>
       <td class="p-3 font-sans">
         <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 text-[10px] font-semibold">${u.tower_type || 'Ground'}</span>
       </td>
-      <td class="p-3 font-bold text-rose-400" title="${u.max_damage.toLocaleString()} DMG">${formatCompactNumber(u.max_damage)}</td>
-      <td class="p-3 text-sky-400">${u.max_range || '-'}</td>
-      <td class="p-3 text-slate-300">${u.min_spa ? u.min_spa + 's' : '-'}</td>
-      <td class="p-3 font-bold text-amber-400" title="${u.max_dps.toLocaleString()} DPS">${formatCompactNumber(u.max_dps)}</td>
-      <td class="p-3 text-emerald-400">${u.total_cost > 0 ? '$' + formatCompactNumber(u.total_cost) : '-'}</td>
+      <td class="p-3 font-bold text-rose-400 font-mono-num" title="${u.max_damage.toLocaleString()} DMG">${formatCompactNumber(u.max_damage)}</td>
+      <td class="p-3 text-sky-400 font-mono-num">${u.max_range || '-'}</td>
+      <td class="p-3 text-slate-300 font-mono-num">${u.min_spa ? u.min_spa + 's' : '-'}</td>
+      <td class="p-3 font-bold text-amber-400 font-mono-num" title="${u.max_dps.toLocaleString()} DPS">${formatCompactNumber(u.max_dps)}</td>
+      <td class="p-3 text-emerald-400 font-mono-num">${u.total_cost > 0 ? '$' + formatCompactNumber(u.total_cost) : '-'}</td>
       <td class="p-3 text-right space-x-1.5 font-sans" onclick="event.stopPropagation()">
-        <button onclick="openUnitModal('${u.id}')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale">
+        <button onclick="openUnitModal('${u.id}')" aria-label="Consulter la fiche de ${u.name}" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale">
           Fiche
         </button>
-        <button onclick="addUnitToTeam('${u.id}')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale" title="Ajouter au deck">
+        <button onclick="addUnitToTeam('${u.id}')" aria-label="Ajouter ${u.name} au deck" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-300 text-[10px] font-semibold tap-scale" title="Ajouter au deck">
           +
         </button>
       </td>
@@ -613,14 +685,19 @@ function stripWikiMarkup(text) {
     .trim();
 }
 
-// Tactical Unit Card Generator
+// Tactical Unit Card Generator (Accessible, High Contrast, Keyboard navigable)
 function createUnitCardHTML(unit) {
   const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
   const imgSrc = unit.image || fallbackImg;
   const originLine = unit.anime_origin || unit.character_origin || 'All Star Tower Defense';
 
   return `
-    <div class="tactical-card rounded-2xl p-3.5 border star-${unit.star}-card flex flex-col justify-between group cursor-pointer tap-scale-subtle" onclick="openUnitModal('${unit.id}')">
+    <article class="tactical-card rounded-2xl p-3.5 border star-${unit.star}-card flex flex-col justify-between group cursor-pointer tap-scale-subtle focus-within:ring-2 focus-within:ring-sky-400"
+             role="button"
+             tabindex="0"
+             aria-label="${unit.name}, unité ${unit.star} étoiles, type ${unit.tower_type || 'Ground'}. Cliquer pour inspecter."
+             onclick="openUnitModal('${unit.id}')"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openUnitModal('${unit.id}');}">
 
       <!-- Top Badges -->
       <div class="flex items-center justify-between z-10 mb-2">
@@ -639,53 +716,53 @@ function createUnitCardHTML(unit) {
 
       <!-- Avatar Framed with concentric radius & neutral outline -->
       <div class="w-full h-32 rounded-xl bg-[#0c1220] border border-slate-800/80 p-2 my-1 flex items-center justify-center relative overflow-hidden group-hover:border-sky-500/40 transition-colors duration-150">
-        <img src="${imgSrc}" alt="${unit.name}" loading="lazy"
+        <img src="${imgSrc}" alt="" loading="lazy"
              onerror="this.src='${fallbackImg}'"
              class="max-h-full max-w-full object-contain filter drop-shadow img-outline rounded-lg group-hover:scale-105 transition-transform duration-150 ease-out">
       </div>
 
       <!-- Title & Origin -->
       <div class="my-2 min-w-0">
-        <div class="font-bold text-xs sm:text-sm text-white group-hover:text-sky-300 transition-colors duration-150 truncate" title="${unit.name}">
+        <div class="font-bold text-xs sm:text-sm text-white group-hover:text-sky-300 transition-colors duration-150 truncate text-balance" title="${unit.name}">
           ${unit.name}
         </div>
-        <div class="text-[11px] text-slate-400 truncate" title="${originLine}">
+        <div class="text-[11px] text-slate-400 truncate text-pretty" title="${originLine}">
           ${originLine}
         </div>
       </div>
 
-      <!-- Tactical Micro-Metrics Grid -->
+      <!-- Tactical Micro-Metrics Grid (High Contrast WCAG AA) -->
       <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800/80 font-mono-num text-[11px]">
         <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
-          <span class="text-slate-500 block text-[9px] font-sans uppercase" title="Dégâts au palier d'amélioration maximum">DMG</span>
+          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="Dégâts au palier d'amélioration maximum">DMG</span>
           <span class="font-bold text-rose-400" title="${unit.max_damage.toLocaleString()}">${formatCompactNumber(unit.max_damage)}</span>
         </div>
         <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
-          <span class="text-slate-500 block text-[9px] font-sans uppercase" title="Dégâts Par Seconde au palier maximum">DPS</span>
+          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="Dégâts Par Seconde au palier maximum">DPS</span>
           <span class="font-bold text-amber-400" title="${unit.max_dps.toLocaleString()}">${formatCompactNumber(unit.max_dps)}</span>
         </div>
         <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
-          <span class="text-slate-500 block text-[9px] font-sans uppercase" title="Distance d'attaque maximale">Portée</span>
+          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="Distance d'attaque maximale">Portée</span>
           <span class="font-bold text-sky-400">${unit.max_range || '-'}</span>
         </div>
         <div class="bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800/60 shadow-sm">
-          <span class="text-slate-500 block text-[9px] font-sans uppercase" title="SPA : Secondes Par Attaque (délai entre deux attaques, plus c'est bas plus c'est rapide)">SPA</span>
+          <span class="text-slate-400 block text-[9px] font-sans uppercase" title="SPA : Secondes Par Attaque (délai entre deux attaques, plus c'est bas plus c'est rapide)">SPA</span>
           <span class="font-bold text-slate-300">${unit.min_spa ? unit.min_spa + 's' : '-'}</span>
         </div>
       </div>
 
-      <!-- Action Button -->
+      <!-- Action Buttons -->
       <div class="mt-3 flex items-center space-x-1.5" onclick="event.stopPropagation()">
-        <button onclick="openUnitModal('${unit.id}')" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1">
+        <button onclick="openUnitModal('${unit.id}')" aria-label="Consulter la fiche de ${unit.name}" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1">
           <i data-lucide="eye" class="w-3 h-3" stroke-width="2"></i>
           <span>Fiche</span>
         </button>
-        <button onclick="addUnitToTeam('${unit.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-emerald-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center" title="Ajouter au deck">
+        <button onclick="addUnitToTeam('${unit.id}')" aria-label="Ajouter ${unit.name} au deck" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-emerald-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center" title="Ajouter au deck">
           +
         </button>
       </div>
 
-    </div>
+    </article>
   `;
 }
 
@@ -719,11 +796,14 @@ function scrollToAbilitiesSection() {
 
 // Toggle the special abilities / passives block on the unit modal
 function toggleAbilities() {
+  const section = document.getElementById('modal-abilities-section');
   const content = document.getElementById('modal-abilities-content');
   const label = document.getElementById('modal-abilities-btn-label');
   const chevron = document.getElementById('modal-abilities-chevron');
   if (!content) return;
   const nowHidden = content.classList.toggle('hidden');
+  const btn = section ? section.querySelector('button') : null;
+  if (btn) btn.setAttribute('aria-expanded', String(!nowHidden));
   if (label) label.textContent = nowHidden ? 'Afficher' : 'Masquer';
   if (chevron) chevron.classList.toggle('rotate-180', !nowHidden);
 }
@@ -747,6 +827,8 @@ function renderModalAbilities(unit) {
 
   // Reset to collapsed state each time the modal opens
   const content = document.getElementById('modal-abilities-content');
+  const btn = section.querySelector('button');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
   if (content) {
     content.classList.add('hidden');
     document.getElementById('modal-abilities-btn-label').textContent = 'Afficher';
@@ -843,6 +925,9 @@ function renderModalAbilities(unit) {
 function openUnitModal(unitId) {
   const unit = ALL_UNITS.find(u => u.id === unitId || u.name.toLowerCase() === unitId.toLowerCase());
   if (!unit) return;
+
+  // Save active element to restore focus on modal close
+  lastFocusedElement = document.activeElement;
 
   currentModalUnit = unit;
   window.location.hash = `unit/${unit.id}`;
@@ -988,6 +1073,8 @@ function openUnitModal(unitId) {
       preevoSection.classList.remove('hidden');
       // Reset to collapsed state each time the modal opens
       preevoContent.classList.add('hidden');
+      const preevoBtn = preevoSection.querySelector('button');
+      if (preevoBtn) preevoBtn.setAttribute('aria-expanded', 'false');
       document.getElementById('modal-preevo-btn-label').textContent = 'Afficher';
       document.getElementById('modal-preevo-chevron').classList.remove('rotate-180');
       document.getElementById('modal-preevo-count').textContent = `(${preEvos.length})`;
@@ -1023,6 +1110,14 @@ function openUnitModal(unitId) {
 
   // Upgrades table & level toggle state are (re)rendered by setLevelView(1) above
 
+  // Set inert on background elements to trap focus within modal dialog
+  const headerEl = document.getElementById('app-header');
+  const mainEl = document.getElementById('main-content');
+  const footerEl = document.querySelector('footer');
+  if (headerEl) headerEl.setAttribute('inert', '');
+  if (mainEl) mainEl.setAttribute('inert', '');
+  if (footerEl) footerEl.setAttribute('inert', '');
+
   const dialog = document.getElementById('unit-modal-dialog');
   modal.classList.remove('hidden', 'closing');
   if (dialog) {
@@ -1031,6 +1126,12 @@ function openUnitModal(unitId) {
   }
   document.body.style.overflow = 'hidden';
   if (window.lucide) lucide.createIcons();
+
+  // Send keyboard focus to the modal close button
+  requestAnimationFrame(() => {
+    const closeBtn = document.getElementById('modal-close-btn');
+    if (closeBtn) closeBtn.focus();
+  });
 }
 
 // Switch the upgrade table between Level 1 and Level 175 card stats
@@ -1042,8 +1143,14 @@ function setLevelView(level) {
   const btn175 = document.getElementById('btn-level-175');
   const activeCls = 'bg-sky-600 text-white border-sky-500';
   const idleCls = 'bg-slate-900 text-slate-300 border-slate-700 hover:border-sky-500/50 hover:text-sky-300';
-  if (btn1) btn1.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border tap-scale transition-colors flex items-center gap-1 shadow-sm ${level === 1 ? activeCls : idleCls}`;
-  if (btn175) btn175.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border tap-scale transition-colors flex items-center gap-1 shadow-sm ${level === 175 ? activeCls : idleCls}`;
+  if (btn1) {
+    btn1.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border tap-scale transition-colors flex items-center gap-1 shadow-sm ${level === 1 ? activeCls : idleCls}`;
+    btn1.setAttribute('aria-pressed', level === 1 ? 'true' : 'false');
+  }
+  if (btn175) {
+    btn175.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border tap-scale transition-colors flex items-center gap-1 shadow-sm ${level === 175 ? activeCls : idleCls}`;
+    btn175.setAttribute('aria-pressed', level === 175 ? 'true' : 'false');
+  }
 
   const note = document.getElementById('modal-level-note');
   if (note) note.classList.toggle('hidden', level !== 175);
@@ -1228,6 +1335,30 @@ function closeUnitModal() {
   const dialog = document.getElementById('unit-modal-dialog');
   if (!modal || modal.classList.contains('hidden')) return;
 
+  // Remove inert on background elements
+  const headerEl = document.getElementById('app-header');
+  const mainEl = document.getElementById('main-content');
+  const footerEl = document.querySelector('footer');
+  if (headerEl) headerEl.removeAttribute('inert');
+  if (mainEl) mainEl.removeAttribute('inert');
+  if (footerEl) footerEl.removeAttribute('inert');
+
+  const onClosed = () => {
+    document.body.style.overflow = '';
+    if (window.location.hash.startsWith('#unit/')) {
+      window.location.hash = currentTab;
+    }
+    // Restore focus to trigger element
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+      try {
+        lastFocusedElement.focus();
+      } catch (e) {
+        // Element might be detached
+      }
+      lastFocusedElement = null;
+    }
+  };
+
   if (dialog) {
     dialog.classList.remove('modal-enter');
     dialog.classList.add('modal-exit');
@@ -1236,17 +1367,11 @@ function closeUnitModal() {
       modal.classList.add('hidden');
       modal.classList.remove('closing');
       dialog.classList.remove('modal-exit');
-      document.body.style.overflow = '';
-      if (window.location.hash.startsWith('#unit/')) {
-        window.location.hash = currentTab;
-      }
+      onClosed();
     }, 150);
   } else {
     modal.classList.add('hidden');
-    document.body.style.overflow = '';
-    if (window.location.hash.startsWith('#unit/')) {
-      window.location.hash = currentTab;
-    }
+    onClosed();
   }
 }
 
@@ -1266,11 +1391,14 @@ function toggleUpgradeAbility(idx) {
 
 // Toggle the pre-evolutions block on the unit modal
 function togglePreEvos() {
+  const section = document.getElementById('modal-preevo-section');
   const content = document.getElementById('modal-preevo-content');
   const label = document.getElementById('modal-preevo-btn-label');
   const chevron = document.getElementById('modal-preevo-chevron');
   if (!content) return;
   const nowHidden = content.classList.toggle('hidden');
+  const btn = section ? section.querySelector('button') : null;
+  if (btn) btn.setAttribute('aria-expanded', String(!nowHidden));
   if (label) label.textContent = nowHidden ? 'Afficher' : 'Masquer';
   if (chevron) chevron.classList.toggle('rotate-180', !nowHidden);
 }
@@ -1413,9 +1541,9 @@ function renderCodes() {
             <strong class="text-amber-400 font-sans">Récompenses :</strong> ${c.reward}
           </div>
         </div>
-        <button onclick="copyCodeText('${c.code}', this)" class="w-full ps-3 pe-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs tracking-wide tap-scale flex items-center justify-center space-x-1.5">
+        <button onclick="copyCodeText('${c.code}', this)" aria-label="Copier le code ${c.code}" class="w-full ps-3 pe-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs tracking-wide tap-scale flex items-center justify-center space-x-1.5">
           <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i>
-          <span>COPIER LE CODE</span>
+          <span>Copier le code</span>
         </button>
       </div>
     `).join('');
@@ -1431,6 +1559,10 @@ function renderCodes() {
 function renderExpiredCodesList(list) {
   const expiredList = document.getElementById('expired-codes-list');
   if (!expiredList) return;
+  if (list.length === 0) {
+    expiredList.innerHTML = `<span class="text-xs text-slate-400 italic py-1">Aucun code expiré ne correspond à cette recherche.</span>`;
+    return;
+  }
   expiredList.innerHTML = list.slice(0, 100).map(c => `
     <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[11px] font-mono-num text-slate-500 line-through">
       ${c.code}
@@ -1447,8 +1579,11 @@ function filterExpiredCodes() {
 function toggleExpiredCodes() {
   const wrapper = document.getElementById('expired-codes-wrapper');
   const arrow = document.getElementById('expired-arrow');
-  if (wrapper) wrapper.classList.toggle('hidden');
-  if (arrow) arrow.classList.toggle('rotate-180');
+  const btn = document.getElementById('toggle-expired-btn');
+  if (!wrapper) return;
+  const nowHidden = wrapper.classList.toggle('hidden');
+  if (arrow) arrow.classList.toggle('rotate-180', !nowHidden);
+  if (btn) btn.setAttribute('aria-expanded', String(!nowHidden));
 }
 
 function copyLatestCode() {
@@ -1463,7 +1598,7 @@ function copyCodeText(text, btnElement) {
     showToast(`Code "${text}" copié !`);
     if (btn) {
       const origHTML = btn.innerHTML;
-      btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i><span>COPIÉ !</span>`;
+      btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i><span>Copié !</span>`;
       if (window.lucide) lucide.createIcons();
       setTimeout(() => {
         btn.innerHTML = origHTML;
@@ -1552,7 +1687,25 @@ function filterOrbs() {
     (o.require || '').toLowerCase().includes(query)
   );
 
-  grid.innerHTML = filtered.map(renderOrbCard).join('');
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="col-span-full py-10 px-4 text-center text-slate-300 tactical-card rounded-2xl border border-slate-800 max-w-md mx-auto">
+        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto mb-3 text-cyan-400">
+          <i data-lucide="search-x" class="w-6 h-6" stroke-width="2"></i>
+        </div>
+        <h3 class="text-sm font-bold text-white text-balance">Aucun orbe trouvé</h3>
+        <p class="text-xs text-slate-400 mt-1 text-pretty">
+          Aucun orbe ne correspond à la recherche « <strong class="text-white">${query}</strong> ».
+        </p>
+        <button onclick="const el=document.getElementById('search-orbs'); if(el){el.value=''; filterOrbs();}" class="mt-4 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tap-scale inline-flex items-center gap-1.5 shadow-md">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5" stroke-width="2"></i>
+          <span>Effacer la recherche</span>
+        </button>
+      </div>
+    `;
+  } else {
+    grid.innerHTML = filtered.map(renderOrbCard).join('');
+  }
   if (window.lucide) lucide.createIcons();
 }
 
@@ -1601,7 +1754,7 @@ function renderTeamBuilder() {
     if (unit) {
       return `
         <div class="tactical-card rounded-2xl p-3 border star-${unit.star}-card relative flex flex-col items-center text-center group tap-scale-subtle">
-          <button onclick="removeUnitFromTeam(${idx})" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-600/90 hover:bg-rose-500 text-white flex items-center justify-center tap-scale transition-colors shadow-sm" title="Retirer de l'équipe">
+          <button onclick="removeUnitFromTeam(${idx})" aria-label="Retirer ${unit.name} du deck" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-600/90 hover:bg-rose-500 text-white flex items-center justify-center tap-scale transition-colors shadow-sm" title="Retirer ${unit.name} du deck">
             <i data-lucide="x" class="w-3.5 h-3.5" stroke-width="2.5"></i>
           </button>
           <div class="w-16 h-16 rounded-xl bg-slate-900/90 border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
@@ -1618,11 +1771,11 @@ function renderTeamBuilder() {
       `;
     } else {
       return `
-        <div class="border border-dashed border-slate-700/80 rounded-2xl p-4 flex flex-col items-center justify-center text-slate-400 h-36 hover:border-sky-500/50 hover:text-sky-400 tap-scale transition-colors cursor-pointer group" onclick="focusTeamSearch()">
+        <button type="button" onclick="focusTeamSearch()" aria-label="Slot ${idx + 1} vide. Cliquer pour rechercher une tour." class="border border-dashed border-slate-700/80 rounded-2xl p-4 flex flex-col items-center justify-center text-slate-400 h-36 hover:border-sky-500/50 hover:text-sky-400 tap-scale transition-colors cursor-pointer group w-full text-center">
           <i data-lucide="plus-circle" class="w-6 h-6 mb-1.5 text-slate-500 group-hover:text-sky-400 transition-colors" stroke-width="2"></i>
           <span class="text-[11px] font-bold text-slate-300 group-hover:text-white transition-colors">SLOT ${idx + 1}</span>
-          <span class="text-[9px] text-slate-500 group-hover:text-slate-400 transition-colors">Ajouter une tour</span>
-        </div>
+          <span class="text-[9px] text-slate-400 group-hover:text-slate-300 transition-colors">Ajouter une tour</span>
+        </button>
       `;
     }
   }).join('');
@@ -1698,7 +1851,7 @@ function renderTeamPicker() {
       </div>
       <div class="text-[11px] font-bold text-white truncate w-full" title="${u.name}">${u.name}</div>
       <span class="text-[10px] star-${u.star}-badge px-1.5 py-0.5 rounded my-1 font-mono-num font-bold">${u.star}★</span>
-      <button onclick="addUnitToTeam('${u.id}')" class="w-full py-1 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-[10px] font-bold tap-scale transition-colors shadow-sm">
+      <button onclick="addUnitToTeam('${u.id}')" aria-label="Ajouter ${u.name} au deck" class="w-full py-1 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-[10px] font-bold tap-scale transition-colors shadow-sm">
         + Ajouter
       </button>
     </div>

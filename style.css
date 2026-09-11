@@ -1,10 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
+  /* better-colors: Palette sémantique et surfaces étagées */
   --bg-main: #0b0f19;
   --bg-surface: #111827;
   --bg-surface-hover: #1f293d;
-  --bg-card: rgba(17, 24, 39, 0.85);
+  --bg-card: rgba(17, 24, 39, 0.9);
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-focus: #38bdf8;
   --cyan-accent: #06b6d4;
@@ -18,26 +19,71 @@
   --ease-fluid: cubic-bezier(0.2, 0, 0, 1);
   --ease-out-fast: cubic-bezier(0, 0, 0.2, 1);
   --duration-interactive: 150ms;
-  --duration-enter: 250ms;
+  --duration-enter: 200ms;
 
   /* better-ui: Dark mode layered depth shadows instead of stark borders */
   --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
-  --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.15), 0 12px 28px -6px rgba(0, 0, 0, 0.65);
+  --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.16), 0 12px 28px -6px rgba(0, 0, 0, 0.65);
   --shadow-elevation-1: 0 0 0 1px oklch(1 0 0 / 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.5);
   --shadow-elevation-2: 0 0 0 1px oklch(1 0 0 / 0.12), 0 16px 36px -8px rgba(0, 0, 0, 0.8);
+
+  /* better-ui: Concentric border radius tokens */
+  --radius-outer-card: 16px;
+  --radius-inner-media: 10px;
+  --radius-btn: 10px;
+}
+
+html, body {
+  min-width: 320px;
+  overflow-x: clip;
 }
 
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-main);
   color: #f1f5f9;
-  overflow-x: hidden;
   letter-spacing: -0.01em;
 }
 
+/* better-accessibility: Visible high-contrast focus indicators */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Skip to main content link for keyboard users */
+.skip-to-content {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background-color: #0284c7;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 2px #38bdf8;
+  transform: translateY(-200%);
+  transition: transform 150ms var(--ease-fluid);
+}
+.skip-to-content:focus {
+  transform: translateY(0);
+}
+
+/* better-typography: Tabular numbers for non-jittering statistics and costs */
 .font-mono-num {
   font-family: 'JetBrains Mono', monospace;
-  font-feature-settings: 'tnum' on, 'zero' on;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+}
+
+/* better-typography: Line-wrap balance & pretty */
+.text-balance {
+  text-wrap: balance;
+}
+.text-pretty {
+  text-wrap: pretty;
 }
 
 /* Custom Tactical Scrollbars */
@@ -66,15 +112,15 @@ body {
 
 /* better-ui: Concentric border radius token helpers */
 .radius-outer-card {
-  border-radius: 18px; /* 10px inner + 8px padding = 18px */
+  border-radius: var(--radius-outer-card);
 }
 .radius-inner-media {
-  border-radius: 10px;
+  border-radius: var(--radius-inner-media);
 }
 
 /* better-ui: Neutral 1px Image Outlines in dark mode (oklch(1 0 0 / 0.1)) */
 .img-outline {
-  outline: 1px solid oklch(1 0 0 / 0.1);
+  outline: 1px solid oklch(1 0 0 / 0.12);
   outline-offset: -1px;
 }
 
@@ -117,7 +163,7 @@ body {
   border-color: rgba(56, 189, 248, 0.35);
 }
 
-/* Star Rarity Indicators (Layered shadows and subtle tinted glow) */
+/* Star Rarity Indicators (Layered shadows, high contrast for WCAG AA compliance) */
 .star-7-card {
   border-color: rgba(244, 63, 94, 0.35);
   box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.6);
@@ -127,8 +173,9 @@ body {
   box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.3), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 20px -2px rgba(244, 63, 94, 0.2);
 }
 .star-7-badge {
-  background: linear-gradient(135deg, #e11d48, #9f1239);
+  background: #be123c;
   color: #ffffff;
+  font-weight: 800;
 }
 
 .star-6-card {
@@ -140,8 +187,9 @@ body {
   box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 20px -2px rgba(245, 158, 11, 0.2);
 }
 .star-6-badge {
-  background: linear-gradient(135deg, #f59e0b, #b45309);
-  color: #ffffff;
+  background: #f59e0b;
+  color: #0b0f19;
+  font-weight: 800;
 }
 
 .star-5-card {
@@ -153,8 +201,9 @@ body {
   box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 20px -2px rgba(139, 92, 246, 0.2);
 }
 .star-5-badge {
-  background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+  background: #7c3aed;
   color: #ffffff;
+  font-weight: 800;
 }
 
 .star-4-card {
@@ -165,7 +214,11 @@ body {
   border-color: rgba(59, 130, 246, 0.65);
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 18px -2px rgba(59, 130, 246, 0.2);
 }
-.star-4-badge { background: #2563eb; color: #ffffff; }
+.star-4-badge {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 800;
+}
 
 .star-3-card {
   border-color: rgba(16, 185, 129, 0.25);
@@ -175,7 +228,11 @@ body {
   border-color: rgba(16, 185, 129, 0.6);
   box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2), 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 16px -2px rgba(16, 185, 129, 0.18);
 }
-.star-3-badge { background: #059669; color: #ffffff; }
+.star-3-badge {
+  background: #059669;
+  color: #ffffff;
+  font-weight: 800;
+}
 
 .star-2-card {
   border-color: rgba(100, 116, 139, 0.25);
@@ -185,7 +242,11 @@ body {
   border-color: rgba(100, 116, 139, 0.5);
   box-shadow: 0 0 0 1px rgba(100, 116, 139, 0.2), 0 12px 28px -6px rgba(0, 0, 0, 0.65);
 }
-.star-2-badge { background: #475569; color: #ffffff; }
+.star-2-badge {
+  background: #475569;
+  color: #ffffff;
+  font-weight: 800;
+}
 
 /* Tactical Data Table styling */
 .tactical-table th {
@@ -225,7 +286,7 @@ body {
 
 .modal-exit {
   opacity: 0 !important;
-  transform: translateY(-12px) scale(0.98) !important;
+  transform: translateY(-8px) scale(0.98) !important;
   filter: blur(4px) !important;
   transition: opacity 150ms ease-out, transform 150ms ease-out, filter 150ms ease-out !important;
 }
@@ -303,7 +364,7 @@ body {
   transition: opacity 150ms ease-out, transform 150ms ease-out, filter 150ms ease-out !important;
 }
 
-/* better-ui: Contextual icon cross-fade transitions */
+/* Contextual icon cross-fade transitions */
 .icon-swap-enter {
   opacity: 1;
   transform: scale(1);
@@ -315,4 +376,39 @@ body {
   transform: scale(0.25);
   filter: blur(4px);
   transition: opacity 200ms var(--ease-fluid), transform 200ms var(--ease-fluid), filter 200ms var(--ease-fluid);
+}
+
+/* better-accessibility & better-ui: Honor prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .tap-scale:active:not(:disabled),
+  .tap-scale-subtle:active:not(:disabled) {
+    transform: none !important;
+  }
+
+  .tactical-card:hover {
+    transform: none !important;
+  }
+
+  .pulse-beacon {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .modal-enter,
+  .modal-exit,
+  .toast-animate-in,
+  .toast-animate-out {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
 }
