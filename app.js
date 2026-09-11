@@ -3,14 +3,18 @@
 // Tactical Pro Architecture (Mobalytics / OP.GG Style)
 // ==========================================
 
-let ALL_UNITS = [];
-let FILTERED_UNITS = [];
-let CODES_DATA = { active: [], expired: [] };
-let ORBS_DATA = [];
-let TIERLIST_DATA = {};
-let GAMEMODES_DATA = [];
-let META_DATA = {};
-let MATERIAL_IMAGES = {};
+var ALL_UNITS = [];
+var FILTERED_UNITS = [];
+var CODES_DATA = { active: [], expired: [] };
+var ORBS_DATA = [];
+var TIERLIST_DATA = {};
+var GAMEMODES_DATA = [];
+var META_DATA = {};
+var MATERIAL_IMAGES = {};
+
+window.ALL_UNITS = ALL_UNITS;
+window.getGlobalUnits = () => ALL_UNITS;
+window.setGlobalUnits = (list) => { ALL_UNITS = list; window.ALL_UNITS = list; };
 
 let currentTab = 'units';
 let currentStarFilter = 'all';
@@ -60,6 +64,8 @@ const I18N = {
     nav_deck_short: "Deck",
     nav_compare: "Comparateur",
     nav_compare_short: "Versus",
+    nav_community: "Communauté",
+    nav_community_short: "Commu",
     nav_mobile_aria: "Menu mobile",
     mobile_search_placeholder: "Rechercher une unité...",
     drawer_units: "Tours & Unités",
@@ -69,6 +75,19 @@ const I18N = {
     drawer_gamemodes: "Modes de Jeu & Raids",
     drawer_teambuilder: "Deck Builder (6 Slots)",
     drawer_compare: "Comparateur Tactique Pro",
+    drawer_community: "Hub Communauté",
+    btn_propose_unit: "Proposer une Unité",
+    btn_propose_unit_short: "Ajouter",
+    comm_btn_add_code_nav: "Proposer un Code",
+    community_h1: "Espace et Contributions de la Communauté",
+    modal_btn_edit: "Modifier",
+    modal_btn_hide: "Masquer",
+    modal_community_tips_title: "Conseils & Avis de la Communauté",
+    btn_add_tip: "Partager un conseil",
+    badge_community: "Communauté",
+    badge_modified: "Modifié",
+    btn_mark_expired: "Signaler expiré",
+    btn_mark_expired_title: "Signaler ce code comme expiré",
 
     // Units Tab & Filters
     units_h1: "Base de Données des Tours & Unités ASTD",
@@ -377,6 +396,8 @@ const I18N = {
     nav_deck_short: "Deck",
     nav_compare: "Compare",
     nav_compare_short: "Versus",
+    nav_community: "Community",
+    nav_community_short: "Commu",
     nav_mobile_aria: "Mobile menu",
     mobile_search_placeholder: "Search unit...",
     drawer_units: "Towers & Units",
@@ -386,6 +407,19 @@ const I18N = {
     drawer_gamemodes: "Game Modes & Raids",
     drawer_teambuilder: "Deck Builder (6 Slots)",
     drawer_compare: "Tactical Pro Comparator",
+    drawer_community: "Community Hub",
+    btn_propose_unit: "Propose Unit",
+    btn_propose_unit_short: "Add",
+    comm_btn_add_code_nav: "Propose Code",
+    community_h1: "Community Space & Contributions",
+    modal_btn_edit: "Edit",
+    modal_btn_hide: "Hide",
+    modal_community_tips_title: "Community Tips & Insights",
+    btn_add_tip: "Share a tip",
+    badge_community: "Community",
+    badge_modified: "Modified",
+    btn_mark_expired: "Report expired",
+    btn_mark_expired_title: "Report this code as expired",
 
     // Units Tab & Filters
     units_h1: "ASTD Towers & Units Database",
@@ -1429,6 +1463,12 @@ async function loadData() {
     META_DATA = metaRes;
     MATERIAL_IMAGES = matImagesRes || {};
 
+    // Intégrer les ajouts et modifications de la communauté
+    if (window.CommunityManager) {
+      await CommunityManager.init();
+      CommunityManager.applyToGlobalData();
+    }
+
     // Header & Analytics metrics
     const unitsCountEl = document.getElementById('stat-units-count');
     if (unitsCountEl) unitsCountEl.textContent = ALL_UNITS.length.toLocaleString();
@@ -1690,7 +1730,7 @@ function handleHashNavigation() {
       }
       switchTab('compare');
       renderCompareView();
-    } else if (['units', 'tierlist', 'codes', 'orbs', 'gamemodes', 'teambuilder', 'compare'].includes(hash)) {
+    } else if (['units', 'tierlist', 'codes', 'orbs', 'gamemodes', 'teambuilder', 'compare', 'community'].includes(hash)) {
       if (currentTab !== hash) {
         switchTab(hash);
       }
@@ -1715,6 +1755,9 @@ function switchTab(tabId) {
 
   if (tabId === 'compare') {
     renderCompareView();
+  }
+  if (tabId === 'community') {
+    if (window.CommunityManager) CommunityManager.renderCommunityHub();
   }
 
   updateNavActiveState(tabId);
@@ -2041,7 +2084,9 @@ function renderUnitsTable() {
       </td>
       <td class="p-3">
         <span class="px-2 py-0.5 rounded text-[11px] font-bold star-${u.star}-badge font-mono-num">${u.star}★</span>
-        ${isNewUnit(u) ? `<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="${t('wiki_page_created_on', 'Fiche wiki créée le')} ${new Date(u.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'fr-FR')}">${t('badge_new', 'Nouveau')}</span>` : ''}
+        ${u._is_community_new ? `<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide">${t('badge_community', 'Communauté')}</span>` : ''}
+        ${u._is_community_modified ? `<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wide">${t('badge_modified', 'Modifié')}</span>` : ''}
+        ${isNewUnit(u) && !u._is_community_new ? `<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="${t('wiki_page_created_on', 'Fiche wiki créée le')} ${new Date(u.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'fr-FR')}">${t('badge_new', 'Nouveau')}</span>` : ''}
       </td>
       <td class="p-3 font-sans">
         <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 text-[10px] font-semibold">${translateTowerType(u.tower_type)}</span>
@@ -2114,7 +2159,9 @@ function createUnitCardHTML(unit) {
           <span class="px-2 py-0.5 rounded text-[11px] font-mono-num font-bold star-${unit.star}-badge shadow-sm">
             ${unit.star}★
           </span>
-          ${isNewUnit(unit) ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="${t('wiki_page_created_on', 'Fiche wiki créée le')} ${new Date(unit.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'fr-FR')}">${t('badge_new', 'Nouveau')}</span>` : ''}
+          ${unit._is_community_new ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="${t('badge_community_title', 'Création communautaire')}">${t('badge_community', 'Communauté')}</span>` : ''}
+          ${unit._is_community_modified ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wide" title="${t('badge_modified_title', 'Statistiques modifiées')}">${t('badge_modified', 'Modifié')}</span>` : ''}
+          ${isNewUnit(unit) && !unit._is_community_new ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase tracking-wide" title="${t('wiki_page_created_on', 'Fiche wiki créée le')} ${new Date(unit.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'fr-FR')}">${t('badge_new', 'Nouveau')}</span>` : ''}
         </div>
         <div class="flex items-center space-x-1">
           ${unit.is_unobtainable ? `<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 rounded" title="${t('filter_obtainable_title', 'Unité retirée du jeu')}">${t('badge_unobtainable', 'Introuvable')}</span>` : ''}
@@ -2597,6 +2644,11 @@ function openUnitModal(unitId) {
   // Render Abilities Section
   renderModalAbilities(unit);
 
+  // Render Community Tips
+  if (window.CommunityManager) {
+    CommunityManager.renderUnitCommunityTips(unit.id);
+  }
+
   // Upgrades table & level toggle state are (re)rendered by setLevelView(1) above
 
   // Set inert on background elements to trap focus within modal dialog
@@ -3026,9 +3078,12 @@ function renderCodes() {
       <div class="tactical-card rounded-xl p-4 border border-slate-800/80 bg-[#0f1629]/95 flex flex-col justify-between space-y-3 hover:border-sky-500/40 transition-colors duration-150">
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-sky-500/15 text-sky-400 border border-sky-500/30">
-              ${t('code_verified_active', 'Vérifié & Actif')}
-            </span>
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-sky-500/15 text-sky-400 border border-sky-500/30">
+                ${t('code_verified_active', 'Vérifié & Actif')}
+              </span>
+              ${c._is_community ? `<span class="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded bg-sky-500/20 text-sky-300 border border-sky-500/40">${t('badge_community', 'Communauté')}</span>` : ''}
+            </div>
             <span class="text-[11px] text-slate-400 font-mono-num">${c.date || t('code_recent', 'Récent')}</span>
           </div>
           <div class="font-mono-num text-base font-bold text-white tracking-wide my-2 select-all bg-[#090e1c] px-3 py-2 rounded-lg border border-slate-800">
@@ -3038,10 +3093,15 @@ function renderCodes() {
             <strong class="text-amber-300 font-sans">${t('code_rewards_label', 'Récompenses :')}</strong> ${translateReward(c.reward)}
           </div>
         </div>
-        <button onclick="copyCodeText('${c.code}', this)" aria-label="${t('btn_copy_code', 'Copier le code')} ${c.code}" class="w-full ps-3 pe-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs tracking-wide tap-scale flex items-center justify-center space-x-1.5 shadow-sm transition-colors">
-          <i data-lucide="copy" class="w-3.5 h-3.5 text-white" stroke-width="2.5"></i>
-          <span>${t('btn_copy_code', 'Copier le code')}</span>
-        </button>
+        <div class="flex items-center gap-1.5 w-full">
+          <button onclick="copyCodeText('${c.code}', this)" aria-label="${t('btn_copy_code', 'Copier le code')} ${c.code}" class="flex-1 ps-3 pe-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs tracking-wide tap-scale flex items-center justify-center space-x-1.5 shadow-sm transition-colors">
+            <i data-lucide="copy" class="w-3.5 h-3.5 text-white" stroke-width="2.5"></i>
+            <span>${t('btn_copy_code', 'Copier le code')}</span>
+          </button>
+          <button onclick="CommunityManager.toggleCodeExpired('${c.code}')" aria-label="${t('btn_mark_expired', 'Signaler comme expiré')}" class="py-2 px-2.5 rounded-lg bg-slate-800 hover:bg-amber-600 hover:text-white text-slate-400 font-semibold text-xs tap-scale transition-colors shrink-0" title="${t('btn_mark_expired_title', 'Signaler ce code comme expiré')}">
+            <i data-lucide="alert-triangle" class="w-3.5 h-3.5" stroke-width="2"></i>
+          </button>
+        </div>
       </div>
     `).join('');
   }

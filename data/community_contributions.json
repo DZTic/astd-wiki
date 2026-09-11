@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "last_updated": "2026-09-11T17:30:47.113160+00:00",
+  "units": {
+    "Test_Goku": {
+      "id": "Test_Goku",
+      "name": "Test Goku",
+      "star": 6,
+      "tower_type": "Ground",
+      "attack_type": "AoE (Circle)",
+      "deployment_cost": 500,
+      "total_cost": 150000,
+      "max_damage": 150000,
+      "max_range": 60,
+      "min_spa": 4,
+      "max_dps": 37500,
+      "character_origin": null,
+      "anime_origin": "ASTD Community",
+      "overview": "Unité ajoutée par la communauté ASTD.",
+      "image": "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png",
+      "is_tradeable": false,
+      "is_unobtainable": false,
+      "_community": true,
+      "created_at": "2026-09-11T17:27:55.896Z",
+      "upgrades": [
+        {
+          "level": 0,
+          "cost": 500,
+          "damage": 15000,
+          "range": 42,
+          "spa": 4,
+          "dps": 3750,
+          "tower_type": "Ground",
+          "attack_type": "AoE (Circle)",
+          "abilities": []
+        },
+        {
+          "level": 1,
+          "cost": 1000,
+          "damage": 45000,
+          "range": 48,
+          "spa": 4,
+          "dps": 11250,
+          "tower_type": "",
+          "attack_type": "",
+          "abilities": []
+        },
+        {
+          "level": 2,
+          "cost": 2500,
+          "damage": 150000,
+          "range": 60,
+          "spa": 4,
+          "dps": 37500,
+          "tower_type": "",
+          "attack_type": "",
+          "abilities": [
+            "+ Max Upgrade"
+          ]
+        }
+      ]
+    },
+    "Goku_Ultra_Instinct_Custom": {
+      "id": "Goku_Ultra_Instinct_Custom",
+      "name": "Goku Ultra Instinct (Custom)",
+      "star": 7,
+      "tower_type": "Ground",
+      "attack_type": "AoE (Circle)",
+      "deployment_cost": 500,
+      "total_cost": 150000,
+      "max_damage": 200000,
+      "max_range": 110,
+      "min_spa": 4,
+      "max_dps": 50000,
+      "character_origin": null,
+      "anime_origin": "Dragon Ball Super",
+      "overview": "Unite creee par la communaute pour les raids de haut niveau.",
+      "image": "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png",
+      "is_tradeable": false,
+      "is_unobtainable": false,
+      "_community": true,
+      "created_at": "2026-09-11T17:30:42.326Z",
+      "upgrades": [
+        {
+          "level": 0,
+          "cost": 500,
+          "damage": 20000,
+          "range": 77,
+          "spa": 4,
+          "dps": 5000,
+          "tower_type": "Ground",
+          "attack_type": "AoE (Circle)",
+          "abilities": []
+        },
+        {
+          "level": 1,
+          "cost": 1000,
+          "damage": 60000,
+          "range": 88,
+          "spa": 4,
+          "dps": 15000,
+          "tower_type": "",
+          "attack_type": "",
+          "abilities": []
+        },
+        {
+          "level": 2,
+          "cost": 2500,
+          "damage": 200000,
+          "range": 110,
+          "spa": 4,
+          "dps": 50000,
+          "tower_type": "",
+          "attack_type": "",
+          "abilities": [
+            "+ Max Upgrade"
+          ]
+        }
+      ]
+    }
+  },
+  "deleted_units": [],
+  "codes": [
+    {
+      "code": "COMMUNITY2026",
+      "reward": "500 Stardust, 15 000 Gemmes",
+      "date": "11/09/2026",
+      "status": "active",
+      "_is_community": true
+    }
+  ],
+  "tips": {
+    "Goku_Ultra_Instinct_Custom": [
+      {
+        "id": "tip_1789147845240",
+        "author": "VegetaMaster",
+        "type": "raid",
+        "text": "Excellente unite en Raid 2 : placez-la en debut de chemin pour appliquer ses degats de zone.",
+        "date": "11/09/2026"
+      },
+      {
+        "id": "tip_1789147793880",
+        "author": "VegetaMaster",
+        "type": "raid",
+        "text": "Excellente unite en Raid 2 : placez-la en debut de chemin pour appliquer ses degats de zone.",
+        "date": "11/09/2026"
+      }
+    ]
+  }
+}
