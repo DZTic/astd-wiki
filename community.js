@@ -887,15 +887,27 @@ const CommunityManager = (function() {
             </div>
           </button>
 
-          <button onclick="CommunityUI.openOrbModalForAdd()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-cyan-600/20 border border-slate-800 hover:border-cyan-500/50 text-left transition-all tap-scale group flex items-start gap-3">
-            <div class="w-10 h-10 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center shrink-0 text-cyan-400 group-hover:scale-105 transition-transform">
-              <i data-lucide="sparkles" class="w-5 h-5" stroke-width="2"></i>
+          <div class="p-3.5 rounded-xl bg-[#090e1c] border border-slate-800 flex flex-col justify-between group">
+            <div class="flex items-start gap-3 mb-2">
+              <div class="w-10 h-10 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center shrink-0 text-cyan-400 group-hover:scale-105 transition-transform">
+                <i data-lucide="sparkles" class="w-5 h-5" stroke-width="2"></i>
+              </div>
+              <div class="min-w-0">
+                <h3 class="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">${window.t ? window.t('comm_card_orb_title', 'Orbes & Reliques') : 'Orbes & Reliques'}</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">${window.t ? window.t('comm_card_orb_desc', 'Ajouter un nouvel orbe ou modifier un orbe existant.') : 'Ajouter un nouvel orbe ou modifier un orbe existant.'}</p>
+              </div>
             </div>
-            <div class="min-w-0">
-              <h3 class="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">${window.t ? window.t('comm_btn_add_orb_title', 'Ajouter / Modifier un Orbe') : 'Ajouter / Modifier un Orbe'}</h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">${window.t ? window.t('comm_btn_add_orb_desc', 'Créer un nouvel orbe ou ajuster ses effets.') : 'Créer un nouvel orbe ou ajuster ses effets.'}</p>
+            <div class="grid grid-cols-2 gap-1.5 pt-1">
+              <button type="button" onclick="CommunityUI.openOrbModalForAdd()" class="px-2 py-1.5 rounded-lg bg-cyan-600/30 hover:bg-cyan-600 text-cyan-200 hover:text-white border border-cyan-500/40 text-[11px] font-bold tap-scale flex items-center justify-center gap-1 transition-colors">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>${window.t ? window.t('comm_btn_add', 'Ajouter') : 'Ajouter'}</span>
+              </button>
+              <button type="button" onclick="CommunityUI.openOrbSelectorForEdit()" class="px-2 py-1.5 rounded-lg bg-amber-600/30 hover:bg-amber-600 text-amber-200 hover:text-white border border-amber-500/40 text-[11px] font-bold tap-scale flex items-center justify-center gap-1 transition-colors">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <span>${window.t ? window.t('comm_action_edit', 'Modifier') : 'Modifier'}</span>
+              </button>
             </div>
-          </button>
+          </div>
 
           <button onclick="CommunityUI.openUnitSelectorForEdit()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-amber-600/20 border border-slate-800 hover:border-amber-500/50 text-left transition-all tap-scale group flex items-start gap-3">
             <div class="w-10 h-10 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 text-amber-400 group-hover:scale-105 transition-transform">
@@ -1028,8 +1040,18 @@ const CommunityManager = (function() {
           </div>
 
           ${modifiedOrbsList.length === 0 ? `
-            <div class="p-6 text-center text-slate-400 bg-[#090e1c] rounded-xl border border-slate-800 text-xs">
-              ${window.t ? window.t('comm_no_orbs', 'Aucun orbe personnalisé pour le moment. Cliquez sur "Ajouter" pour créer un nouvel orbe ou "Modifier existant" pour ajuster un orbe officiel !') : 'Aucun orbe personnalisé pour le moment. Cliquez sur "Ajouter" pour créer un nouvel orbe ou "Modifier existant" pour ajuster un orbe officiel !'}
+            <div class="p-6 text-center text-slate-400 bg-[#090e1c] rounded-xl border border-slate-800 text-xs space-y-3">
+              <p>${window.t ? window.t('comm_no_orbs', 'Aucun orbe personnalisé pour le moment. Vous pouvez créer un nouvel orbe ou modifier un orbe officiel du wiki !') : 'Aucun orbe personnalisé pour le moment. Vous pouvez créer un nouvel orbe ou modifier un orbe officiel du wiki !'}</p>
+              <div class="flex items-center justify-center gap-2 pt-1">
+                <button onclick="CommunityUI.openOrbModalForAdd()" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center gap-1.5 tap-scale shadow-sm">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>Créer un Nouvel Orbe</span>
+                </button>
+                <button onclick="CommunityUI.openOrbSelectorForEdit()" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold flex items-center gap-1.5 tap-scale shadow-sm">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  <span>Modifier un Orbe Officiel</span>
+                </button>
+              </div>
             </div>
           ` : `
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1298,26 +1320,60 @@ const CommunityUI = (function() {
 
   function openOrbSelectorForEdit() {
     const orbs = window.ORBS_DATA || (window.getGlobalOrbs ? window.getGlobalOrbs() : []);
-    if (orbs.length === 0) return;
+    if (orbs.length === 0) {
+      alert(window.t ? window.t('comm_no_orbs_available', 'Aucun orbe disponible dans la base de données.') : 'Aucun orbe disponible dans la base de données.');
+      return;
+    }
     const selectHtml = `
-      <div class="space-y-4">
-        <label class="block text-xs font-bold text-slate-200">
-          ${window.t ? window.t('comm_select_orb_to_edit', 'Choisissez un orbe à modifier :') : 'Choisissez un orbe à modifier :'}
-        </label>
-        <select id="select-orb-to-edit" class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
-          ${orbs.map(o => `<option value="${encodeURIComponent(o.name)}">${escapeHtml(o.name)} (${escapeHtml(o.require || 'All units')})</option>`).join('')}
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold text-slate-200">
+            ${window.t ? window.t('comm_select_orb_to_edit', 'Choisissez un orbe à modifier :') : 'Choisissez un orbe à modifier :'}
+          </label>
+          <span class="text-[11px] text-slate-400 font-mono-num">${orbs.length} orbes disponibles</span>
+        </div>
+        <div>
+          <input type="text" id="select-orb-filter-input"
+                 placeholder="${window.t ? window.t('comm_filter_orbs_placeholder', 'Rechercher un orbe par nom, effet ou unité requise...') : 'Rechercher un orbe par nom, effet ou unité requise...'}"
+                 class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                 oninput="CommunityUI.filterOrbSelectOptions(this.value)">
+        </div>
+        <select id="select-orb-to-edit" size="8"
+                class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-cyan-500 scrollbar-thin"
+                ondblclick="const sel = document.getElementById('select-orb-to-edit'); if(sel && sel.value) CommunityUI.openOrbModalForEdit(decodeURIComponent(sel.value));">
+          ${orbs.map((o, idx) => `<option value="${encodeURIComponent(o.name)}" ${idx === 0 ? 'selected' : ''} class="py-1 px-1.5 hover:bg-cyan-950/60 rounded">${escapeHtml(o.name)} (${escapeHtml(o.require || 'All units')}) - ${escapeHtml(o.effect || '')}</option>`).join('')}
         </select>
-        <div class="flex justify-end gap-2 pt-2">
-          <button onclick="CommunityUI.closeModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold tap-scale">
+        <p class="text-[10px] text-slate-400 flex items-center gap-1">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-cyan-400 inline"></i>
+          <span>Astuce : Sélectionnez un orbe puis validez, ou double-cliquez directement dessus.</span>
+        </p>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+          <button onclick="CommunityUI.closeModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold tap-scale">
             ${window.t ? window.t('cancel', 'Annuler') : 'Annuler'}
           </button>
-          <button onclick="CommunityUI.openOrbModalForEdit(decodeURIComponent(document.getElementById('select-orb-to-edit').value))" class="px-4 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold tap-scale">
-            ${window.t ? window.t('comm_btn_edit_orb_now', 'Modifier cet orbe') : 'Modifier cet orbe'}
+          <button onclick="const sel = document.getElementById('select-orb-to-edit'); if(sel && sel.value) CommunityUI.openOrbModalForEdit(decodeURIComponent(sel.value));" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold tap-scale flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            <span>${window.t ? window.t('comm_btn_edit_orb_now', 'Modifier cet orbe') : 'Modifier cet orbe'}</span>
           </button>
         </div>
       </div>
     `;
     showCustomModalContent(window.t ? window.t('comm_title_select_orb', 'Modifier un orbe existant') : 'Modifier un orbe existant', selectHtml);
+  }
+
+  function filterOrbSelectOptions(query) {
+    const select = document.getElementById('select-orb-to-edit');
+    if (!select) return;
+    const q = (query || '').toLowerCase().trim();
+    const orbs = window.ORBS_DATA || (window.getGlobalOrbs ? window.getGlobalOrbs() : []);
+    const filtered = orbs.filter(o =>
+      (o.name || '').toLowerCase().includes(q) ||
+      (o.require || '').toLowerCase().includes(q) ||
+      (o.effect || '').toLowerCase().includes(q)
+    );
+    select.innerHTML = filtered.map((o, idx) =>
+      `<option value="${encodeURIComponent(o.name)}" ${idx === 0 ? 'selected' : ''} class="py-1 px-1.5 hover:bg-cyan-950/60 rounded">${escapeHtml(o.name)} (${escapeHtml(o.require || 'All units')}) - ${escapeHtml(o.effect || '')}</option>`
+    ).join('');
   }
 
   function openUnitSelectorForEdit() {
@@ -2452,28 +2508,47 @@ const CommunityUI = (function() {
       currentUploadedOrbImageName = '';
     }
 
-    const currentRequire = existing?.require || 'All units';
+    // PAS DE PRÉ-REMPLISSAGE PAR DÉFAUT SI NOUVEL ORBE
+    const currentRequire = existing?.require || '';
+    const currentObtain = existing?.obtain || '';
 
     const standardPresets = [
-      { val: 'All units', label: 'Toutes les unités (All units)' },
-      { val: '6 Star Units', label: 'Unités 6★ uniquement' },
-      { val: '7 Star Units', label: 'Unités 7★ uniquement' },
-      { val: 'Ground Units', label: 'Unités Sol uniquement' },
-      { val: 'Air Units', label: 'Unités Aériennes uniquement' },
-      { val: 'Hill Units', label: 'Unités Colline uniquement' }
+      { val: 'All units', label: 'Toutes les unités' },
+      { val: '6 Star Units', label: '6★' },
+      { val: '7 Star Units', label: '7★' },
+      { val: 'Ground Units', label: 'Sol' },
+      { val: 'Air Units', label: 'Air' },
+      { val: 'Hill Units', label: 'Colline' }
     ];
 
     const orbUniqueRequires = Array.from(new Set(
       allOrbs.map(o => (o.require || '').trim()).filter(r => r && !standardPresets.some(p => p.val.toLowerCase() === r.toLowerCase()))
     )).sort((a, b) => a.localeCompare(b));
 
-    const isPreset = standardPresets.some(p => p.val.toLowerCase() === currentRequire.toLowerCase());
-    const isOrbSpecific = orbUniqueRequires.some(r => r.toLowerCase() === currentRequire.toLowerCase());
-    const isCustom = !isPreset && !isOrbSpecific && !!currentRequire;
-
     bodyEl.innerHTML = `
       <form id="comm-orb-form" onsubmit="event.preventDefault(); CommunityUI.submitOrbForm();" class="space-y-4">
         
+        <!-- Sélecteur Rapide Mode Création / Édition d'un orbe existant -->
+        <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-xs font-bold text-slate-300 whitespace-nowrap">Mode actuel :</span>
+            <span class="px-2.5 py-1 rounded text-xs font-bold ${isEdit ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'} flex items-center gap-1.5 truncate">
+              <i data-lucide="${isEdit ? 'edit-3' : 'plus-circle'}" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">${isEdit ? `Modification : ${escapeHtml(existing.name)}` : 'Création d\'un nouvel orbe'}</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+            <label for="comm-orb-target-switcher" class="text-xs text-slate-400 font-medium whitespace-nowrap">Changer :</label>
+            <select id="comm-orb-target-switcher" onchange="CommunityUI.onOrbModalSwitchTarget(this.value)"
+                    class="flex-1 sm:flex-none bg-[#0a0f1d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 cursor-pointer max-w-xs truncate">
+              <option value="__NEW__" ${!isEdit ? 'selected' : ''}>➕ Nouvel orbe (vierge)</option>
+              <optgroup label="Modifier un orbe existant (${allOrbs.length})">
+                ${allOrbs.map(o => `<option value="${encodeURIComponent(o.name)}" ${isEdit && existing.name.toLowerCase() === o.name.toLowerCase() ? 'selected' : ''}>✏️ ${escapeHtml(o.name)}</option>`).join('')}
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
         <!-- Aide Débutant & Guide -->
         <div class="bg-cyan-950/30 border border-cyan-500/30 rounded-xl p-3 text-xs text-cyan-200 flex items-start gap-2.5">
           <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
@@ -2491,7 +2566,7 @@ const CommunityUI = (function() {
             
             <!-- Nom de l'orbe -->
             <div>
-              <label class="block font-bold text-slate-200 mb-1">
+              <label for="comm-orb-name" class="block font-bold text-slate-200 mb-1">
                 ${window.t ? window.t('comm_field_orb_name', 'Nom de l\'orbe *') : 'Nom de l\'orbe *'}
               </label>
               <input type="text" id="comm-orb-name" required value="${escapeHtml(existing?.name || '')}"
@@ -2502,7 +2577,7 @@ const CommunityUI = (function() {
 
             <!-- Effet / Bonus Statistique -->
             <div>
-              <label class="block font-bold text-slate-200 mb-1">
+              <label for="comm-orb-effect" class="block font-bold text-slate-200 mb-1">
                 ${window.t ? window.t('comm_field_orb_effect', 'Effet / Bonus Statistique *') : 'Effet / Bonus Statistique *'}
               </label>
               <textarea id="comm-orb-effect" required rows="2"
@@ -2514,49 +2589,50 @@ const CommunityUI = (function() {
             <!-- Compatibilité & Obtention -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-200 mb-1">
-                  ${window.t ? window.t('comm_field_orb_require', 'Compatibilité (Condition requise) *') : 'Compatibilité (Condition requise) *'}
-                </label>
-                <div class="space-y-1.5">
-                  <select id="comm-orb-require-select"
-                          class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-cyan-500 cursor-pointer"
-                          onchange="CommunityUI.onOrbRequireSelectChange(this.value)">
-                    <optgroup label="Conditions Générales">
-                      ${standardPresets.map(p => `
-                        <option value="${escapeHtml(p.val)}" ${p.val.toLowerCase() === currentRequire.toLowerCase() ? 'selected' : ''}>
-                          ${escapeHtml(p.label)}
-                        </option>
-                      `).join('')}
-                    </optgroup>
-                    ${orbUniqueRequires.length > 0 ? `
-                      <optgroup label="Unités Spécifiques (Orbes existants)">
-                        ${orbUniqueRequires.map(r => `
-                          <option value="${escapeHtml(r)}" ${r.toLowerCase() === currentRequire.toLowerCase() ? 'selected' : ''}>
-                            ${escapeHtml(r)}
-                          </option>
-                        `).join('')}
-                      </optgroup>
-                    ` : ''}
-                    <option value="__custom__" ${isCustom ? 'selected' : ''}>➕ Autre unité ou condition personnalisée...</option>
-                  </select>
+                <div class="flex items-center justify-between mb-1">
+                  <label for="comm-orb-require" class="block font-bold text-slate-200">
+                    ${window.t ? window.t('comm_field_orb_require', 'Compatibilité (Condition requise)') : 'Compatibilité (Condition requise)'}
+                  </label>
+                  <span class="text-[10px] text-slate-400">Optionnel</span>
+                </div>
+                <input type="text" id="comm-orb-require"
+                       value="${escapeHtml(currentRequire)}"
+                       placeholder="Ex: All units, Goku, 6 Star Units..."
+                       class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-cyan-500"
+                       oninput="CommunityUI.updateLiveOrbPreview()">
 
-                  <div id="comm-orb-require-custom-wrap" class="${isCustom ? '' : 'hidden'}">
-                    <input type="text" id="comm-orb-require-custom"
-                           value="${escapeHtml(isCustom ? currentRequire : '')}"
-                           placeholder="Précisez la condition ou le nom de l'unité..."
-                           class="w-full bg-[#070b14] border border-cyan-500/60 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-400"
-                           oninput="CommunityUI.onOrbRequireCustomInput(this.value)">
+                <!-- Suggestions rapides en 1 clic sans blocage -->
+                <div class="mt-1.5 space-y-1.5">
+                  <div class="flex flex-wrap items-center gap-1 text-[11px]">
+                    <span class="text-[10px] text-slate-500 font-semibold mr-0.5">Suggestions :</span>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('All units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">Toutes</button>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('6 Star Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">6★</button>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('7 Star Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">7★</button>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('Ground Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">Sol</button>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('Air Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">Air</button>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('Hill Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">Colline</button>
                   </div>
 
-                  <input type="hidden" id="comm-orb-require" value="${escapeHtml(currentRequire)}">
+                  <!-- Sélecteur de conditions existantes pour aide -->
+                  <div class="pt-0.5">
+                    <select onchange="if(this.value){ CommunityUI.fillOrbRequire(this.value); this.value=''; }"
+                            class="w-full bg-[#070b14] border border-slate-700/80 rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none focus:border-cyan-500 cursor-pointer">
+                      <option value="">-- Ou choisir une condition d'orbe existant --</option>
+                      ${orbUniqueRequires.length > 0 ? `
+                        <optgroup label="Conditions Spécifiques">
+                          ${orbUniqueRequires.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('')}
+                        </optgroup>
+                      ` : ''}
+                    </select>
+                  </div>
                 </div>
               </div>
 
               <div>
-                <label class="block font-bold text-slate-200 mb-1">
+                <label for="comm-orb-obtain" class="block font-bold text-slate-200 mb-1">
                   ${window.t ? window.t('comm_field_orb_obtain', 'Méthode d\'Obtention') : 'Méthode d\'Obtention'}
                 </label>
-                <input type="text" id="comm-orb-obtain" value="${escapeHtml(existing?.obtain || 'Trial 1')}"
+                <input type="text" id="comm-orb-obtain" value="${escapeHtml(currentObtain)}"
                        placeholder="Ex: Trial 1, Extreme Raid, Crafting..."
                        class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
                        oninput="CommunityUI.updateLiveOrbPreview()">
@@ -2744,46 +2820,46 @@ const CommunityUI = (function() {
     if (window.lucide) lucide.createIcons();
   }
 
-  function onOrbRequireSelectChange(val) {
-    const customWrap = document.getElementById('comm-orb-require-custom-wrap');
-    const customInput = document.getElementById('comm-orb-require-custom');
-    const hiddenRequire = document.getElementById('comm-orb-require');
-
-    if (val === '__custom__') {
-      if (customWrap) customWrap.classList.remove('hidden');
-      if (customInput) {
-        customInput.focus();
-        if (hiddenRequire) hiddenRequire.value = customInput.value.trim() || 'All units';
-      }
-    } else {
-      if (customWrap) customWrap.classList.add('hidden');
-      if (hiddenRequire) hiddenRequire.value = val;
+  function fillOrbRequire(val) {
+    const input = document.getElementById('comm-orb-require');
+    if (input) {
+      input.value = val;
+      input.focus();
+      updateLiveOrbPreview();
     }
-    updateLiveOrbPreview();
+  }
+
+  function onOrbModalSwitchTarget(val) {
+    if (!val || val === '__NEW__') {
+      openOrbModalForAdd();
+    } else {
+      openOrbModalForEdit(decodeURIComponent(val));
+    }
+  }
+
+  function onOrbRequireSelectChange(val) {
+    fillOrbRequire(val);
   }
 
   function onOrbRequireCustomInput(val) {
-    const hiddenRequire = document.getElementById('comm-orb-require');
-    if (hiddenRequire) {
-      hiddenRequire.value = val.trim() || 'All units';
-    }
-    updateLiveOrbPreview();
+    fillOrbRequire(val);
   }
 
   function updateLiveOrbPreview() {
     const previewContainer = document.getElementById('live-preview-orb-card');
     if (!previewContainer) return;
 
-    const name = document.getElementById('comm-orb-name')?.value?.trim() || 'Nom de l\'Orbe';
-    const effect = document.getElementById('comm-orb-effect')?.value?.trim() || '+15% Dégâts & +10% Portée';
-    const require = document.getElementById('comm-orb-require')?.value?.trim() || 'All units';
-    const obtain = document.getElementById('comm-orb-obtain')?.value?.trim() || 'Trial 1';
+    const name = document.getElementById('comm-orb-name')?.value?.trim() || '(Nom de l\'Orbe)';
+    const effect = document.getElementById('comm-orb-effect')?.value?.trim() || '(Effet / Bonus à définir)';
+    const rawRequire = document.getElementById('comm-orb-require')?.value?.trim();
+    const rawObtain = document.getElementById('comm-orb-obtain')?.value?.trim();
+    const obtain = rawObtain || 'Non spécifié';
     const inputUrl = document.getElementById('comm-orb-image')?.value?.trim();
     const fallbackImg = 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
     const image = currentUploadedOrbImageDataUrl || inputUrl || fallbackImg;
 
-    const isUniversal = /toutes les unit|all units/i.test(require);
-    const requireText = isUniversal ? (window.t ? window.t('all_units_badge', '★ Toutes les unités') : '★ Toutes les unités') : require;
+    const isUniversal = !rawRequire || /toutes les unit|all units/i.test(rawRequire);
+    const requireText = !rawRequire ? '★ Toutes les unités (par défaut)' : (isUniversal ? (window.t ? window.t('all_units_badge', '★ Toutes les unités') : '★ Toutes les unités') : rawRequire);
 
     previewContainer.innerHTML = `
       <div class="tactical-card rounded-xl p-4 border border-cyan-500/40 bg-[#0f1629]/95 flex flex-col justify-between space-y-3 shadow-lg">
@@ -2818,7 +2894,7 @@ const CommunityUI = (function() {
             </div>
             ${!isUniversal ? `
             <div class="text-[11px] text-slate-400">
-              <strong class="text-slate-300 font-sans">${window.t ? window.t('compatible_label', 'Compatible :') : 'Compatible :'}</strong> <span class="text-sky-300">${escapeHtml(require)}</span>
+              <strong class="text-slate-300 font-sans">${window.t ? window.t('compatible_label', 'Compatible :') : 'Compatible :'}</strong> <span class="text-sky-300">${escapeHtml(rawRequire)}</span>
             </div>` : ''}
           </div>
         </div>
@@ -2849,7 +2925,7 @@ const CommunityUI = (function() {
     }
 
     const require = document.getElementById('comm-orb-require')?.value?.trim() || 'All units';
-    const obtain = document.getElementById('comm-orb-obtain')?.value?.trim() || 'Trial 1';
+    const obtain = document.getElementById('comm-orb-obtain')?.value?.trim() || '';
     const inputUrl = document.getElementById('comm-orb-image')?.value?.trim();
     const finalImage = currentUploadedOrbImageDataUrl || inputUrl || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
 
@@ -2882,7 +2958,7 @@ const CommunityUI = (function() {
     }
 
     const require = document.getElementById('comm-orb-require')?.value?.trim() || 'All units';
-    const obtain = document.getElementById('comm-orb-obtain')?.value?.trim() || 'Trial 1';
+    const obtain = document.getElementById('comm-orb-obtain')?.value?.trim() || '';
     const inputUrl = document.getElementById('comm-orb-image')?.value?.trim();
     const finalImage = currentUploadedOrbImageDataUrl || inputUrl || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png';
 
@@ -2913,6 +2989,9 @@ const CommunityUI = (function() {
     openOrbModalForAdd,
     openOrbModalForEdit,
     openOrbSelectorForEdit,
+    filterOrbSelectOptions,
+    onOrbModalSwitchTarget,
+    fillOrbRequire,
     openCodeModalForAdd,
     openTipModalForUnit,
     openModal,

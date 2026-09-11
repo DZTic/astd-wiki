@@ -326,7 +326,8 @@ def apply_orb_payload(orb_data):
         "_approved_at": datetime.now(timezone.utc).isoformat()
     }
 
-    existing_idx = next((i for i, o in enumerate(orbs) if o.get('name', '').lower() == orb_name.lower()), -1)
+    orig_name = str(orb_data.get('_original_name') or orb_name).strip()
+    existing_idx = next((i for i, o in enumerate(orbs) if o.get('name', '').lower() == orig_name.lower() or o.get('name', '').lower() == orb_name.lower()), -1)
     is_update = existing_idx >= 0
 
     if is_update:
