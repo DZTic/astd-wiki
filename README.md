@@ -1,20 +1,33 @@
-# ASTD Wiki FR — encyclopédie All Star Tower Defense
+# ASTD Database & Wiki — All Star Tower Defense
 
-Site web en français regroupant les **unités, codes promo, orbes, tier lists et modes de jeu** de *All Star Tower Defense* (Roblox).
+Application web interactive et encyclopédie complète bilingue (Français 🇫🇷 / Anglais 🇬🇧) pour le jeu Roblox **All Star Tower Defense (ASTD)**.
 
-🌐 **Accès au site : https://dztic.github.io/astd-wiki/**
+🌐 **Accès direct au site : https://dztic.github.io/astd-wiki/**
 
-## À propos
+---
 
-- Site **100% statique** (HTML + JS + JSON) : aucune publicité, aucun traceur, pas de base de données.
-- Les données sont **mises à jour automatiquement chaque nuit** depuis le wiki officiel : [allstartd.fandom.com](https://allstartd.fandom.com/wiki/Roblox:_All_Star_Tower_Defense_Wiki).
-- Ce dépôt ne contient **que l'interface publique et les données publiées** (`index.html`, `app.js`, `style.css`, `data/*.json`). L'outillage de synchronisation est conservé en local.
+## Fonctionnalités
 
-## Crédits & sources
+- ⚔️ **Encyclopédie de 1 250+ Unités** : filtres multi-critères, 189 séries anime, simulation Level 1 / 175, buff Idol, arbre complet d'évolutions et sources d'obtention profondes (raids, donjons, histoire).
+- ⚖️ **Comparateur de Personnages (Versus)** : confrontation directe de deux unités en face-à-face, calculs d'écarts statistiques et ratios d'efficacité économique.
+- 👥 **Hub & Contributions Communautaires** : proposition et correction d'unités, d'orbes, de codes promo et partage d'astuces, intégrées automatiquement via les GitHub Issues et GitHub Actions.
+- 🎁 **Codes Promotionnels** : codes actifs vérifiés avec bouton de copie en 1 clic et historique des codes expirés.
+- 🔮 **Compendium des Orbes** : bonus, conditions, méthodes de drop et recettes de craft complètes.
+- 👑 **Tier List Méta** : 41 catégories de classement compétitif.
+- 🧩 **Simulateur de Deck (Team Builder 6 slots)** : composition d'équipe, calcul du coût et analyse de la couverture tactique.
+- 🗺️ **Guides des Modes de Jeu & Raids** : Monde 1, Monde 2, Donjons, Mode Infini et Trials.
 
-- Toutes les données proviennent du travail des contributeurs du [wiki officiel ASTD](https://allstartd.fandom.com/wiki/Roblox:_All_Star_Tower_Defense_Wiki) — un immense merci à eux.
-- *All Star Tower Defense* est un jeu Roblox créé par ses développeurs respectifs ; ce site est un projet de fan non officiel, sans affiliation avec Fandom, Roblox ou les créateurs du jeu.
+---
 
-## Licence
+## À propos de ce dépôt
 
-Le contenu est mis à disposition dans le respect de la licence du wiki d'origine (contenu communautaire Fandom). Le code de ce site statique est fourni à titre informatif.
+- **Site 100% statique** ultra-rapide (HTML5, Tailwind CSS, Vanilla JS, données JSON optimisées).
+- Données **synchronisées automatiquement chaque jour** depuis le wiki officiel ASTD.
+- Ce dépôt héberge la version publique déployée sur GitHub Pages. Les outils de scraping et de maintenance sont conservés en local.
+
+---
+
+## Crédits & Sources
+
+- Toutes les données proviennent du travail des contributeurs du [Wiki officiel ASTD (Fandom)](https://allstartd.fandom.com/wiki/Roblox:_All_Star_Tower_Defense_Wiki).
+- *All Star Tower Defense* est un jeu Roblox créé par ses développeurs respectifs. Ce site est un projet tiers communautaire sans affiliation avec Roblox ou Fandom.
