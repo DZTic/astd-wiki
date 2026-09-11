@@ -287,7 +287,7 @@ const I18N = {
     compare_heading: "Comparateur Tactique Pro (Versus)",
     compare_subheading: "Confrontez deux unités face-à-face : DPS, rentabilité ($/DPS), portée, cadence et verdict automatisé.",
     compare_level_group_aria: "Niveau de carte pour la comparaison",
-    compare_idol_buff_title: "Simuler le buff de dégâts fourni par Idol (aptitude Shine)",
+    compare_idol_buff_title: "Simuler le buff maximal de dégâts fourni par Idol (+250%)",
     compare_slot_a_title: "Unité A :",
     compare_slot_a_sr: "Rechercher l'unité A",
     compare_slot_a_placeholder: "Rechercher l'unité A (ex. Demon of Emotion, Kura...)",
@@ -604,7 +604,7 @@ const I18N = {
     compare_heading: "Tactical Pro Comparator (Versus)",
     compare_subheading: "Compare two units face-to-face: DPS, cost efficiency ($/DPS), range, attack rate, and automated verdict.",
     compare_level_group_aria: "Card level for comparison",
-    compare_idol_buff_title: "Simulate damage buff provided by Idol (Shine ability)",
+    compare_idol_buff_title: "Simulate maximum damage buff provided by Idol (+250%)",
     compare_slot_a_title: "Unit A:",
     compare_slot_a_sr: "Search unit A",
     compare_slot_a_placeholder: "Search unit A (e.g. Demon of Emotion, Kura...)",
@@ -3429,6 +3429,18 @@ let compareUnitB = null;
 let compareLevelView = 1; // 1 | 175
 let compareIdolBuff = false;
 
+function getCompareIdolMaxPercent() {
+  const p = findBuffProvider();
+  let maxBuff = 250;
+  if (p && p.upgrades) {
+    p.upgrades.forEach(up => {
+      if (up.buff_damage_high != null) maxBuff = Math.max(maxBuff, up.buff_damage_high);
+      if (up.buff_damage_low != null) maxBuff = Math.max(maxBuff, up.buff_damage_low);
+    });
+  }
+  return maxBuff || 250;
+}
+
 function setCompareLevel(lvl) {
   if (lvl !== 1 && lvl !== 175) return;
   compareLevelView = lvl;
@@ -3444,7 +3456,7 @@ function setCompareLevel(lvl) {
   }
   const pctEl = document.getElementById('compare-idol-pct');
   if (pctEl) {
-    pctEl.textContent = lvl === 175 ? '+250%' : '+130%';
+    pctEl.textContent = `+${getCompareIdolMaxPercent()}%`;
   }
   renderCompareView();
 }
@@ -3454,22 +3466,15 @@ function toggleCompareIdolBuff() {
   compareIdolBuff = cb ? cb.checked : !compareIdolBuff;
   const pctEl = document.getElementById('compare-idol-pct');
   if (pctEl) {
-    pctEl.textContent = compareLevelView === 175 ? '+250%' : '+130%';
+    pctEl.textContent = `+${getCompareIdolMaxPercent()}%`;
   }
   renderCompareView();
 }
 
 function getCompareIdolMultiplier() {
   if (!compareIdolBuff) return 1;
-  const p = findBuffProvider();
-  if (!p) return 1;
-  let low = 0, high = 0;
-  p.upgrades.forEach(up => {
-    if (up.buff_damage_low != null) low = Math.max(low, up.buff_damage_low);
-    if (up.buff_damage_high != null) high = Math.max(high, up.buff_damage_high);
-  });
-  const pct = compareLevelView === 175 ? (high || low) : (low || high);
-  return pct ? 1 + pct / 100 : 1;
+  const pct = getCompareIdolMaxPercent();
+  return 1 + pct / 100;
 }
 
 function setCompareUnit(slot, unitOrId) {
