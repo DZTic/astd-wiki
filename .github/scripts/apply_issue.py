@@ -366,6 +366,73 @@ def apply_orb_payload(orb_data):
     return orb_obj, is_update
 
 
+def apply_tierlist_payload(tierlist_data):
+    """Intègre ou met à jour la tier list dans data/tierlist.json."""
+    tierlist_file = os.path.join(DATA_DIR, 'tierlist.json')
+    if not os.path.exists(tierlist_file):
+        raise FileNotFoundError(f"Fichier introuvable : {tierlist_file}")
+
+    with open(tierlist_file, 'r', encoding='utf-8') as f:
+        current_tiers = json.load(f)
+
+    # Extraire les catégories
+    new_categories = tierlist_data.get('categories')
+    if new_categories is None:
+        new_categories = tierlist_data.get('tierlist')
+    if new_categories is None:
+        new_categories = {k: v for k, v in tierlist_data.items() if k not in ['mode', 'version', 'type', 'action', '_original_name']}
+
+    if not isinstance(new_categories, dict):
+        raise ValueError("Les données de Tier List doivent être un dictionnaire de catégories.")
+
+    mode = str(tierlist_data.get('mode', 'replace')).lower()
+
+    if mode == 'merge':
+        for cat, units in new_categories.items():
+            if isinstance(units, list):
+                if cat not in current_tiers:
+                    current_tiers[cat] = []
+                for u in units:
+                    if u not in current_tiers[cat]:
+                        current_tiers[cat].append(u)
+    else:
+        cleaned_tiers = {}
+        for cat, units in new_categories.items():
+            if isinstance(units, list):
+                seen = set()
+                c_units = []
+                for u in units:
+                    su = str(u).strip()
+                    if su and su.lower() not in seen:
+                        seen.add(su.lower())
+                        c_units.append(su)
+                cleaned_tiers[str(cat).strip()] = c_units
+        current_tiers = cleaned_tiers
+
+    temp_file = tierlist_file + '.tmp'
+    with open(temp_file, 'w', encoding='utf-8') as f:
+        json.dump(current_tiers, f, ensure_ascii=False, indent=2)
+    os.replace(temp_file, tierlist_file)
+
+    log(f"data/tierlist.json mis à jour avec {len(current_tiers)} catégories.")
+
+    # Nettoyage synchronisé de data/community_contributions.json
+    comm_file = os.path.join(DATA_DIR, 'community_contributions.json')
+    if os.path.exists(comm_file):
+        try:
+            with open(comm_file, 'r', encoding='utf-8') as f:
+                comm_data = json.load(f)
+            if 'tierlist' in comm_data:
+                comm_data['tierlist'] = None
+            with open(comm_file, 'w', encoding='utf-8') as f:
+                json.dump(comm_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            log(f"Note : Impossible de nettoyer community_contributions.json : {e}")
+
+    update_meta()
+    return current_tiers
+
+
 def update_meta():
     """Met à jour l'horodatage dans data/meta.json."""
     meta_file = os.path.join(DATA_DIR, 'meta.json')
@@ -498,6 +565,18 @@ def main():
             f"- **Compatibilité :** {orb.get('require', '-')}\n"
             f"- **Obtention :** {orb.get('obtain', '-')}\n\n"
             f"🚀 *Le site GitHub Pages est en cours de redéploiement automatique (~1 minute).* Merci pour votre contribution !"
+        )
+
+    elif item_type == 'tierlist':
+        tierlist = apply_tierlist_payload(item_data)
+        total_cats = len(tierlist)
+        total_units = sum(len(units) for units in tierlist.values())
+        feedback_msg = (
+            f"🎉 **Tier List validée et synchronisée !**\n\n"
+            f"La **Tier List officielle ASTD** a été automatiquement mise à jour dans `data/tierlist.json`.\n\n"
+            f"- **Catégories compétitives :** {total_cats}\n"
+            f"- **Unités classées au total :** {total_units}\n\n"
+            f"🚀 *Le site GitHub Pages est en cours de redéploiement automatique (~1 minute).* Merci pour votre contribution à la méta !"
         )
 
     else:

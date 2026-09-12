@@ -34,16 +34,19 @@ const CommunityManager = (function() {
     orbs: {},          // { [orbName]: orbObject }
     deleted_orbs: [],  // [ orbName1, orbName2... ]
     codes: [],         // [ { code, reward, date, status } ]
-    tips: {}           // { [unitId]: [ { id, author, type, text, date } ] }
+    tips: {},          // { [unitId]: [ { id, author, type, text, date } ] }
+    tierlist: null,    // { [categoryName]: [ unitNames... ] } ou null si officiel
+    custom_tierlists: {} // { [presetName]: { [categoryName]: [ unitNames... ] } }
   };
 
   let isServerAvailable = false;
   let originalUnitsBackup = null;
   let originalOrbsBackup = null;
+  let originalTierlistBackup = null;
 
   // Initialisation : charge depuis le serveur ou localStorage
   async function init() {
-    // 1. Sauvegarder une copie propre des unités et orbes officiels au premier chargement
+    // 1. Sauvegarder une copie propre des unités, orbes et tier list officiels au premier chargement
     const currentList = window.getGlobalUnits ? window.getGlobalUnits() : window.ALL_UNITS;
     if (!originalUnitsBackup && Array.isArray(currentList) && currentList.length > 0) {
       originalUnitsBackup = JSON.parse(JSON.stringify(currentList));
@@ -51,6 +54,10 @@ const CommunityManager = (function() {
     const currentOrbsList = window.getGlobalOrbs ? window.getGlobalOrbs() : window.ORBS_DATA;
     if (!originalOrbsBackup && Array.isArray(currentOrbsList) && currentOrbsList.length > 0) {
       originalOrbsBackup = JSON.parse(JSON.stringify(currentOrbsList));
+    }
+    const currentTier = window.getGlobalTierList ? window.getGlobalTierList() : window.TIERLIST_DATA;
+    if (!originalTierlistBackup && currentTier && typeof currentTier === 'object' && Object.keys(currentTier).length > 0) {
+      originalTierlistBackup = JSON.parse(JSON.stringify(currentTier));
     }
 
     // 2. Tenter de charger depuis l'API locale du serveur
@@ -65,6 +72,8 @@ const CommunityManager = (function() {
           state.deleted_orbs = data.deleted_orbs || [];
           state.codes = data.codes || [];
           state.tips = data.tips || {};
+          state.tierlist = data.tierlist || null;
+          state.custom_tierlists = data.custom_tierlists || {};
           isServerAvailable = true;
           saveToLocalStorage();
         }
@@ -91,6 +100,8 @@ const CommunityManager = (function() {
         state.deleted_orbs = parsed.deleted_orbs || [];
         state.codes = parsed.codes || [];
         state.tips = parsed.tips || {};
+        state.tierlist = parsed.tierlist || null;
+        state.custom_tierlists = parsed.custom_tierlists || {};
       }
     } catch (e) {
       console.warn('Erreur lecture localStorage communautaire:', e);
@@ -219,6 +230,29 @@ const CommunityManager = (function() {
       });
     }
 
+    // 5. Appliquer les modifications de Tier List
+    if (state.tierlist && typeof state.tierlist === 'object') {
+      if (window.setGlobalTierList) {
+        window.setGlobalTierList(JSON.parse(JSON.stringify(state.tierlist)));
+      } else {
+        window.TIERLIST_DATA = JSON.parse(JSON.stringify(state.tierlist));
+      }
+      const badgeModified = document.getElementById('tierlist-badge-modified');
+      if (badgeModified) badgeModified.classList.remove('hidden');
+    } else if (originalTierlistBackup) {
+      if (window.setGlobalTierList) {
+        window.setGlobalTierList(JSON.parse(JSON.stringify(originalTierlistBackup)));
+      } else {
+        window.TIERLIST_DATA = JSON.parse(JSON.stringify(originalTierlistBackup));
+      }
+      const badgeModified = document.getElementById('tierlist-badge-modified');
+      if (badgeModified) badgeModified.classList.add('hidden');
+    }
+
+    if (window.renderTierList) {
+      window.renderTierList();
+    }
+
     updateCommunityBadge();
   }
 
@@ -227,7 +261,8 @@ const CommunityManager = (function() {
                   (state.deleted_units || []).length +
                   Object.keys(state.orbs || {}).length +
                   (state.deleted_orbs || []).length +
-                  (state.codes || []).length;
+                  (state.codes || []).length +
+                  (state.tierlist ? 1 : 0);
     const badge = document.getElementById('badge-community-count');
     if (badge) {
       if (count > 0) {
@@ -560,6 +595,32 @@ const CommunityManager = (function() {
     return state.tips[unitId] || [];
   }
 
+  // --- GESTION DE LA TIER LIST COMMUNAUTAIRE ---
+
+  async function saveTierList(tierlistData, syncOfficial = true) {
+    if (!tierlistData || typeof tierlistData !== 'object') return false;
+    state.tierlist = JSON.parse(JSON.stringify(tierlistData));
+    await syncWithServer('save_tierlist', {
+      tierlist: state.tierlist,
+      sync_official: !!syncOfficial
+    });
+    applyToGlobalData();
+    renderCommunityHub();
+    const msg = window.t ? window.t('tierlist_saved_toast', 'Tier List enregistrée avec succès !') : 'Tier List enregistrée avec succès !';
+    if (window.showToast) window.showToast(msg);
+    return true;
+  }
+
+  async function resetTierList() {
+    state.tierlist = null;
+    await syncWithServer('reset_tierlist');
+    applyToGlobalData();
+    renderCommunityHub();
+    const msg = window.t ? window.t('tierlist_reset_toast', 'Tier List réinitialisée à l\'état officiel.') : 'Tier List réinitialisée à l\'état officiel.';
+    if (window.showToast) window.showToast(msg);
+    return true;
+  }
+
   // --- RÉINITIALISATION ET EXPORT / IMPORT ---
 
   async function resetAllToOfficial() {
@@ -577,7 +638,9 @@ const CommunityManager = (function() {
       orbs: {},
       deleted_orbs: [],
       codes: [],
-      tips: {}
+      tips: {},
+      tierlist: null,
+      custom_tierlists: {}
     };
 
     await syncWithServer('reset_all');
@@ -790,6 +853,43 @@ const CommunityManager = (function() {
              `<!-- ASTD_PAYLOAD_START\n${JSON.stringify(payload)}\nASTD_PAYLOAD_END -->\n\n` +
              `<details>\n<summary>🤖 Données techniques JSON</summary>\n\n` +
              `\`\`\`json\n${JSON.stringify(payload, null, 2)}\n\`\`\`\n\n</details>`;
+    } else if (type === 'tierlist') {
+      const categories = data.categories || {};
+      const catCount = Object.keys(categories).length;
+      const totalUnits = Object.values(categories).reduce((acc, l) => acc + (Array.isArray(l) ? l.length : 0), 0);
+      const payload = {
+        version: 1,
+        type: 'tierlist',
+        action: 'save_tierlist',
+        data: {
+          categories: categories,
+          mode: 'replace'
+        }
+      };
+
+      const topCatsPreview = Object.entries(categories).slice(0, 15).map(([cat, uList]) => {
+        const uArr = Array.isArray(uList) ? uList : [];
+        const sample = uArr.slice(0, 6).join(', ') + (uArr.length > 6 ? '...' : '');
+        return `| **${cat}** | ${uArr.length} unités | ${sample || '-'} |`;
+      }).join('\n');
+
+      title = `[Proposition Tier List] Mise à jour méta (${catCount} catégories, ${totalUnits} unités)`;
+      body = `### 👑 Proposition de Mise à Jour de la Tier List ASTD\n\n` +
+             `| Métrique | Valeur |\n` +
+             `| :--- | :--- |\n` +
+             `| **Catégories Méta** | ${catCount} |\n` +
+             `| **Unités Classées au total** | ${totalUnits} |\n\n` +
+             `### 📋 Aperçu des Catégories Méta\n` +
+             `| Catégorie | Total | Exemples d'unités |\n` +
+             `| :--- | :--- | :--- |\n` +
+             `${topCatsPreview}\n\n` +
+             (catCount > 15 ? `*(Et ${catCount - 15} autres catégories incluses dans le payload complet ci-dessous)*\n\n` : '') +
+             `---\n` +
+             `### 🛠️ Validation Automatique du Wiki (Mainteneurs)\n` +
+             `> Ajoutez le label **\`validé\`** ou commentez **/valider** pour synchroniser automatiquement ces classements dans \`data/tierlist.json\`.\n\n` +
+             `<!-- ASTD_PAYLOAD_START\n${JSON.stringify(payload)}\nASTD_PAYLOAD_END -->\n\n` +
+             `<details>\n<summary>🤖 Données techniques JSON</summary>\n\n` +
+             `\`\`\`json\n${JSON.stringify(payload, null, 2)}\n\`\`\`\n\n</details>`;
     }
 
     return `${base}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&labels=${encodeURIComponent(labels)}`;
@@ -813,6 +913,16 @@ const CommunityManager = (function() {
              `> Bonus : ${data.effect || '-'}\n` +
              `> Compatible : ${data.require || 'All units'}\n` +
              `> Obtention : ${data.obtain || '-'}`;
+    } else if (type === 'tierlist') {
+      const cats = data || {};
+      const catCount = Object.keys(cats).length;
+      const totalUnits = Object.values(cats).reduce((acc, l) => acc + (Array.isArray(l) ? l.length : 0), 0);
+      const topPreview = Object.entries(cats).slice(0, 5).map(([c, uList]) => {
+        const uArr = Array.isArray(uList) ? uList : [];
+        return `> **${c}** (${uArr.length}): ${uArr.slice(0, 4).join(', ')}${uArr.length > 4 ? '...' : ''}`;
+      }).join('\n');
+      text = `**[ASTD Wiki - Communauté] Tier List Méta Collaborative** (${catCount} catégories, ${totalUnits} unités)\n` +
+             topPreview;
     }
 
     navigator.clipboard.writeText(text).then(() => {
@@ -855,7 +965,7 @@ const CommunityManager = (function() {
           </div>
 
           <!-- Statistiques rapides -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 shrink-0 text-center font-mono-num">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 shrink-0 text-center font-mono-num">
             <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
               <span class="text-[10px] text-slate-400 font-sans block uppercase font-bold">${window.t ? window.t('comm_stat_units', 'Unités') : 'Unités'}</span>
               <span class="text-base font-bold text-sky-400">${modifiedUnitsList.length}</span>
@@ -863,6 +973,10 @@ const CommunityManager = (function() {
             <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
               <span class="text-[10px] text-slate-400 font-sans block uppercase font-bold">${window.t ? window.t('comm_stat_orbs', 'Orbes') : 'Orbes'}</span>
               <span class="text-base font-bold text-cyan-400">${modifiedOrbsList.length}</span>
+            </div>
+            <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
+              <span class="text-[10px] text-slate-400 font-sans block uppercase font-bold">${window.t ? window.t('comm_stat_tierlist', 'Tier List') : 'Tier List'}</span>
+              <span class="text-base font-bold ${state.tierlist ? 'text-amber-400' : 'text-slate-400'}">${state.tierlist ? (window.t ? window.t('comm_tierlist_status_custom', 'Éditée') : 'Éditée') : (window.t ? window.t('comm_tierlist_status_official', 'Officielle') : 'Officielle')}</span>
             </div>
             <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
               <span class="text-[10px] text-slate-400 font-sans block uppercase font-bold">${window.t ? window.t('comm_stat_codes', 'Codes') : 'Codes'}</span>
@@ -875,8 +989,8 @@ const CommunityManager = (function() {
           </div>
         </div>
 
-        <!-- 4 Cartes d'Actions Rapides Débutant -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-800/80">
+        <!-- 5 Cartes d'Actions Rapides Collaboratives -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-3 border-t border-slate-800/80">
           <button onclick="CommunityUI.openUnitModalForAdd()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-sky-600/20 border border-slate-800 hover:border-sky-500/50 text-left transition-all tap-scale group flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center shrink-0 text-sky-400 group-hover:scale-105 transition-transform">
               <i data-lucide="plus-circle" class="w-5 h-5" stroke-width="2"></i>
@@ -905,6 +1019,28 @@ const CommunityManager = (function() {
               <button type="button" onclick="CommunityUI.openOrbSelectorForEdit()" class="px-2 py-1.5 rounded-lg bg-amber-600/30 hover:bg-amber-600 text-amber-200 hover:text-white border border-amber-500/40 text-[11px] font-bold tap-scale flex items-center justify-center gap-1 transition-colors">
                 <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                 <span>${window.t ? window.t('comm_action_edit', 'Modifier') : 'Modifier'}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#090e1c] border border-slate-800 flex flex-col justify-between group">
+            <div class="flex items-start gap-3 mb-2">
+              <div class="w-10 h-10 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 text-amber-400 group-hover:scale-105 transition-transform">
+                <i data-lucide="crown" class="w-5 h-5" stroke-width="2"></i>
+              </div>
+              <div class="min-w-0">
+                <h3 class="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">${window.t ? window.t('comm_card_tierlist_title', 'Tier Lists & Méta') : 'Tier Lists & Méta'}</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">${window.t ? window.t('comm_card_tierlist_desc', 'Glisser-déposer d\'unités, tiers sur mesure et presets.') : 'Glisser-déposer d\'unités, tiers sur mesure et presets.'}</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 pt-1">
+              <button type="button" onclick="switchTab('tierlist'); if (window.CommunityUI) CommunityUI.toggleTierListEditMode(true);" class="px-2 py-1.5 rounded-lg bg-amber-600/30 hover:bg-amber-600 text-amber-200 hover:text-white border border-amber-500/40 text-[11px] font-bold tap-scale flex items-center justify-center gap-1 transition-colors">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <span>${window.t ? window.t('comm_btn_edit_tierlist', 'Éditer') : 'Éditer'}</span>
+              </button>
+              <button type="button" onclick="switchTab('tierlist')" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-semibold tap-scale flex items-center justify-center gap-1 transition-colors">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span>${window.t ? window.t('comm_btn_view_tierlist', 'Consulter') : 'Consulter'}</span>
               </button>
             </div>
           </div>
@@ -1187,6 +1323,63 @@ const CommunityManager = (function() {
           `}
         </div>
 
+        <!-- Section Tier List Personnalisée & Statut -->
+        <div class="tactical-card rounded-xl p-4 border ${state.tierlist ? 'border-amber-500/40 bg-amber-950/10' : 'border-slate-800 bg-[#0f1629]'} space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i>
+              <h3 class="text-sm font-bold text-white">${window.t ? window.t('comm_tierlist_section_title', 'Tier List Méta Collaborative') : 'Tier List Méta Collaborative'}</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${state.tierlist ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-400'} uppercase font-mono-num">
+                ${state.tierlist ? (window.t ? window.t('comm_tierlist_status_custom', 'Personnalisée') : 'Personnalisée') : (window.t ? window.t('comm_tierlist_status_official', 'Officielle') : 'Officielle')}
+              </span>
+            </div>
+            <div class="flex items-center flex-wrap gap-1.5">
+              <button onclick="switchTab('tierlist'); if (window.CommunityUI) CommunityUI.toggleTierListEditMode(true);" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold flex items-center gap-1 tap-scale shadow-sm">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <span>${window.t ? window.t('comm_btn_edit_tierlist', 'Éditer en direct') : 'Éditer en direct'}</span>
+              </button>
+              ${state.tierlist ? `
+                <button onclick="CommunityUI.proposeTierListToGitHub()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1 tap-scale" title="Proposer vos rangs à la communauté ASTD sur GitHub">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                  <span>${window.t ? window.t('tierlist_btn_github', 'Soumettre sur GitHub') : 'Soumettre sur GitHub'}</span>
+                </button>
+                <button onclick="CommunityUI.exportTierListJSON()" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 tap-scale" title="Télécharger le fichier JSON">
+                  <i data-lucide="download" class="w-3 h-3"></i>
+                  <span>JSON</span>
+                </button>
+                <button onclick="CommunityManager.resetTierList()" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white text-xs font-semibold flex items-center gap-1 tap-scale" title="Restaurer la tier list officielle">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>${window.t ? window.t('tierlist_btn_reset', 'Réinitialiser') : 'Réinitialiser'}</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          ${state.tierlist ? `
+            <div class="p-3.5 rounded-xl bg-[#090e1c] border border-slate-800 space-y-2.5">
+              <div class="text-xs text-slate-300">
+                ${window.t ? window.t('comm_tierlist_custom_desc', 'Vous utilisez actuellement une version personnalisée de la Tier List avec vos propres classements et catégories.') : 'Vous utilisez actuellement une version personnalisée de la Tier List avec vos propres classements et catégories.'}
+              </div>
+              <div class="flex flex-wrap gap-2 pt-1">
+                ${Object.entries(state.tierlist).map(([cat, list]) => `
+                  <div class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs flex items-center gap-2">
+                    <span class="font-bold text-amber-300">${escapeHtml(cat)}</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono-num bg-slate-800 text-slate-300">${Array.isArray(list) ? list.length : 0} unités</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : `
+            <div class="p-4 rounded-xl bg-[#090e1c] border border-slate-800 text-xs text-slate-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <p>${window.t ? window.t('comm_tierlist_official_desc', 'La Tier List officielle du Wiki est actuellement chargée. Vous pouvez la personnaliser librement par glisser-déposer, créer de nouvelles catégories, et proposer vos changements en ligne !') : 'La Tier List officielle du Wiki est actuellement chargée. Vous pouvez la personnaliser librement par glisser-déposer, créer de nouvelles catégories, et proposer vos changements en ligne !'}</p>
+              <button onclick="switchTab('tierlist'); if (window.CommunityUI) CommunityUI.toggleTierListEditMode(true);" class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs tap-scale shrink-0 flex items-center gap-1.5">
+                <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+                <span>Personnaliser</span>
+              </button>
+            </div>
+          `}
+        </div>
+
       </div>
     `;
 
@@ -1259,6 +1452,9 @@ const CommunityManager = (function() {
     deleteCode,
     saveTip,
     deleteTip,
+    saveTierList,
+    resetTierList,
+    getOriginalTierlistBackup: () => originalTierlistBackup,
     getUnitTips,
     renderUnitCommunityTips,
     renderCommunityHub,
@@ -1285,6 +1481,9 @@ const CommunityUI = (function() {
   let currentUploadedImageName = '';
   let currentUploadedOrbImageDataUrl = null;
   let currentUploadedOrbImageName = '';
+  let isTierListEditMode = false;
+  let tierListSearchQuery = '';
+  let draggedTierItem = null;
 
   function openUnitModalForAdd() {
     currentFormMode = 'unit';
@@ -2976,6 +3175,650 @@ const CommunityUI = (function() {
     }
   }
 
+  // --- GESTION ET ÉDITION DES TIER LISTS ---
+
+  function toggleTierListEditMode(forceState) {
+    if (forceState !== undefined) {
+      isTierListEditMode = !!forceState;
+    } else {
+      isTierListEditMode = !isTierListEditMode;
+    }
+
+    const editBtn = document.getElementById('tierlist-toggle-edit-btn');
+    const editBtnText = document.getElementById('tierlist-edit-btn-text');
+    const addCatBtn = document.getElementById('tierlist-add-cat-btn');
+    const editBanner = document.getElementById('tierlist-edit-banner');
+
+    if (editBtn && editBtnText) {
+      if (isTierListEditMode) {
+        editBtn.className = 'tier-action-btn px-3 py-1.5 rounded-lg bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shrink-0 border border-sky-400';
+        editBtnText.textContent = window.t ? window.t('tierlist_btn_edit_active', 'Mode Lecture') : 'Mode Lecture';
+      } else {
+        editBtn.className = 'tier-action-btn px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shrink-0';
+        editBtnText.textContent = window.t ? window.t('tierlist_btn_edit', 'Modifier la Tier List') : 'Modifier la Tier List';
+      }
+    }
+
+    if (addCatBtn) {
+      addCatBtn.classList.toggle('hidden', !isTierListEditMode);
+    }
+    if (editBanner) {
+      editBanner.classList.toggle('hidden', !isTierListEditMode);
+    }
+
+    if (window.renderTierList) {
+      window.renderTierList();
+    }
+  }
+
+  function isEditMode() {
+    return isTierListEditMode;
+  }
+
+  function onTierListSearch(query) {
+    tierListSearchQuery = (query || '').trim();
+    if (window.renderTierList) {
+      window.renderTierList();
+    }
+  }
+
+  function getTierListSearchQuery() {
+    return tierListSearchQuery;
+  }
+
+  let currentTargetTierCategory = '';
+  let currentAddUnitFilterStar = 'all';
+
+  function openAddUnitToTierModal(targetCategory) {
+    currentTargetTierCategory = targetCategory;
+    currentAddUnitFilterStar = 'all';
+
+    const modalTitle = `${window.t ? window.t('tierlist_cat_add_unit', '+ Ajouter une unité à :') : '+ Ajouter une unité à :'} ${targetCategory}`;
+
+    const modalBody = `
+      <div class="space-y-4">
+        <!-- Recherche et filtres rareté -->
+        <div class="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between">
+          <div class="relative flex-1">
+            <input type="text" id="tier-unit-search-input"
+                   oninput="CommunityUI.renderAddUnitList(this.value)"
+                   placeholder="${window.t ? window.t('search_placeholder', 'Rechercher par nom d\'unité ou anime...') : 'Rechercher par nom d\'unité ou anime...'}"
+                   class="w-full bg-[#070b14] border border-slate-700 rounded-lg ps-8 pe-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute start-2.5 top-2.5" stroke-width="2"></i>
+          </div>
+          <div class="flex items-center gap-1 overflow-x-auto py-0.5 shrink-0" id="tier-unit-rarity-filters">
+            <button type="button" onclick="CommunityUI.setAddUnitStarFilter('all', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-sky-500 text-white shadow-sm shrink-0">Tous</button>
+            <button type="button" onclick="CommunityUI.setAddUnitStarFilter('7', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">7★</button>
+            <button type="button" onclick="CommunityUI.setAddUnitStarFilter('6', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">6★</button>
+            <button type="button" onclick="CommunityUI.setAddUnitStarFilter('5', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">5★</button>
+            <button type="button" onclick="CommunityUI.setAddUnitStarFilter('4', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">4★</button>
+          </div>
+        </div>
+
+        <!-- Liste des unités -->
+        <div id="tier-unit-selector-grid" class="max-h-[380px] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 p-1 border border-slate-800 rounded-xl bg-[#090e1c]/80">
+        </div>
+
+        <!-- Pied de modale -->
+        <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
+          <span class="text-slate-400 font-mono-num" id="tier-unit-selector-count">0 unités</span>
+          <button type="button" onclick="CommunityUI.closeModal()" class="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold tap-scale">
+            ${window.t ? window.t('cancel', 'Fermer') : 'Fermer'}
+          </button>
+        </div>
+      </div>
+    `;
+
+    showCustomModalContent(modalTitle, modalBody);
+    renderAddUnitList('');
+  }
+
+  function setAddUnitStarFilter(star, btnEl) {
+    currentAddUnitFilterStar = star;
+    const container = document.getElementById('tier-unit-rarity-filters');
+    if (container) {
+      const btns = container.querySelectorAll('button');
+      btns.forEach(b => {
+        b.className = 'px-2 py-1 rounded text-[11px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0';
+      });
+      if (btnEl) btnEl.className = 'px-2 py-1 rounded text-[11px] font-bold bg-sky-500 text-white shadow-sm shrink-0';
+    }
+    const searchVal = document.getElementById('tier-unit-search-input')?.value || '';
+    renderAddUnitList(searchVal);
+  }
+
+  function renderAddUnitList(query) {
+    const grid = document.getElementById('tier-unit-selector-grid');
+    const countEl = document.getElementById('tier-unit-selector-count');
+    if (!grid) return;
+
+    const allUnits = window.ALL_UNITS || (window.getGlobalUnits ? window.getGlobalUnits() : []);
+    const q = (query || '').toLowerCase().trim();
+    const existingInCat = (window.TIERLIST_DATA[currentTargetTierCategory] || []).map(n => (n || '').toLowerCase());
+
+    const filtered = allUnits.filter(u => {
+      if (currentAddUnitFilterStar !== 'all' && String(u.star || '') !== currentAddUnitFilterStar) {
+        return false;
+      }
+      if (!q) return true;
+      return (u.name || '').toLowerCase().includes(q) || (u.anime_origin || '').toLowerCase().includes(q);
+    });
+
+    if (countEl) countEl.textContent = `${filtered.length} unités trouvées`;
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full py-8 text-center text-slate-500 text-xs italic">
+          Aucune unité ne correspond à ces critères.
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filtered.slice(0, 120).map(u => {
+      const isAlreadyAdded = existingInCat.includes((u.name || '').toLowerCase());
+      const thumb = window.tierThumbUrl ? window.tierThumbUrl(u) : u.image;
+      const escapeUName = (u.name || '').replace(/'/g, "\\'");
+
+      return `
+        <button type="button"
+                onclick="${isAlreadyAdded ? `if(window.showToast) window.showToast('Cette unité est déjà dans cette catégorie');` : `CommunityUI.addUnitToTier('${currentTargetTierCategory.replace(/'/g, "\\'")}', '${escapeUName}')`}"
+                class="p-2 rounded-xl border text-left flex items-center gap-2 tap-scale transition-all ${isAlreadyAdded ? 'bg-slate-900/40 border-slate-800/40 opacity-50 cursor-not-allowed' : 'bg-[#0e162a] hover:bg-sky-600/20 border-slate-800 hover:border-sky-500/50 group'}">
+          <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+            <img src="${thumb || ''}" alt="${escapeHtml(u.name)}" loading="lazy"
+                 onerror="this.style.display='none'"
+                 class="max-h-full max-w-full object-contain">
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-1">
+              <span class="text-[9px] font-mono-num font-bold px-1 rounded star-${u.star || 6}-badge">${u.star || 6}★</span>
+              <span class="text-[11px] font-bold text-white truncate block group-hover:text-sky-300" title="${escapeHtml(u.name)}">${escapeHtml(u.name)}</span>
+            </div>
+            <span class="text-[9px] text-slate-400 truncate block mt-0.5">${escapeHtml(u.anime_origin || 'ASTD')}</span>
+          </div>
+          ${isAlreadyAdded ? `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>` : `<i data-lucide="plus" class="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 shrink-0"></i>`}
+        </button>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function addUnitToTier(categoryName, unitName) {
+    if (!categoryName || !unitName) return;
+    if (!window.TIERLIST_DATA[categoryName]) {
+      window.TIERLIST_DATA[categoryName] = [];
+    }
+    const exists = window.TIERLIST_DATA[categoryName].some(n => n.toLowerCase() === unitName.toLowerCase());
+    if (exists) {
+      if (window.showToast) window.showToast(`L'unité ${unitName} est déjà dans ${categoryName}.`);
+      return;
+    }
+    window.TIERLIST_DATA[categoryName].push(unitName);
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+    closeModal();
+    if (window.showToast) window.showToast(`Unité ${unitName} ajoutée à ${categoryName} !`);
+  }
+
+  function removeUnitFromTier(categoryName, unitName) {
+    if (!categoryName || !unitName || !window.TIERLIST_DATA[categoryName]) return;
+    window.TIERLIST_DATA[categoryName] = window.TIERLIST_DATA[categoryName].filter(n => n.toLowerCase() !== unitName.toLowerCase());
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+    if (window.showToast) window.showToast(`Unité ${unitName} retirée de ${categoryName}.`);
+  }
+
+  function openAddTierCategoryModal() {
+    const modalTitle = window.t ? window.t('tierlist_btn_add_cat_title', 'Créer une nouvelle catégorie méta') : 'Créer une nouvelle catégorie méta';
+    const suggestions = ['S+ (Transcendant)', 'S (Meta Absolue)', 'A (Haut Niveau)', 'B (Viable)', 'C (Situationnel)', 'D (Dépassé)', 'GOD TIER', 'MÉTA DONJONS', 'MÉTA RAIDS', 'SUPPORT ELITE', 'FARMING PRO'];
+
+    const modalBody = `
+      <form id="comm-add-cat-form" onsubmit="event.preventDefault(); CommunityUI.submitAddTierCategory();" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-200 mb-1.5">Nom de la Catégorie :</label>
+          <input type="text" id="comm-new-cat-name" required placeholder="Ex: S+ (Transcendant), GOD TIER, Méta Donjons..."
+                 class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1.5">Suggestions rapides en 1 clic :</label>
+          <div class="flex flex-wrap gap-1.5">
+            ${suggestions.map(s => `
+              <button type="button" onclick="document.getElementById('comm-new-cat-name').value='${s.replace(/'/g, "\\'")}'"
+                      class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 hover:text-sky-300 tap-scale transition-colors">
+                ${s}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-200 mb-1.5">Position :</label>
+          <select id="comm-new-cat-pos" class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+            <option value="top">Au tout début de la Tier List (En haut)</option>
+            <option value="bottom" selected>À la fin de la Tier List (En bas)</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="CommunityUI.closeModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold tap-scale">
+            ${window.t ? window.t('cancel', 'Annuler') : 'Annuler'}
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 tap-scale shadow-sm">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Créer la Catégorie</span>
+          </button>
+        </div>
+      </form>
+    `;
+
+    showCustomModalContent(modalTitle, modalBody);
+  }
+
+  function submitAddTierCategory() {
+    const nameInput = document.getElementById('comm-new-cat-name');
+    const posInput = document.getElementById('comm-new-cat-pos');
+    const catName = (nameInput?.value || '').trim();
+    if (!catName) return;
+
+    if (window.TIERLIST_DATA[catName]) {
+      alert(`La catégorie "${catName}" existe déjà dans cette Tier List.`);
+      return;
+    }
+
+    const pos = posInput?.value || 'bottom';
+    if (pos === 'top') {
+      const reordered = { [catName]: [] };
+      Object.entries(window.TIERLIST_DATA).forEach(([k, v]) => {
+        reordered[k] = v;
+      });
+      window.TIERLIST_DATA = reordered;
+    } else {
+      window.TIERLIST_DATA[catName] = [];
+    }
+
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+    closeModal();
+    if (window.showToast) window.showToast(`Catégorie "${catName}" créée avec succès !`);
+  }
+
+  function openRenameTierCategoryModal(oldName) {
+    const modalTitle = `Renommer la catégorie : ${oldName}`;
+    const modalBody = `
+      <form id="comm-rename-cat-form" onsubmit="event.preventDefault(); CommunityUI.submitRenameTierCategory('${oldName.replace(/'/g, "\\'")}');" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-200 mb-1.5">Nouveau nom de catégorie :</label>
+          <input type="text" id="comm-rename-cat-input" required value="${escapeHtml(oldName)}"
+                 class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="CommunityUI.closeModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold tap-scale">
+            Annuler
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold flex items-center gap-1.5 tap-scale shadow-sm">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Enregistrer le Nom</span>
+          </button>
+        </div>
+      </form>
+    `;
+    showCustomModalContent(modalTitle, modalBody);
+  }
+
+  function submitRenameTierCategory(oldName) {
+    const newName = (document.getElementById('comm-rename-cat-input')?.value || '').trim();
+    if (!newName || newName === oldName) {
+      closeModal();
+      return;
+    }
+
+    if (window.TIERLIST_DATA[newName]) {
+      alert(`Une catégorie intitulée "${newName}" existe déjà.`);
+      return;
+    }
+
+    const reordered = {};
+    Object.entries(window.TIERLIST_DATA).forEach(([k, v]) => {
+      if (k === oldName) {
+        reordered[newName] = v;
+      } else {
+        reordered[k] = v;
+      }
+    });
+    window.TIERLIST_DATA = reordered;
+
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+    closeModal();
+    if (window.showToast) window.showToast(`Catégorie renommée en "${newName}" !`);
+  }
+
+  function deleteTierCategory(categoryName) {
+    if (!categoryName || !window.TIERLIST_DATA[categoryName]) return;
+    const count = (window.TIERLIST_DATA[categoryName] || []).length;
+    const confirmMsg = `Supprimer la catégorie "${categoryName}" (${count} unité(s)) ?`;
+    if (!confirm(confirmMsg)) return;
+
+    delete window.TIERLIST_DATA[categoryName];
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+    if (window.showToast) window.showToast(`Catégorie "${categoryName}" supprimée.`);
+  }
+
+  function moveTierCategory(categoryName, direction) {
+    const keys = Object.keys(window.TIERLIST_DATA);
+    const idx = keys.indexOf(categoryName);
+    if (idx < 0) return;
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= keys.length) return;
+
+    keys.splice(idx, 1);
+    keys.splice(newIdx, 0, categoryName);
+
+    const reordered = {};
+    keys.forEach(k => {
+      reordered[k] = window.TIERLIST_DATA[k];
+    });
+    window.TIERLIST_DATA = reordered;
+
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+  }
+
+  function openMoveUnitModal(sourceCat, unitName) {
+    const categories = Object.keys(window.TIERLIST_DATA).filter(c => c !== sourceCat);
+    if (categories.length === 0) {
+      alert("Aucune autre catégorie disponible.");
+      return;
+    }
+
+    const modalTitle = `Déplacer "${unitName}" vers une autre catégorie`;
+    const modalBody = `
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-200 mb-1.5">Catégorie cible :</label>
+          <select id="select-target-cat" class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+            ${categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="CommunityUI.closeModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold tap-scale">
+            Annuler
+          </button>
+          <button type="button" onclick="const target = document.getElementById('select-target-cat').value; CommunityUI.moveUnitToCategory('${sourceCat.replace(/'/g, "\\'")}', target, '${unitName.replace(/'/g, "\\'")}');" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold flex items-center gap-1.5 tap-scale shadow-sm">
+            <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
+            <span>Déplacer</span>
+          </button>
+        </div>
+      </div>
+    `;
+    showCustomModalContent(modalTitle, modalBody);
+  }
+
+  function moveUnitToCategory(sourceCat, targetCat, unitName) {
+    if (!sourceCat || !targetCat || !unitName) return;
+    if (window.TIERLIST_DATA[sourceCat]) {
+      window.TIERLIST_DATA[sourceCat] = window.TIERLIST_DATA[sourceCat].filter(n => n.toLowerCase() !== unitName.toLowerCase());
+    }
+    if (!window.TIERLIST_DATA[targetCat]) {
+      window.TIERLIST_DATA[targetCat] = [];
+    }
+    if (!window.TIERLIST_DATA[targetCat].some(n => n.toLowerCase() === unitName.toLowerCase())) {
+      window.TIERLIST_DATA[targetCat].push(unitName);
+    }
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+    closeModal();
+    if (window.showToast) window.showToast(`"${unitName}" déplacé de ${sourceCat} vers ${targetCat} !`);
+  }
+
+  function openManageUnitInTierModal(unitName) {
+    const categories = Object.keys(window.TIERLIST_DATA);
+    const unitMatch = (window.ALL_UNITS || []).find(u => u.name.toLowerCase() === unitName.toLowerCase());
+    const star = unitMatch ? unitMatch.star : 6;
+    const thumb = unitMatch ? (window.tierThumbUrl ? window.tierThumbUrl(unitMatch) : unitMatch.image) : '';
+
+    const modalTitle = `Gérer "${unitName}" dans les Tier Lists`;
+    const modalBody = `
+      <div class="space-y-4 text-xs">
+        <!-- Résumé unité -->
+        <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+            <img src="${thumb || ''}" alt="${escapeHtml(unitName)}" class="max-h-full max-w-full object-contain">
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-mono-num font-bold px-1.5 rounded star-${star}-badge">${star}★</span>
+              <strong class="text-sm font-bold text-white">${escapeHtml(unitName)}</strong>
+            </div>
+            <span class="text-[11px] text-slate-400 mt-0.5 block">${escapeHtml(unitMatch?.anime_origin || 'ASTD')}</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-200 mb-2">Cochez les catégories dans lesquelles classer cette unité :</label>
+          <div class="max-h-[300px] overflow-y-auto space-y-1.5 p-2 rounded-xl border border-slate-800 bg-[#070b14]">
+            ${categories.map(cat => {
+              const isChecked = (window.TIERLIST_DATA[cat] || []).some(n => n.toLowerCase() === unitName.toLowerCase());
+              const count = (window.TIERLIST_DATA[cat] || []).length;
+              return `
+                <label class="flex items-center justify-between p-2 rounded-lg bg-[#0d1424] hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer tap-scale transition-colors">
+                  <div class="flex items-center gap-2.5">
+                    <input type="checkbox" data-category="${escapeHtml(cat)}" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded text-sky-500 bg-slate-900 border-slate-700 focus:ring-0 cursor-pointer">
+                    <span class="font-semibold text-slate-200">${escapeHtml(cat)}</span>
+                  </div>
+                  <span class="text-[10px] text-slate-500 font-mono-num">${count} unité(s)</span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="CommunityUI.closeModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold tap-scale">
+            Annuler
+          </button>
+          <button type="button" onclick="CommunityUI.submitManageUnitInTier('${unitName.replace(/'/g, "\\'")}')" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold flex items-center gap-1.5 tap-scale shadow-sm">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Enregistrer les Catégories</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    showCustomModalContent(modalTitle, modalBody);
+  }
+
+  function submitManageUnitInTier(unitName) {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-category]');
+    checkboxes.forEach(cb => {
+      const cat = cb.getAttribute('data-category');
+      if (!cat) return;
+      if (!window.TIERLIST_DATA[cat]) window.TIERLIST_DATA[cat] = [];
+
+      const exists = window.TIERLIST_DATA[cat].some(n => n.toLowerCase() === unitName.toLowerCase());
+      if (cb.checked && !exists) {
+        window.TIERLIST_DATA[cat].push(unitName);
+      } else if (!cb.checked && exists) {
+        window.TIERLIST_DATA[cat] = window.TIERLIST_DATA[cat].filter(n => n.toLowerCase() !== unitName.toLowerCase());
+      }
+    });
+
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+    closeModal();
+    if (window.showToast) window.showToast(`Catégories de "${unitName}" mises à jour !`);
+  }
+
+  // --- HANDLERS DRAG & DROP NATIVE ---
+
+  function onTierDragStart(event, unitName, sourceCat) {
+    draggedTierItem = { unitName, sourceCat };
+    try {
+      event.dataTransfer.setData('text/plain', JSON.stringify({ unitName, sourceCat }));
+      event.dataTransfer.effectAllowed = 'move';
+    } catch (e) {}
+    setTimeout(() => {
+      if (event.target && event.target.classList) {
+        event.target.classList.add('tier-item-dragging');
+      }
+    }, 0);
+  }
+
+  function onTierDragOver(event) {
+    event.preventDefault();
+    try {
+      event.dataTransfer.dropEffect = 'move';
+    } catch (e) {}
+    const dropzone = event.currentTarget;
+    if (dropzone && dropzone.classList && !dropzone.classList.contains('tier-drag-over')) {
+      dropzone.classList.add('tier-drag-over');
+    }
+  }
+
+  function onTierDragLeave(event) {
+    const dropzone = event.currentTarget;
+    if (dropzone && dropzone.classList && !dropzone.contains(event.relatedTarget)) {
+      dropzone.classList.remove('tier-drag-over');
+    }
+  }
+
+  function onTierDragEnd(event) {
+    document.querySelectorAll('.tier-drag-over').forEach(el => el.classList.remove('tier-drag-over'));
+    document.querySelectorAll('.tier-item-dragging').forEach(el => el.classList.remove('tier-item-dragging'));
+    draggedTierItem = null;
+  }
+
+  function onTierDrop(event, targetCat) {
+    event.preventDefault();
+    document.querySelectorAll('.tier-drag-over').forEach(el => el.classList.remove('tier-drag-over'));
+    document.querySelectorAll('.tier-item-dragging').forEach(el => el.classList.remove('tier-item-dragging'));
+
+    let unitName = null;
+    let sourceCat = null;
+
+    if (draggedTierItem) {
+      unitName = draggedTierItem.unitName;
+      sourceCat = draggedTierItem.sourceCat;
+    } else {
+      try {
+        const raw = event.dataTransfer.getData('text/plain');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          unitName = parsed.unitName;
+          sourceCat = parsed.sourceCat;
+        }
+      } catch (e) {}
+    }
+
+    if (!unitName || !targetCat) return;
+
+    if (sourceCat && window.TIERLIST_DATA[sourceCat]) {
+      window.TIERLIST_DATA[sourceCat] = window.TIERLIST_DATA[sourceCat].filter(n => n.toLowerCase() !== unitName.toLowerCase());
+    }
+
+    if (!window.TIERLIST_DATA[targetCat]) {
+      window.TIERLIST_DATA[targetCat] = [];
+    }
+    if (!window.TIERLIST_DATA[targetCat].some(n => n.toLowerCase() === unitName.toLowerCase())) {
+      window.TIERLIST_DATA[targetCat].push(unitName);
+    }
+
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+    if (window.showToast) {
+      window.showToast(`"${unitName}" déplacé vers ${targetCat} !`);
+    }
+  }
+
+  function onTierListPresetChange(preset) {
+    if (preset === 'official') {
+      const backup = CommunityManager.getOriginalTierlistBackup();
+      if (backup && Object.keys(backup).length > 0) {
+        window.TIERLIST_DATA = JSON.parse(JSON.stringify(backup));
+        CommunityManager.saveTierList(window.TIERLIST_DATA);
+      }
+    } else if (preset === 'standard_tiers') {
+      const standardTemplate = {
+        'S+ (Transcendant)': [],
+        'S (Meta Absolue)': [],
+        'A (Haut Niveau)': [],
+        'B (Solide & Viable)': [],
+        'C (Situationnel)': [],
+        'D (Obsolète)': []
+      };
+
+      const existingUnits = [];
+      Object.values(window.TIERLIST_DATA).forEach(list => {
+        if (Array.isArray(list)) list.forEach(n => { if (!existingUnits.includes(n)) existingUnits.push(n); });
+      });
+
+      if (existingUnits.length > 0) {
+        standardTemplate['S+ (Transcendant)'] = existingUnits.slice(0, 5);
+        standardTemplate['S (Meta Absolue)'] = existingUnits.slice(5, 12);
+        standardTemplate['A (Haut Niveau)'] = existingUnits.slice(12, 22);
+        standardTemplate['B (Solide & Viable)'] = existingUnits.slice(22, 35);
+      }
+
+      window.TIERLIST_DATA = standardTemplate;
+      CommunityManager.saveTierList(window.TIERLIST_DATA);
+      if (!isTierListEditMode) {
+        toggleTierListEditMode(true);
+      }
+      if (window.showToast) window.showToast('Modèle Standard (S+ / S / A / B / C / D) activé !');
+    }
+  }
+
+  function saveTierList() {
+    CommunityManager.saveTierList(window.TIERLIST_DATA);
+  }
+
+  function confirmResetTierList() {
+    const confirmMsg = window.t ? window.t('tierlist_confirm_reset', 'Voulez-vous vraiment réinitialiser la Tier List à sa version officielle ? Toutes les modifications locales seront effacées.') : 'Voulez-vous vraiment réinitialiser la Tier List à sa version officielle ? Toutes les modifications locales seront effacées.';
+    if (!confirm(confirmMsg)) return;
+
+    CommunityManager.resetTierList();
+    const selector = document.getElementById('tierlist-preset-selector');
+    if (selector) selector.value = 'official';
+  }
+
+  function proposeTierListToGitHub() {
+    const url = CommunityManager.generateGitHubIssueURL('tierlist', { categories: window.TIERLIST_DATA });
+    window.open(url, '_blank');
+  }
+
+  function exportTierListJSON() {
+    const exportData = {
+      app: 'ASTD Database Pro',
+      type: 'tierlist',
+      version: 1,
+      exported_at: new Date().toISOString(),
+      categories_count: Object.keys(window.TIERLIST_DATA).length,
+      categories: window.TIERLIST_DATA
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `astd_tierlist_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    if (window.showToast) window.showToast('Fichier JSON de Tier List exporté avec succès !');
+  }
+
+  function importTierListJSON(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        const cats = parsed.categories || parsed.tierlist || parsed;
+        if (typeof cats !== 'object' || Array.isArray(cats)) {
+          throw new Error('Format de fichier invalide (doit contenir un dictionnaire de catégories).');
+        }
+        window.TIERLIST_DATA = cats;
+        CommunityManager.saveTierList(cats);
+        if (window.showToast) window.showToast('Tier List importée avec succès !');
+      } catch (err) {
+        alert('Erreur lors de l\'importation de la Tier List : ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
   return {
     openUnitModalForAdd,
     openUnitModalForEdit,
@@ -3016,7 +3859,38 @@ const CommunityUI = (function() {
     computeUnitTowerType,
     onTopTowerTypeChange,
     onOrbRequireSelectChange,
-    onOrbRequireCustomInput
+    onOrbRequireCustomInput,
+    // Méthodes Tier List
+    toggleTierListEditMode,
+    isEditMode,
+    onTierListSearch,
+    getTierListSearchQuery,
+    openAddUnitToTierModal,
+    setAddUnitStarFilter,
+    renderAddUnitList,
+    addUnitToTier,
+    removeUnitFromTier,
+    openAddTierCategoryModal,
+    submitAddTierCategory,
+    openRenameTierCategoryModal,
+    submitRenameTierCategory,
+    deleteTierCategory,
+    moveTierCategory,
+    openMoveUnitModal,
+    moveUnitToCategory,
+    openManageUnitInTierModal,
+    submitManageUnitInTier,
+    onTierDragStart,
+    onTierDragOver,
+    onTierDragLeave,
+    onTierDragEnd,
+    onTierDrop,
+    onTierListPresetChange,
+    saveTierList,
+    confirmResetTierList,
+    proposeTierListToGitHub,
+    exportTierListJSON,
+    importTierListJSON
   };
 })();
 

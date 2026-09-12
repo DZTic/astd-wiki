@@ -20,6 +20,10 @@ window.ORBS_DATA = ORBS_DATA;
 window.getGlobalOrbs = () => ORBS_DATA;
 window.setGlobalOrbs = (list) => { ORBS_DATA = list; window.ORBS_DATA = list; };
 
+window.TIERLIST_DATA = TIERLIST_DATA;
+window.getGlobalTierList = () => TIERLIST_DATA;
+window.setGlobalTierList = (data) => { TIERLIST_DATA = data; window.TIERLIST_DATA = data; };
+
 let currentTab = 'units';
 let currentStarFilter = 'all';
 let currentViewMode = 'grid'; // 'grid' | 'table'
@@ -84,6 +88,16 @@ const I18N = {
     btn_propose_unit_short: "Ajouter",
     comm_btn_add_code_nav: "Proposer un Code",
     community_h1: "Espace et Contributions de la Communauté",
+    comm_stat_tierlist: "Tier List",
+    comm_card_tierlist_title: "Tier Lists & Méta",
+    comm_card_tierlist_desc: "Glisser-déposer d'unités, tiers sur mesure et presets.",
+    comm_btn_edit_tierlist: "Éditer",
+    comm_btn_view_tierlist: "Consulter",
+    comm_tierlist_section_title: "Tier List Méta Collaborative",
+    comm_tierlist_status_custom: "Personnalisée",
+    comm_tierlist_status_official: "Officielle",
+    comm_tierlist_custom_desc: "Vous utilisez actuellement une version personnalisée de la Tier List avec vos propres classements et catégories.",
+    comm_tierlist_official_desc: "La Tier List officielle du Wiki est actuellement chargée. Vous pouvez la personnaliser librement par glisser-déposer, créer de nouvelles catégories, et proposer vos changements en ligne !",
     modal_btn_edit: "Modifier",
     modal_btn_hide: "Masquer",
     modal_community_tips_title: "Conseils & Avis de la Communauté",
@@ -251,9 +265,46 @@ const I18N = {
 
     // Tier List
     tierlist_heading: "Tier List Officielle ASTD",
-    tierlist_subheading: "Classement officiel des meilleures unités par catégorie compétitive.",
+    tierlist_subheading: "Classement officiel des meilleures unités par catégorie compétitive. Modifiez, créez et réorganisez les tiers en direct !",
     tierlist_region_aria: "Tier List Officielle ASTD",
     tierlist_loading: "Tier list en cours de chargement...",
+    tierlist_btn_edit: "Modifier la Tier List",
+    tierlist_btn_edit_active: "Mode Lecture",
+    tierlist_btn_edit_title: "Activer ou désactiver l'édition des catégories et unités",
+    tierlist_btn_add_cat: "Nouvelle Catégorie",
+    tierlist_btn_add_cat_title: "Créer une nouvelle catégorie méta",
+    tierlist_opt_official: "Tier List Méta Officielle",
+    tierlist_opt_standard: "Tier Maker Standard (S+ / S / A / B / C / D)",
+    tierlist_select_preset_title: "Changer le modèle de Tier List",
+    tierlist_btn_github: "Proposer au Wiki",
+    tierlist_btn_github_title: "Proposer vos modifications au Wiki via GitHub",
+    tierlist_btn_reset: "Rétablir",
+    tierlist_btn_reset_title: "Rétablir la Tier List officielle d'origine",
+    tierlist_btn_export: "Exporter",
+    tierlist_btn_export_title: "Exporter au format JSON",
+    tierlist_btn_import: "Importer",
+    tierlist_btn_import_title: "Importer un fichier JSON de Tier List",
+    tierlist_search_placeholder: "Filtrer une unité ou catégorie...",
+    tierlist_stat_cats: "catégories",
+    tierlist_stat_units: "unités classées",
+    tierlist_edit_active: "Mode Édition Actif :",
+    tierlist_edit_desc: "Glissez-déposez les cartes pour réordonner ou changer de catégorie. Cliquez sur + pour ajouter une unité ou sur ✕ pour la retirer.",
+    tierlist_btn_save: "Enregistrer",
+    tierlist_btn_save_title: "Enregistrer les modifications en local ou sur le serveur",
+    tierlist_btn_close_edit: "Fermer l'édition",
+    tierlist_cat_add_unit: "+ Ajouter une unité",
+    tierlist_cat_rename: "Renommer",
+    tierlist_cat_delete: "Supprimer la catégorie",
+    tierlist_unit_remove: "Retirer de cette catégorie",
+    tierlist_unit_move: "Déplacer vers...",
+    tierlist_empty_cat: "Aucune unité dans cette catégorie. Cliquez sur '+ Ajouter' pour en insérer ou glissez-déposez une unité ici.",
+    modal_btn_tier: "Gérer dans la Tier List",
+    modal_btn_tier_title: "Gérer ou ajouter cette unité dans les catégories de la Tier List",
+    tierlist_confirm_reset: "Voulez-vous vraiment réinitialiser la Tier List à sa version officielle ? Toutes les modifications locales seront effacées.",
+    tierlist_confirm_delete_cat: "Supprimer définitivement la catégorie '{name}' et retirer ses unités classées ?",
+    tierlist_saved_toast: "Tier List enregistrée avec succès !",
+    tierlist_reset_toast: "Tier List réinitialisée à l'état officiel.",
+    badge_modified_community: "Modifiée",
 
     // Codes
     codes_heading: "Codes Cadeaux Actifs & Vérifiés",
@@ -467,6 +518,16 @@ const I18N = {
     btn_propose_unit_short: "Add",
     comm_btn_add_code_nav: "Propose Code",
     community_h1: "Community Space & Contributions",
+    comm_stat_tierlist: "Tier List",
+    comm_card_tierlist_title: "Tier Lists & Meta",
+    comm_card_tierlist_desc: "Drag & drop units, custom tiers and presets.",
+    comm_btn_edit_tierlist: "Edit",
+    comm_btn_view_tierlist: "View",
+    comm_tierlist_section_title: "Collaborative Meta Tier List",
+    comm_tierlist_status_custom: "Custom",
+    comm_tierlist_status_official: "Official",
+    comm_tierlist_custom_desc: "You are currently using a custom version of the Tier List with your own rankings and categories.",
+    comm_tierlist_official_desc: "The official Wiki Tier List is currently active. You can freely customize it by drag and drop, create new categories, and propose your changes online!",
     modal_btn_edit: "Edit",
     modal_btn_hide: "Hide",
     modal_community_tips_title: "Community Tips & Insights",
@@ -634,9 +695,46 @@ const I18N = {
 
     // Tier List
     tierlist_heading: "Official ASTD Tier List",
-    tierlist_subheading: "Official ranking of top units by competitive category.",
+    tierlist_subheading: "Official ranking of top units by competitive category. Edit, create and reorder tiers live!",
     tierlist_region_aria: "Official ASTD Tier List",
     tierlist_loading: "Loading tier list...",
+    tierlist_btn_edit: "Edit Tier List",
+    tierlist_btn_edit_active: "View Mode",
+    tierlist_btn_edit_title: "Toggle edit mode for categories and units",
+    tierlist_btn_add_cat: "New Category",
+    tierlist_btn_add_cat_title: "Create a new meta category",
+    tierlist_opt_official: "Official Meta Tier List",
+    tierlist_opt_standard: "Standard Tier Maker (S+ / S / A / B / C / D)",
+    tierlist_select_preset_title: "Switch tier list template",
+    tierlist_btn_github: "Submit to Wiki",
+    tierlist_btn_github_title: "Submit your modifications to the Wiki via GitHub",
+    tierlist_btn_reset: "Reset",
+    tierlist_btn_reset_title: "Restore original official Tier List",
+    tierlist_btn_export: "Export",
+    tierlist_btn_export_title: "Export as JSON",
+    tierlist_btn_import: "Import",
+    tierlist_btn_import_title: "Import Tier List JSON file",
+    tierlist_search_placeholder: "Filter a unit or category...",
+    tierlist_stat_cats: "categories",
+    tierlist_stat_units: "ranked units",
+    tierlist_edit_active: "Edit Mode Active:",
+    tierlist_edit_desc: "Drag and drop cards to reorder or move between categories. Click + to add a unit or ✕ to remove.",
+    tierlist_btn_save: "Save",
+    tierlist_btn_save_title: "Save modifications locally or to server",
+    tierlist_btn_close_edit: "Done Editing",
+    tierlist_cat_add_unit: "+ Add a unit",
+    tierlist_cat_rename: "Rename",
+    tierlist_cat_delete: "Delete category",
+    tierlist_unit_remove: "Remove from this category",
+    tierlist_unit_move: "Move to...",
+    tierlist_empty_cat: "No units in this category. Click '+ Add' to insert or drag and drop a unit here.",
+    modal_btn_tier: "Manage in Tier List",
+    modal_btn_tier_title: "Manage or add this unit to Tier List categories",
+    tierlist_confirm_reset: "Do you really want to reset the Tier List to its official version? All local changes will be cleared.",
+    tierlist_confirm_delete_cat: "Permanently delete category '{name}' and remove its ranked units?",
+    tierlist_saved_toast: "Tier List saved successfully!",
+    tierlist_reset_toast: "Tier List restored to official state.",
+    badge_modified_community: "Modified",
 
     // Codes
     codes_heading: "Active & Verified Gift Codes",
@@ -1664,6 +1762,7 @@ async function loadData() {
     CODES_DATA = codesRes;
     ORBS_DATA = orbsRes;
     TIERLIST_DATA = tierRes;
+    window.TIERLIST_DATA = tierRes;
     GAMEMODES_DATA = modesRes;
     META_DATA = metaRes;
     MATERIAL_IMAGES = matImagesRes || {};
@@ -3213,66 +3312,213 @@ function tierThumbUrl(unit) {
   return img;
 }
 
+function getCategoryBadgeClass(catName) {
+  const norm = (catName || '').toUpperCase();
+  if (norm.startsWith('S+') || norm.includes('GOD') || norm.includes('TRANSCENDANT')) return 'tier-badge-s-plus';
+  if (norm.startsWith('S ') || norm.startsWith('S -') || norm === 'S' || norm.includes('META (DPS)')) return 'tier-badge-s';
+  if (norm.startsWith('A ') || norm.startsWith('A -') || norm === 'A' || norm.includes('META SUPPORT')) return 'tier-badge-a';
+  if (norm.startsWith('B ') || norm.startsWith('B -') || norm === 'B' || norm.includes('OVERALL')) return 'tier-badge-b';
+  if (norm.startsWith('C ') || norm.startsWith('C -') || norm === 'C') return 'tier-badge-c';
+  if (norm.startsWith('D ') || norm.startsWith('D -') || norm === 'D') return 'tier-badge-d';
+  return 'bg-sky-950/40 border-sky-500/40 text-sky-300';
+}
+
 function renderTierList() {
   const container = document.getElementById('tierlist-container');
   if (!container) return;
 
-  const categories = Object.keys(TIERLIST_DATA);
+  const isEditMode = window.CommunityUI && typeof window.CommunityUI.isEditMode === 'function' && window.CommunityUI.isEditMode();
+  const filterQuery = (window.CommunityUI && typeof window.CommunityUI.getTierListSearchQuery === 'function' ? window.CommunityUI.getTierListSearchQuery() : '').toLowerCase().trim();
+
+  let categories = Object.keys(TIERLIST_DATA);
+  const totalCategoriesCount = categories.length;
+  let totalUnitsCount = 0;
+  categories.forEach(cat => {
+    totalUnitsCount += (TIERLIST_DATA[cat] || []).length;
+  });
+
+  // Mettre à jour les compteurs statistiques dans la barre d'outils
+  const catCountEl = document.getElementById('tierlist-stat-categories');
+  const unitCountEl = document.getElementById('tierlist-stat-total-units');
+  if (catCountEl) catCountEl.textContent = totalCategoriesCount;
+  if (unitCountEl) unitCountEl.textContent = totalUnitsCount.toLocaleString();
+
   if (categories.length === 0) {
-    container.innerHTML = `<div class="text-slate-400 text-xs">${t('tierlist_loading', 'Tier list en cours de chargement...')}</div>`;
+    container.innerHTML = `
+      <div class="tactical-card p-8 rounded-xl border border-slate-800 text-center space-y-3">
+        <i data-lucide="inbox" class="w-8 h-8 text-slate-500 mx-auto"></i>
+        <div class="text-slate-300 font-bold text-sm">${t('tierlist_empty_all', 'Aucune catégorie dans cette tier list.')}</div>
+        <p class="text-xs text-slate-500">${t('tierlist_empty_hint', 'Cliquez sur « Nouvelle Catégorie » pour commencer à organiser vos unités.')}</p>
+        <button onclick="CommunityUI.openAddTierCategoryModal()" class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-sm tap-scale">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>${t('tierlist_btn_add_cat', 'Nouvelle Catégorie')}</span>
+        </button>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
     return;
   }
 
-  container.innerHTML = categories.map(catName => {
-    const unitNames = TIERLIST_DATA[catName] || [];
-    const unitWord = currentLang === 'en' ? (unitNames.length > 1 ? 'units' : 'unit') : (unitNames.length > 1 ? 'unités' : 'unité');
+  // Filtrage par recherche
+  if (filterQuery) {
+    categories = categories.filter(catName => {
+      if (catName.toLowerCase().includes(filterQuery)) return true;
+      const unitNames = TIERLIST_DATA[catName] || [];
+      return unitNames.some(uName => {
+        if (uName.toLowerCase().includes(filterQuery)) return true;
+        const uObj = ALL_UNITS.find(u => u.name.toLowerCase() === uName.toLowerCase());
+        return uObj && (uObj.anime_origin || '').toLowerCase().includes(filterQuery);
+      });
+    });
+  }
+
+  if (categories.length === 0 && filterQuery) {
+    container.innerHTML = `
+      <div class="tactical-card p-6 rounded-xl border border-slate-800 text-center space-y-2">
+        <i data-lucide="search-x" class="w-7 h-7 text-slate-500 mx-auto"></i>
+        <div class="text-slate-400 text-xs">${t('tierlist_no_search_results', 'Aucune catégorie ou unité ne correspond à :')} "<span class="text-sky-300">${filterQuery}</span>"</div>
+        <button onclick="document.getElementById('tierlist-filter-search').value=''; CommunityUI.onTierListSearch('');" class="text-xs text-sky-400 hover:underline tap-scale font-semibold">${t('filter_reset_btn', 'Réinitialiser le filtre')}</button>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = categories.map((catName, catIdx) => {
+    let unitNames = TIERLIST_DATA[catName] || [];
+    const rawCount = unitNames.length;
+    const unitWord = currentLang === 'en' ? (rawCount > 1 ? 'units' : 'unit') : (rawCount > 1 ? 'unités' : 'unité');
+    const badgeStyle = getCategoryBadgeClass(catName);
+    const escapeCat = catName.replace(/'/g, "\\'");
+
+    // Filtrer les unités affichées si recherche active mais ne correspondant pas au nom de la catégorie
+    if (filterQuery && !catName.toLowerCase().includes(filterQuery)) {
+      unitNames = unitNames.filter(uName => {
+        if (uName.toLowerCase().includes(filterQuery)) return true;
+        const uObj = ALL_UNITS.find(u => u.name.toLowerCase() === uName.toLowerCase());
+        return uObj && (uObj.anime_origin || '').toLowerCase().includes(filterQuery);
+      });
+    }
 
     return `
-      <div class="tactical-card rounded-xl p-4 border border-slate-800/80 bg-[#0f1629]/95 space-y-3">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-          <div class="flex items-center space-x-2.5">
-            <span class="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border bg-sky-950/40 border-sky-500/40 text-sky-300">
-              ${catName}
+      <div class="tier-category-card tactical-card rounded-xl p-4 border border-slate-800/80 bg-[#0f1629]/95 space-y-3 transition-colors duration-150">
+        <!-- En-tête de la Catégorie -->
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5 flex-wrap gap-2">
+          <div class="flex items-center space-x-2.5 flex-wrap">
+            <span class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border shadow-sm ${badgeStyle}">
+              ${escapeHtml(catName)}
             </span>
-            <span class="text-xs text-slate-500 font-mono-num font-semibold">${unitNames.length} ${unitWord}</span>
+            <span class="text-xs text-slate-400 font-mono-num font-semibold">${rawCount} ${unitWord}</span>
           </div>
+
+          <!-- Actions de gestion de la catégorie (Mode Édition) -->
+          ${isEditMode ? `
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button onclick="CommunityUI.openAddUnitToTierModal('${escapeCat}')" class="tier-action-btn px-2.5 py-1 rounded-lg bg-sky-600/25 hover:bg-sky-600 text-sky-200 hover:text-white border border-sky-500/40 text-[11px] font-bold tap-scale flex items-center gap-1 shadow-sm transition-colors" title="${t('tierlist_cat_add_unit', '+ Ajouter une unité')}">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>${t('tierlist_cat_add_unit', '+ Ajouter')}</span>
+              </button>
+              <button onclick="CommunityUI.openRenameTierCategoryModal('${escapeCat}')" class="tier-action-btn p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 tap-scale" title="${t('tierlist_cat_rename', 'Renommer la catégorie')}">
+                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="CommunityUI.moveTierCategory('${escapeCat}', -1)" ${catIdx === 0 ? 'disabled class="p-1.5 rounded-lg bg-slate-900 text-slate-600 cursor-not-allowed"' : 'class="tier-action-btn p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 tap-scale"'} title="Monter">
+                <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="CommunityUI.moveTierCategory('${escapeCat}', 1)" ${catIdx === categories.length - 1 ? 'disabled class="p-1.5 rounded-lg bg-slate-900 text-slate-600 cursor-not-allowed"' : 'class="tier-action-btn p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 tap-scale"'} title="Descendre">
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="CommunityUI.deleteTierCategory('${escapeCat}')" class="tier-action-btn p-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 tap-scale transition-colors" title="${t('tierlist_cat_delete', 'Supprimer la catégorie')}">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          ` : ''}
         </div>
 
-        <div class="flex flex-wrap gap-2.5">
+        <!-- Zone de dépôt et cartes d'unités (Dropzone Drag & Drop) -->
+        <div class="flex flex-wrap gap-2.5 tier-dropzone p-2 rounded-xl transition-all ${isEditMode ? 'border border-dashed border-slate-700/60 bg-[#090e1c]/60 hover:border-sky-500/40' : ''}"
+             data-category="${escapeHtml(catName)}"
+             ondragover="CommunityUI.onTierDragOver(event)"
+             ondragleave="CommunityUI.onTierDragLeave(event)"
+             ondrop="CommunityUI.onTierDrop(event, '${escapeCat}')">
+
+          ${unitNames.length === 0 ? `
+            <div class="w-full py-4 text-center text-xs text-slate-500 italic flex items-center justify-center gap-2">
+              <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              <span>${t('tierlist_empty_cat', 'Aucune unité dans cette catégorie. Cliquez sur "+ Ajouter" pour en insérer ou glissez-déposez une unité ici.')}</span>
+            </div>
+          ` : ''}
+
           ${unitNames.map(name => {
             const unitMatch = ALL_UNITS.find(u => u.name.toLowerCase() === name.toLowerCase());
+            const escapeName = name.replace(/'/g, "\\'");
+            const isDraggableAttr = isEditMode ? `draggable="true" ondragstart="CommunityUI.onTierDragStart(event, '${escapeName}', '${escapeCat}')" ondragend="CommunityUI.onTierDragEnd(event)"` : '';
+            const dragClass = isEditMode ? 'tier-item-draggable group cursor-grab' : 'group';
+
             if (!unitMatch) {
               return `
-                <button onclick="openUnitByName('${name.replace(/'/g, "\\'")}')"
-                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale transition-colors">
-                  <span>${name}</span>
-                  <i data-lucide="external-link" class="w-3 h-3 text-slate-500" stroke-width="1.75"></i>
-                </button>
+                <div class="relative inline-block ${dragClass}" ${isDraggableAttr}>
+                  <button onclick="${isEditMode ? `openUnitByName('${escapeName}')` : `openUnitByName('${escapeName}')`}"
+                          class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale transition-colors">
+                    <span>${escapeHtml(name)}</span>
+                    <i data-lucide="external-link" class="w-3 h-3 text-slate-500" stroke-width="1.75"></i>
+                  </button>
+                  ${isEditMode ? `
+                    <button type="button" onclick="event.stopPropagation(); CommunityUI.removeUnitFromTier('${escapeCat}', '${escapeName}')" class="tier-unit-action-badge absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-md tap-scale z-20" title="${t('tierlist_unit_remove', 'Retirer de cette catégorie')}">
+                      <i data-lucide="x" class="w-3 h-3" stroke-width="2.5"></i>
+                    </button>
+                    <button type="button" onclick="event.stopPropagation(); CommunityUI.openMoveUnitModal('${escapeCat}', '${escapeName}')" class="tier-unit-action-badge absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center shadow-md tap-scale z-20" title="${t('tierlist_unit_move', 'Déplacer vers...')}">
+                      <i data-lucide="arrow-left-right" class="w-2.5 h-2.5" stroke-width="2.5"></i>
+                    </button>
+                  ` : ''}
+                </div>
               `;
             }
+
             const star = unitMatch.star || 6;
             const thumb = tierThumbUrl(unitMatch);
+
             if (!thumb) {
               return `
-                <button onclick="openUnitModal('${unitMatch.id}')"
-                        class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale transition-colors">
-                  <span class="text-[10px] font-mono-num px-1 rounded star-${star}-badge">${star}★</span>
-                  <span>${name}</span>
-                  <i data-lucide="chevron-right" class="w-3 h-3 text-slate-500" stroke-width="2"></i>
-                </button>
+                <div class="relative inline-block ${dragClass}" ${isDraggableAttr}>
+                  <button onclick="openUnitModal('${unitMatch.id}')"
+                          class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale transition-colors">
+                    <span class="text-[10px] font-mono-num px-1 rounded star-${star}-badge">${star}★</span>
+                    <span>${escapeHtml(name)}</span>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-slate-500" stroke-width="2"></i>
+                  </button>
+                  ${isEditMode ? `
+                    <button type="button" onclick="event.stopPropagation(); CommunityUI.removeUnitFromTier('${escapeCat}', '${escapeName}')" class="tier-unit-action-badge absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-md tap-scale z-20" title="${t('tierlist_unit_remove', 'Retirer de cette catégorie')}">
+                      <i data-lucide="x" class="w-3 h-3" stroke-width="2.5"></i>
+                    </button>
+                    <button type="button" onclick="event.stopPropagation(); CommunityUI.openMoveUnitModal('${escapeCat}', '${escapeName}')" class="tier-unit-action-badge absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center shadow-md tap-scale z-20" title="${t('tierlist_unit_move', 'Déplacer vers...')}">
+                      <i data-lucide="arrow-left-right" class="w-2.5 h-2.5" stroke-width="2.5"></i>
+                    </button>
+                  ` : ''}
+                </div>
               `;
             }
+
             return `
-              <button onclick="openUnitModal('${unitMatch.id}')"
-                      class="w-[92px] rounded-xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-1.5 flex flex-col items-center gap-1 group tap-scale transition-colors">
-                <div class="w-full h-[76px] rounded-lg bg-[#070b14] border border-slate-800/80 flex items-center justify-center overflow-hidden">
-                  <img src="${thumb}" alt="${name}" loading="lazy"
-                       onerror="this.onerror=null;this.closest('div').classList.add('tier-img-fallback');this.style.display='none'"
-                       class="max-h-full max-w-full object-contain img-outline rounded group-hover:scale-105 transition-transform duration-150 ease-out">
-                </div>
-                <span class="text-[9px] font-mono-num font-bold px-1 rounded star-${star}-badge">${star}★</span>
-                <span class="text-[10px] font-bold text-white leading-tight text-center line-clamp-2 w-full" title="${name}">${name}</span>
-              </button>
+              <div class="relative inline-block ${dragClass}" ${isDraggableAttr}>
+                <button onclick="openUnitModal('${unitMatch.id}')"
+                        class="w-[92px] rounded-xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-1.5 flex flex-col items-center gap-1 tap-scale transition-colors">
+                  <div class="w-full h-[76px] rounded-lg bg-[#070b14] border border-slate-800/80 flex items-center justify-center overflow-hidden">
+                    <img src="${thumb}" alt="${escapeHtml(name)}" loading="lazy"
+                         onerror="this.onerror=null;this.closest('div').classList.add('tier-img-fallback');this.style.display='none'"
+                         class="max-h-full max-w-full object-contain img-outline rounded group-hover:scale-105 transition-transform duration-150 ease-out pointer-events-none">
+                  </div>
+                  <span class="text-[9px] font-mono-num font-bold px-1 rounded star-${star}-badge">${star}★</span>
+                  <span class="text-[10px] font-bold text-white leading-tight text-center line-clamp-2 w-full" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
+                </button>
+                ${isEditMode ? `
+                  <button type="button" onclick="event.stopPropagation(); CommunityUI.removeUnitFromTier('${escapeCat}', '${escapeName}')" class="tier-unit-action-badge absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-md tap-scale z-20" title="${t('tierlist_unit_remove', 'Retirer de cette catégorie')}">
+                    <i data-lucide="x" class="w-3 h-3" stroke-width="2.5"></i>
+                  </button>
+                  <button type="button" onclick="event.stopPropagation(); CommunityUI.openMoveUnitModal('${escapeCat}', '${escapeName}')" class="tier-unit-action-badge absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center shadow-md tap-scale z-20" title="${t('tierlist_unit_move', 'Déplacer vers...')}">
+                    <i data-lucide="arrow-left-right" class="w-2.5 h-2.5" stroke-width="2.5"></i>
+                  </button>
+                ` : ''}
+              </div>
             `;
           }).join('')}
         </div>

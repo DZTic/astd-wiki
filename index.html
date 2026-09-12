@@ -459,18 +459,103 @@
     <!-- ==================== TAB 2 : TIER LIST ==================== -->
     <section id="tab-tierlist" class="tab-content hidden space-y-4" aria-labelledby="tierlist-heading">
       
-      <div class="tactical-card p-4 rounded-xl border border-slate-800 flex items-center justify-between">
-        <div>
-          <h2 id="tierlist-heading" class="text-lg font-bold text-white flex items-center gap-2 text-balance">
-            <i data-lucide="crown" class="w-5 h-5 text-amber-400"></i>
-            <span data-i18n="tierlist_heading">Tier list méta ASTD</span>
-          </h2>
-          <p class="text-xs text-slate-400 text-pretty mt-0.5" data-i18n="tierlist_subheading">
-            Unités classées par efficacité méta (DPS, Support, Farming, Nukes). Cliquez sur une unité pour inspecter ses statistiques.
-          </p>
+      <!-- En-tête principal & Barre d'outils collaborative -->
+      <div class="tactical-card p-4 sm:p-5 rounded-xl border border-slate-800 space-y-3.5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h2 id="tierlist-heading" class="text-lg sm:text-xl font-bold text-white flex items-center gap-2 text-balance">
+              <i data-lucide="crown" class="w-5 h-5 text-amber-400"></i>
+              <span data-i18n="tierlist_heading">Tier list méta ASTD</span>
+              <span id="tierlist-badge-modified" class="hidden px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full" data-i18n="badge_modified_community">Modifiée</span>
+            </h2>
+            <p class="text-xs text-slate-400 text-pretty mt-0.5" data-i18n="tierlist_subheading">
+              Unités classées par efficacité méta (DPS, Support, Farming, Nukes). Modifiez, créez et réorganisez les tiers en direct !
+            </p>
+          </div>
+
+          <!-- Boutons d'Action Principaux -->
+          <div class="flex items-center gap-2 flex-wrap shrink-0">
+            <!-- Bouton Mode Édition -->
+            <button id="tierlist-toggle-edit-btn" onclick="CommunityUI.toggleTierListEditMode()" class="tier-action-btn px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shrink-0" title="Activer ou désactiver l'édition des catégories et unités" data-i18n-title="tierlist_btn_edit_title">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span id="tierlist-edit-btn-text" data-i18n="tierlist_btn_edit">Modifier la Tier List</span>
+            </button>
+
+            <!-- Bouton Nouvelle Catégorie (visible en mode édition) -->
+            <button id="tierlist-add-cat-btn" onclick="CommunityUI.openAddTierCategoryModal()" class="tier-action-btn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs hidden flex items-center gap-1.5 shadow-sm shrink-0" title="Créer une nouvelle catégorie méta" data-i18n-title="tierlist_btn_add_cat_title">
+              <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
+              <span data-i18n="tierlist_btn_add_cat">Nouvelle Catégorie</span>
+            </button>
+
+            <!-- Sélecteur de Présentations / Presets -->
+            <div class="relative inline-block">
+              <select id="tierlist-preset-selector" onchange="CommunityUI.onTierListPresetChange(this.value)" class="px-2.5 py-1.5 rounded-lg bg-[#090e1c] border border-slate-700 text-xs font-semibold text-slate-200 hover:border-sky-500/50 focus:outline-none focus:border-sky-500 pr-7 cursor-pointer" title="Changer le modèle de Tier List" data-i18n-title="tierlist_select_preset_title">
+                <option value="official" data-i18n="tierlist_opt_official">Tier List Méta Officielle</option>
+                <option value="standard_tiers" data-i18n="tierlist_opt_standard">Tier Maker Standard (S+ / S / A / B / C / D)</option>
+              </select>
+            </div>
+
+            <!-- Proposer au Wiki (GitHub Issue) -->
+            <button id="tierlist-github-btn" onclick="CommunityUI.proposeTierListToGitHub()" class="tier-action-btn px-3 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 font-bold text-xs flex items-center gap-1.5 shrink-0 transition-colors shadow-sm" title="Proposer vos modifications au Wiki via GitHub" data-i18n-title="tierlist_btn_github_title">
+              <i data-lucide="git-pull-request" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span data-i18n="tierlist_btn_github">Proposer au Wiki</span>
+            </button>
+
+            <!-- Réinitialiser -->
+            <button id="tierlist-reset-btn" onclick="CommunityUI.confirmResetTierList()" class="tier-action-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-600 hover:text-white text-slate-400 font-semibold text-xs flex items-center gap-1 shrink-0 transition-colors" title="Rétablir la Tier List officielle d'origine" data-i18n-title="tierlist_btn_reset_title">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline" data-i18n="tierlist_btn_reset">Rétablir</span>
+            </button>
+
+            <!-- Menu Export / Import JSON -->
+            <button onclick="CommunityUI.exportTierListJSON()" class="tier-action-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs flex items-center gap-1 shrink-0" title="Exporter au format JSON" data-i18n-title="tierlist_btn_export_title">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span class="hidden md:inline" data-i18n="tierlist_btn_export">Exporter</span>
+            </button>
+
+            <label class="tier-action-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs flex items-center gap-1 shrink-0 cursor-pointer" title="Importer un fichier JSON de Tier List" data-i18n-title="tierlist_btn_import_title">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span class="hidden md:inline" data-i18n="tierlist_btn_import">Importer</span>
+              <input type="file" accept=".json" class="hidden" onchange="CommunityUI.importTierListJSON(this.files[0])">
+            </label>
+          </div>
+        </div>
+
+        <!-- Deuxième ligne : Recherche & Filtre rapide -->
+        <div class="flex items-center justify-between gap-3 pt-2 border-t border-slate-800/80 flex-wrap">
+          <div class="relative flex-1 min-w-[240px] max-w-md">
+            <input type="text" id="tierlist-filter-search" oninput="CommunityUI.onTierListSearch(this.value)" placeholder="Filtrer une unité ou catégorie..." class="w-full ps-8 pe-3 py-1.5 rounded-lg bg-[#090e1c] border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-colors" data-i18n-placeholder="tierlist_search_placeholder">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute start-2.5 top-2.5" stroke-width="2"></i>
+          </div>
+          <div class="text-[11px] text-slate-400 font-mono-num flex items-center gap-3">
+            <span><span id="tierlist-stat-categories">0</span> <span data-i18n="tierlist_stat_cats">catégories</span></span>
+            <span>•</span>
+            <span><span id="tierlist-stat-total-units">0</span> <span data-i18n="tierlist_stat_units">unités classées</span></span>
+          </div>
+        </div>
+
+        <!-- Bandeau d'aide lorsque le mode édition est actif -->
+        <div id="tierlist-edit-banner" class="hidden tactical-card p-3 rounded-xl border border-sky-500/50 bg-sky-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-sky-200">
+          <div class="flex items-center gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-sky-400 shrink-0"></i>
+            <div>
+              <strong data-i18n="tierlist_edit_active">Mode Édition Actif :</strong>
+              <span class="text-sky-300/90 ml-1" data-i18n="tierlist_edit_desc">Glissez-déposez les cartes pour réordonner ou changer de catégorie. Cliquez sur + pour ajouter une unité ou sur ✕ pour la retirer.</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button type="button" onclick="CommunityUI.saveTierList()" class="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold tap-scale flex items-center gap-1.5 shadow-sm" title="Enregistrer les modifications en local ou sur le serveur" data-i18n-title="tierlist_btn_save_title">
+              <i data-lucide="save" class="w-3.5 h-3.5"></i>
+              <span data-i18n="tierlist_btn_save">Enregistrer</span>
+            </button>
+            <button type="button" onclick="CommunityUI.toggleTierListEditMode()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold tap-scale">
+              <span data-i18n="tierlist_btn_close_edit">Fermer l'édition</span>
+            </button>
+          </div>
         </div>
       </div>
 
+      <!-- Conteneur principal des catégories de la Tier List -->
       <div id="tierlist-container" class="space-y-4" role="region" aria-label="Catégories méta" data-i18n-aria="tierlist_region_aria">
         <!-- Rendered via JS -->
       </div>
@@ -865,6 +950,12 @@
                 <a id="modal-fandom-link" href="#" target="_blank" rel="noopener noreferrer" class="py-1.5 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white tap-scale flex items-center justify-center shrink-0" title="Fiche Fandom Wiki" data-i18n-title="modal_fandom_title" aria-label="Consulter la page officielle Fandom de cette unité (nouvelle fenêtre)" data-i18n-aria="modal_fandom_aria">
                   <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0" stroke-width="1.75"></i>
                 </a>
+              </div>
+              <div class="flex items-center gap-1.5 w-full pt-1">
+                <button id="modal-add-tier-btn" onclick="if(currentModalUnit) CommunityUI.openManageUnitInTierModal(currentModalUnit.name)" class="w-full py-1.5 px-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 hover:text-white font-semibold text-xs flex items-center justify-center gap-1.5 tap-scale transition-colors" title="Gérer ou ajouter cette unité dans les catégories de la Tier List" data-i18n-title="modal_btn_tier_title">
+                  <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-400" stroke-width="2"></i>
+                  <span data-i18n="modal_btn_tier">Gérer dans la Tier List</span>
+                </button>
               </div>
               <div class="flex items-center gap-1.5 w-full pt-1">
                 <button id="modal-edit-unit-btn" onclick="if(currentModalUnit) CommunityUI.openUnitModalForEdit(currentModalUnit.id)" class="flex-1 py-1.5 px-2 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-semibold text-xs flex items-center justify-center gap-1 tap-scale transition-colors" title="Modifier ou corriger cette fiche">
