@@ -1581,7 +1581,7 @@ function openAdsNoticeModal() {
 
 function closeAdsNoticeModal() {
   try {
-    localStorage.setItem('astd_ads_notice_dismissed', '1');
+    localStorage.setItem('astd_ads_notice_v2', '1');
   } catch (e) {}
 
   const modal = document.getElementById('ads-notice-modal');
@@ -1619,7 +1619,7 @@ function closeAdsNoticeModal() {
 
 function checkAdsNotice() {
   try {
-    const dismissed = localStorage.getItem('astd_ads_notice_dismissed');
+    const dismissed = localStorage.getItem('astd_ads_notice_v2');
     if (!dismissed) {
       setTimeout(() => {
         openAdsNoticeModal();
