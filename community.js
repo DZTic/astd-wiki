@@ -877,7 +877,7 @@ const CommunityManager = (function() {
 
         <!-- 4 Cartes d'Actions Rapides Débutant -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-800/80">
-          <button onclick="CommunityUI.openUnitModalForAdd()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-sky-600/20 border border-slate-800 hover:border-sky-500/50 text-left transition-all tap-scale group flex items-start gap-3">
+          <button onclick="CommunityUI.openUnitModalForAdd()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-sky-600/20 border border-slate-800 hover:border-sky-500/50 text-left transition-all tap-scale group flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center shrink-0 text-sky-400 group-hover:scale-105 transition-transform">
               <i data-lucide="plus-circle" class="w-5 h-5" stroke-width="2"></i>
             </div>
@@ -909,7 +909,7 @@ const CommunityManager = (function() {
             </div>
           </div>
 
-          <button onclick="CommunityUI.openUnitSelectorForEdit()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-amber-600/20 border border-slate-800 hover:border-amber-500/50 text-left transition-all tap-scale group flex items-start gap-3">
+          <button onclick="CommunityUI.openUnitSelectorForEdit()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-amber-600/20 border border-slate-800 hover:border-amber-500/50 text-left transition-all tap-scale group flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 text-amber-400 group-hover:scale-105 transition-transform">
               <i data-lucide="edit-3" class="w-5 h-5" stroke-width="2"></i>
             </div>
@@ -919,7 +919,7 @@ const CommunityManager = (function() {
             </div>
           </button>
 
-          <button onclick="CommunityUI.openCodeModalForAdd()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-emerald-600/20 border border-slate-800 hover:border-emerald-500/50 text-left transition-all tap-scale group flex items-start gap-3">
+          <button onclick="CommunityUI.openCodeModalForAdd()" class="p-3.5 rounded-xl bg-[#090e1c] hover:bg-emerald-600/20 border border-slate-800 hover:border-emerald-500/50 text-left transition-all tap-scale group flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-400 group-hover:scale-105 transition-transform">
               <i data-lucide="gift" class="w-5 h-5" stroke-width="2"></i>
             </div>

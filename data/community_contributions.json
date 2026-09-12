@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "last_updated": "2026-09-11T20:30:40.436418+00:00",
+  "last_updated": "2026-09-12T13:11:01.534232+00:00",
   "units": {
     "Goku_Ultra_Instinct_Custom": {
       "id": "Goku_Ultra_Instinct_Custom",
@@ -65,7 +65,7 @@
         }
       ],
       "_community": true,
-      "created_at": "2026-09-11T20:30:36.825Z"
+      "created_at": "2026-09-12T13:10:56.092Z"
     }
   },
   "deleted_units": [],
@@ -75,13 +75,20 @@
     {
       "code": "COMMUNITY2026",
       "reward": "500 Stardust, 15 000 Gemmes",
-      "date": "11/09/2026",
+      "date": "12/09/2026",
       "status": "active",
       "_is_community": true
     }
   ],
   "tips": {
     "Goku_Ultra_Instinct_Custom": [
+      {
+        "id": "tip_1789218659516",
+        "author": "VegetaMaster",
+        "type": "raid",
+        "text": "Excellente unite en Raid 2 : placez-la en debut de chemin pour appliquer ses degats de zone.",
+        "date": "12/09/2026"
+      },
       {
         "id": "tip_1789158638890",
         "author": "VegetaMaster",
