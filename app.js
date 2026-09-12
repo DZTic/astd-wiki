@@ -3456,7 +3456,7 @@ function renderTierList() {
 
             if (!unitMatch) {
               return `
-                <div class="relative inline-block ${dragClass}" ${isDraggableAttr}>
+                <div class="tier-unit-card relative inline-block ${dragClass}" ${isDraggableAttr} data-unit="${escapeName}">
                   <button onclick="${isEditMode ? `openUnitByName('${escapeName}')` : `openUnitByName('${escapeName}')`}"
                           class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale transition-colors">
                     <span>${escapeHtml(name)}</span>
@@ -3479,7 +3479,7 @@ function renderTierList() {
 
             if (!thumb) {
               return `
-                <div class="relative inline-block ${dragClass}" ${isDraggableAttr}>
+                <div class="tier-unit-card relative inline-block ${dragClass}" ${isDraggableAttr} data-unit="${escapeName}">
                   <button onclick="openUnitModal('${unitMatch.id}')"
                           class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-bold text-white flex items-center space-x-1.5 tap-scale transition-colors">
                     <span class="text-[10px] font-mono-num px-1 rounded star-${star}-badge">${star}★</span>
@@ -3499,7 +3499,7 @@ function renderTierList() {
             }
 
             return `
-              <div class="relative inline-block ${dragClass}" ${isDraggableAttr}>
+              <div class="tier-unit-card relative inline-block ${dragClass}" ${isDraggableAttr} data-unit="${escapeName}">
                 <button onclick="openUnitModal('${unitMatch.id}')"
                         class="w-[92px] rounded-xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-1.5 flex flex-col items-center gap-1 tap-scale transition-colors">
                   <div class="w-full h-[76px] rounded-lg bg-[#070b14] border border-slate-800/80 flex items-center justify-center overflow-hidden">

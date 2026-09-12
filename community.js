@@ -3644,17 +3644,36 @@ const CommunityUI = (function() {
     if (window.showToast) window.showToast(`Catégories de "${unitName}" mises à jour !`);
   }
 
-  // --- HANDLERS DRAG & DROP NATIVE ---
+  // --- HANDLERS DRAG & DROP AVEC INDICATEUR VISUEL D'INSERTION DYNAMIQUE ---
+
+  function getDropIndicator() {
+    let indicator = document.getElementById('tier-active-drop-indicator');
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'tier-active-drop-indicator';
+      indicator.className = 'tier-drop-indicator';
+      indicator.setAttribute('aria-hidden', 'true');
+    }
+    return indicator;
+  }
+
+  function removeDropIndicator() {
+    const indicator = document.getElementById('tier-active-drop-indicator');
+    if (indicator && indicator.parentNode) {
+      indicator.parentNode.removeChild(indicator);
+    }
+  }
 
   function onTierDragStart(event, unitName, sourceCat) {
-    draggedTierItem = { unitName, sourceCat };
+    const dragTarget = event.currentTarget || event.target;
+    draggedTierItem = { unitName, sourceCat, element: dragTarget };
     try {
       event.dataTransfer.setData('text/plain', JSON.stringify({ unitName, sourceCat }));
       event.dataTransfer.effectAllowed = 'move';
     } catch (e) {}
     setTimeout(() => {
-      if (event.target && event.target.classList) {
-        event.target.classList.add('tier-item-dragging');
+      if (dragTarget && dragTarget.classList) {
+        dragTarget.classList.add('tier-item-dragging');
       }
     }, 0);
   }
@@ -3664,22 +3683,85 @@ const CommunityUI = (function() {
     try {
       event.dataTransfer.dropEffect = 'move';
     } catch (e) {}
+
     const dropzone = event.currentTarget;
-    if (dropzone && dropzone.classList && !dropzone.classList.contains('tier-drag-over')) {
+    if (!dropzone) return;
+
+    if (!dropzone.classList.contains('tier-drag-over')) {
       dropzone.classList.add('tier-drag-over');
+    }
+
+    const indicator = getDropIndicator();
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+
+    // Récupérer toutes les cartes d'unités dans cette zone de dépôt, sauf celle en cours de drag
+    const cards = Array.from(dropzone.querySelectorAll('.tier-unit-card:not(.tier-item-dragging)'));
+
+    if (cards.length === 0) {
+      // Zone vide : insérer l'indicateur en tête de zone
+      if (indicator.parentNode !== dropzone || indicator !== dropzone.firstChild) {
+        dropzone.insertBefore(indicator, dropzone.firstChild);
+      }
+      return;
+    }
+
+    // Trouver la carte la plus proche du curseur
+    let closestCard = null;
+    let closestDist = Number.POSITIVE_INFINITY;
+    let insertBefore = true;
+
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      const rect = card.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      // Distance géométrique au centre de la carte
+      const dist = Math.hypot(clientX - centerX, clientY - centerY);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closestCard = card;
+        // Si le curseur est dans la moitié gauche de la carte, insérer avant ; sinon après
+        insertBefore = clientX < centerX;
+      }
+    }
+
+    if (closestCard) {
+      if (insertBefore) {
+        if (indicator.nextSibling !== closestCard) {
+          dropzone.insertBefore(indicator, closestCard);
+        }
+      } else {
+        const next = closestCard.nextElementSibling;
+        const actualNext = (next === indicator) ? indicator.nextElementSibling : next;
+        if (indicator.nextSibling !== actualNext) {
+          dropzone.insertBefore(indicator, actualNext);
+        }
+      }
+    } else {
+      if (indicator.parentNode !== dropzone) {
+        dropzone.appendChild(indicator);
+      }
     }
   }
 
   function onTierDragLeave(event) {
     const dropzone = event.currentTarget;
-    if (dropzone && dropzone.classList && !dropzone.contains(event.relatedTarget)) {
+    // Ne nettoyer que si on quitte réellement la zone de dépôt (et pas juste en survolant un enfant ou l'indicateur)
+    if (dropzone && (!event.relatedTarget || !dropzone.contains(event.relatedTarget))) {
       dropzone.classList.remove('tier-drag-over');
+      const indicator = document.getElementById('tier-active-drop-indicator');
+      if (indicator && indicator.parentNode === dropzone) {
+        removeDropIndicator();
+      }
     }
   }
 
   function onTierDragEnd(event) {
     document.querySelectorAll('.tier-drag-over').forEach(el => el.classList.remove('tier-drag-over'));
     document.querySelectorAll('.tier-item-dragging').forEach(el => el.classList.remove('tier-item-dragging'));
+    removeDropIndicator();
     draggedTierItem = null;
   }
 
@@ -3687,6 +3769,25 @@ const CommunityUI = (function() {
     event.preventDefault();
     document.querySelectorAll('.tier-drag-over').forEach(el => el.classList.remove('tier-drag-over'));
     document.querySelectorAll('.tier-item-dragging').forEach(el => el.classList.remove('tier-item-dragging'));
+
+    const dropzone = event.currentTarget;
+    const indicator = document.getElementById('tier-active-drop-indicator');
+
+    let targetIndex = -1;
+    if (indicator && dropzone && indicator.parentNode === dropzone) {
+      // Compter le nombre de cartes unitaires avant l'indicateur d'insertion
+      let count = 0;
+      let sibling = indicator.previousElementSibling;
+      while (sibling) {
+        if (sibling.classList.contains('tier-unit-card') && !sibling.classList.contains('tier-item-dragging')) {
+          count++;
+        }
+        sibling = sibling.previousElementSibling;
+      }
+      targetIndex = count;
+    }
+
+    removeDropIndicator();
 
     let unitName = null;
     let sourceCat = null;
@@ -3705,8 +3806,32 @@ const CommunityUI = (function() {
       } catch (e) {}
     }
 
+    draggedTierItem = null;
+
     if (!unitName || !targetCat) return;
 
+    // Cas 1 : Réorganisation au sein de la même catégorie
+    if (sourceCat && sourceCat === targetCat) {
+      const list = window.TIERLIST_DATA[targetCat] || [];
+      const currentIdx = list.findIndex(n => n.toLowerCase() === unitName.toLowerCase());
+      if (currentIdx !== -1) {
+        list.splice(currentIdx, 1);
+        if (targetIndex === -1 || targetIndex >= list.length) {
+          list.push(unitName);
+        } else {
+          list.splice(targetIndex, 0, unitName);
+        }
+        window.TIERLIST_DATA[targetCat] = list;
+        CommunityManager.saveTierList(window.TIERLIST_DATA);
+        if (window.renderTierList) window.renderTierList();
+        if (window.showToast) {
+          window.showToast(`Position de "${unitName}" mise à jour dans ${targetCat} !`);
+        }
+        return;
+      }
+    }
+
+    // Cas 2 : Déplacement vers une autre catégorie
     if (sourceCat && window.TIERLIST_DATA[sourceCat]) {
       window.TIERLIST_DATA[sourceCat] = window.TIERLIST_DATA[sourceCat].filter(n => n.toLowerCase() !== unitName.toLowerCase());
     }
@@ -3714,13 +3839,20 @@ const CommunityUI = (function() {
     if (!window.TIERLIST_DATA[targetCat]) {
       window.TIERLIST_DATA[targetCat] = [];
     }
-    if (!window.TIERLIST_DATA[targetCat].some(n => n.toLowerCase() === unitName.toLowerCase())) {
+
+    // Nettoyer d'éventuels doublons
+    window.TIERLIST_DATA[targetCat] = window.TIERLIST_DATA[targetCat].filter(n => n.toLowerCase() !== unitName.toLowerCase());
+
+    if (targetIndex === -1 || targetIndex >= window.TIERLIST_DATA[targetCat].length) {
       window.TIERLIST_DATA[targetCat].push(unitName);
+    } else {
+      window.TIERLIST_DATA[targetCat].splice(targetIndex, 0, unitName);
     }
 
     CommunityManager.saveTierList(window.TIERLIST_DATA);
+    if (window.renderTierList) window.renderTierList();
     if (window.showToast) {
-      window.showToast(`"${unitName}" déplacé vers ${targetCat} !`);
+      window.showToast(`"${unitName}" déplacé vers ${targetCat} (rang ${targetIndex + 1}) !`);
     }
   }
 

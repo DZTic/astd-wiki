@@ -678,6 +678,59 @@ select.comm-upg-input {
   border-color: #38bdf8 !important;
 }
 
+/* Indicateur visuel d'insertion (barre lumineuse qui se déplace) */
+.tier-drop-indicator {
+  display: inline-block;
+  position: relative;
+  width: 5px;
+  min-width: 5px;
+  height: 84px;
+  margin: 0 4px;
+  background: linear-gradient(180deg, #38bdf8, #06b6d4, #0284c7);
+  border-radius: 9999px;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.9), 0 0 24px rgba(6, 182, 212, 0.6);
+  pointer-events: none;
+  z-index: 30;
+  align-self: center;
+  flex-shrink: 0;
+  animation: tier-drop-bar-pulse 0.7s ease-in-out infinite alternate;
+  transition: transform 120ms ease;
+}
+
+.tier-drop-indicator::before,
+.tier-drop-indicator::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+}
+
+.tier-drop-indicator::before {
+  top: -5px;
+}
+
+.tier-drop-indicator::after {
+  bottom: -5px;
+}
+
+@keyframes tier-drop-bar-pulse {
+  0% {
+    opacity: 0.85;
+    transform: scaleY(0.96);
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1.02);
+    box-shadow: 0 0 18px rgba(56, 189, 248, 1), 0 0 28px rgba(6, 182, 212, 0.8);
+  }
+}
+
 .tier-dropzone {
   min-height: 84px;
   transition: background-color 150ms var(--ease-fluid), border-color 150ms var(--ease-fluid), box-shadow 150ms var(--ease-fluid);
