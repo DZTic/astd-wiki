@@ -1089,72 +1089,29 @@
 
   <!-- ==================== WELCOME & ADS SUPPORT NOTICE MODAL ==================== -->
   <div id="ads-notice-modal" role="dialog" aria-modal="true" aria-labelledby="ads-notice-title" aria-describedby="ads-notice-desc" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto modal-backdrop">
-    <div id="ads-notice-dialog" class="relative w-full max-w-lg bg-[#0f1629] border border-sky-500/30 rounded-2xl shadow-2xl overflow-hidden modal-enter my-auto flex flex-col">
-      <!-- Gradient accent border top -->
-      <div class="h-1.5 w-full bg-gradient-to-r from-sky-500 via-indigo-500 to-amber-500 shrink-0"></div>
-
+    <div id="ads-notice-dialog" class="relative w-full max-w-md bg-[#0f172a] border border-slate-700/80 rounded-xl shadow-2xl overflow-hidden modal-enter my-auto flex flex-col">
       <!-- Header -->
-      <div class="px-4 sm:px-5 py-3.5 sm:py-4 bg-[#141d33] border-b border-slate-800 flex items-center justify-between gap-3 shrink-0">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center shrink-0 shadow-sm">
-            <i data-lucide="sparkles" class="w-5 h-5"></i>
+      <div class="px-5 py-3.5 bg-[#131d35] border-b border-slate-800 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-7 h-7 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center shrink-0">
+            <i data-lucide="info" class="w-4 h-4"></i>
           </div>
-          <div class="min-w-0">
-            <span class="text-[10px] uppercase font-bold tracking-wider text-sky-400 block" data-i18n="ads_notice_badge">Information & Soutien</span>
-            <h2 id="ads-notice-title" class="text-sm sm:text-base font-bold text-white tracking-tight truncate" data-i18n="ads_notice_title">Bienvenue sur ASTD Wiki !</h2>
-          </div>
+          <h2 id="ads-notice-title" class="text-sm sm:text-base font-bold text-white tracking-tight truncate" data-i18n="ads_notice_title">Bienvenue sur ASTD Wiki</h2>
         </div>
-        <button id="ads-notice-close-btn" onclick="closeAdsNoticeModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center tap-scale shrink-0" aria-label="Fermer" data-i18n-aria="modal_close_aria">
+        <button id="ads-notice-close-btn" onclick="closeAdsNoticeModal()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center tap-scale shrink-0" aria-label="Fermer" data-i18n-aria="modal_close_aria">
           <i data-lucide="x" class="w-4 h-4" stroke-width="2"></i>
         </button>
       </div>
 
       <!-- Body -->
-      <div class="p-4 sm:p-6 space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed overflow-y-auto max-h-[75vh]">
-        <p class="font-medium text-slate-200" data-i18n="ads_notice_lead">
-          Ce site est une base de données indépendante et gratuite conçue pour toute la communauté All Star Tower Defense.
+      <div class="p-5 space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <p id="ads-notice-desc" data-i18n="ads_notice_desc">
+          Quelques publicités discrètes sont présentes sur le site pour me soutenir. Elles sont disposées de manière à ne pas déranger votre navigation.
         </p>
 
-        <p class="text-slate-300 text-xs leading-relaxed" id="ads-notice-desc" data-i18n="ads_notice_desc">
-          Pour financer l'hébergement et me soutenir dans les mises à jour et le développement, quelques publicités discrètes sont présentes sur le site.
-        </p>
-
-        <div class="p-3.5 rounded-xl bg-sky-950/40 border border-sky-500/30 text-sky-200 text-xs space-y-1">
-          <div class="flex items-center gap-2 font-semibold text-sky-300">
-            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-            <span data-i18n="ads_notice_point1_title">Confort de navigation garanti</span>
-          </div>
-          <p class="text-slate-300 leading-relaxed" data-i18n="ads_notice_reassurance">
-            Rassurez-vous : ces annonces ne dérangent absolument pas l'utilisation du site ni l'accès à vos données (encyclopédie, filtres, comparateur, simulateur). Aucune pop-up intrusive ne viendra interrompre votre navigation.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 font-sans">
-          <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800 flex items-start gap-2.5">
-            <i data-lucide="zap" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
-            <div>
-              <span class="font-bold text-xs text-slate-200 block" data-i18n="ads_notice_point2_title">100% Gratuit & Libre</span>
-              <span class="text-[11px] text-slate-400 leading-tight block mt-0.5" data-i18n="ads_notice_point2_desc">Accès illimité à l'intégralité des fonctionnalités et guides.</span>
-            </div>
-          </div>
-          <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800 flex items-start gap-2.5">
-            <i data-lucide="heart" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i>
-            <div>
-              <span class="font-bold text-xs text-slate-200 block" data-i18n="ads_notice_point3_title">Merci de votre soutien</span>
-              <span class="text-[11px] text-slate-400 leading-tight block mt-0.5" data-i18n="ads_notice_point3_desc">Chaque visite permet de pérenniser le projet et sa maintenance.</span>
-            </div>
-          </div>
-        </div>
-
-        <p class="text-slate-400 text-xs text-center italic pt-1" data-i18n="ads_notice_thanks">
-          Merci infiniment pour votre compréhension et bon jeu sur ASTD !
-        </p>
-
-        <!-- Action button -->
-        <div class="pt-2">
-          <button id="ads-notice-confirm-btn" onclick="closeAdsNoticeModal()" class="w-full py-2.5 sm:py-3 px-4 rounded-xl bg-gradient-to-r from-sky-600 via-indigo-600 to-sky-600 hover:from-sky-500 hover:via-indigo-500 hover:to-sky-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-sky-950/60 tap-scale transition-all">
-            <i data-lucide="check" class="w-4 h-4" stroke-width="2.5"></i>
-            <span data-i18n="ads_notice_btn">J'ai compris, accéder au site</span>
+        <div class="pt-1">
+          <button id="ads-notice-confirm-btn" onclick="closeAdsNoticeModal()" class="w-full py-2.5 px-4 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 tap-scale transition-colors shadow-sm">
+            <span data-i18n="ads_notice_btn">Continuer</span>
           </button>
         </div>
       </div>

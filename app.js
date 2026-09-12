@@ -416,19 +416,9 @@ const I18N = {
     footer_last_updated_tpl: "Dernière synchro wiki : {date} ({count} unités)",
 
     // Pop-up d'accueil et annonce de soutien publicitaire
-    ads_notice_badge: "Information & Soutien",
-    ads_notice_title: "Bienvenue sur ASTD Wiki !",
-    ads_notice_lead: "Ce site est une base de données indépendante et gratuite conçue pour toute la communauté All Star Tower Defense.",
-    ads_notice_desc: "Pour financer l'hébergement et me soutenir dans les mises à jour et le développement, quelques publicités discrètes sont présentes sur le site.",
-    ads_notice_reassurance: "Rassurez-vous : ces annonces ne dérangent absolument pas l'utilisation du site ni l'accès à vos données (encyclopédie, filtres, comparateur, simulateur). Aucune pop-up intrusive ne viendra interrompre votre navigation.",
-    ads_notice_point1_title: "Confort de navigation garanti",
-    ads_notice_point1_desc: "Aucune gêne lors de vos recherches ou de votre navigation.",
-    ads_notice_point2_title: "100% Gratuit & Libre",
-    ads_notice_point2_desc: "Accès illimité à l'intégralité des fonctionnalités et guides.",
-    ads_notice_point3_title: "Merci de votre soutien",
-    ads_notice_point3_desc: "Chaque visite permet de pérenniser le projet et sa maintenance.",
-    ads_notice_thanks: "Merci infiniment pour votre compréhension et bon jeu sur ASTD !",
-    ads_notice_btn: "J'ai compris, accéder au site"
+    ads_notice_title: "Bienvenue sur ASTD Wiki",
+    ads_notice_desc: "Quelques publicités discrètes sont présentes sur le site pour me soutenir. Elles sont disposées de manière à ne pas déranger votre navigation.",
+    ads_notice_btn: "Continuer"
   },
   en: {
     // Header, brand & nav
@@ -809,19 +799,9 @@ const I18N = {
     footer_last_updated_tpl: "Last wiki sync: {date} ({count} units)",
 
     // Welcome & Ads Support Notice Modal
-    ads_notice_badge: "Notice & Support",
-    ads_notice_title: "Welcome to ASTD Wiki!",
-    ads_notice_lead: "This site is a free, independent encyclopedia designed for the entire All Star Tower Defense community.",
-    ads_notice_desc: "To help cover server hosting and support ongoing maintenance and development, a few discreet ads are present on the site.",
-    ads_notice_reassurance: "Rest assured: these ads will never disturb your browsing comfort or the use of any tools (encyclopedia, filters, comparator, team builder). No intrusive pop-up will disrupt your visit.",
-    ads_notice_point1_title: "Seamless experience guaranteed",
-    ads_notice_point1_desc: "No disruption while searching or exploring the database.",
-    ads_notice_point2_title: "100% Free & Open",
-    ads_notice_point2_desc: "Unlimited access to all features, data, and guides.",
-    ads_notice_point3_title: "Thank you for your support",
-    ads_notice_point3_desc: "Every visit helps keep the project online and updated.",
-    ads_notice_thanks: "Thank you so much for your understanding and enjoy ASTD!",
-    ads_notice_btn: "Got it, continue to site"
+    ads_notice_title: "Welcome to ASTD Wiki",
+    ads_notice_desc: "A few discreet ads are displayed on the site to support my work. They are placed so as not to disturb your browsing experience.",
+    ads_notice_btn: "Continue"
   }
 };
 
