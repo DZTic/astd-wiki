@@ -304,6 +304,12 @@ body {
   overscroll-behavior: contain;
 }
 
+#ads-notice-modal,
+#ads-notice-dialog,
+#ads-notice-modal .overflow-y-auto {
+  overscroll-behavior: contain;
+}
+
 /* Tactical Pill Button - Specific transitions */
 .btn-pill {
   transition-property: transform, background-color, border-color, box-shadow, color;
@@ -651,6 +657,5 @@ select.comm-upg-input {
   -moz-appearance: none;
   appearance: none;
 }
-
 
 

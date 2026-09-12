@@ -413,7 +413,22 @@ const I18N = {
     footer_desc: "Base de données non officielle et hub stratégique pour All Star Tower Defense sur Roblox.",
     footer_sync: "Synchro automatique avec le wiki Fandom officiel.",
     db_label: "Données :",
-    footer_last_updated_tpl: "Dernière synchro wiki : {date} ({count} unités)"
+    footer_last_updated_tpl: "Dernière synchro wiki : {date} ({count} unités)",
+
+    // Pop-up d'accueil et annonce de soutien publicitaire
+    ads_notice_badge: "Information & Soutien",
+    ads_notice_title: "Bienvenue sur ASTD Wiki !",
+    ads_notice_lead: "Ce site est une base de données indépendante et gratuite conçue pour toute la communauté All Star Tower Defense.",
+    ads_notice_desc: "Pour financer l'hébergement et me soutenir dans les mises à jour et le développement, quelques publicités discrètes sont présentes sur le site.",
+    ads_notice_reassurance: "Rassurez-vous : ces annonces ne dérangent absolument pas l'utilisation du site ni l'accès à vos données (encyclopédie, filtres, comparateur, simulateur). Aucune pop-up intrusive ne viendra interrompre votre navigation.",
+    ads_notice_point1_title: "Confort de navigation garanti",
+    ads_notice_point1_desc: "Aucune gêne lors de vos recherches ou de votre navigation.",
+    ads_notice_point2_title: "100% Gratuit & Libre",
+    ads_notice_point2_desc: "Accès illimité à l'intégralité des fonctionnalités et guides.",
+    ads_notice_point3_title: "Merci de votre soutien",
+    ads_notice_point3_desc: "Chaque visite permet de pérenniser le projet et sa maintenance.",
+    ads_notice_thanks: "Merci infiniment pour votre compréhension et bon jeu sur ASTD !",
+    ads_notice_btn: "J'ai compris, accéder au site"
   },
   en: {
     // Header, brand & nav
@@ -791,7 +806,22 @@ const I18N = {
     footer_desc: "Unofficial database and tactical meta hub for All Star Tower Defense on Roblox.",
     footer_sync: "Automatic synchronization with the official Fandom wiki.",
     db_label: "Data:",
-    footer_last_updated_tpl: "Last wiki sync: {date} ({count} units)"
+    footer_last_updated_tpl: "Last wiki sync: {date} ({count} units)",
+
+    // Welcome & Ads Support Notice Modal
+    ads_notice_badge: "Notice & Support",
+    ads_notice_title: "Welcome to ASTD Wiki!",
+    ads_notice_lead: "This site is a free, independent encyclopedia designed for the entire All Star Tower Defense community.",
+    ads_notice_desc: "To help cover server hosting and support ongoing maintenance and development, a few discreet ads are present on the site.",
+    ads_notice_reassurance: "Rest assured: these ads will never disturb your browsing comfort or the use of any tools (encyclopedia, filters, comparator, team builder). No intrusive pop-up will disrupt your visit.",
+    ads_notice_point1_title: "Seamless experience guaranteed",
+    ads_notice_point1_desc: "No disruption while searching or exploring the database.",
+    ads_notice_point2_title: "100% Free & Open",
+    ads_notice_point2_desc: "Unlimited access to all features, data, and guides.",
+    ads_notice_point3_title: "Thank you for your support",
+    ads_notice_point3_desc: "Every visit helps keep the project online and updated.",
+    ads_notice_thanks: "Thank you so much for your understanding and enjoy ASTD!",
+    ads_notice_btn: "Got it, continue to site"
   }
 };
 
@@ -1542,11 +1572,88 @@ window.addEventListener('resize', () => {
   }, 200);
 });
 
+// ==========================================
+// Pop-up d'accueil & Annonce Soutien Publicitaire
+// S'affiche une seule fois grâce au localStorage
+// ==========================================
+function openAdsNoticeModal() {
+  const modal = document.getElementById('ads-notice-modal');
+  const dialog = document.getElementById('ads-notice-dialog');
+  if (!modal) return;
+
+  modal.classList.remove('hidden');
+  modal.classList.remove('closing');
+  if (dialog) {
+    dialog.classList.remove('modal-exit');
+    dialog.classList.add('modal-enter');
+  }
+  document.documentElement.classList.add('modal-open');
+  document.body.classList.add('modal-open');
+  if (window.lucide) lucide.createIcons();
+
+  const confirmBtn = document.getElementById('ads-notice-confirm-btn');
+  if (confirmBtn) {
+    setTimeout(() => {
+      try { confirmBtn.focus(); } catch (e) {}
+    }, 60);
+  }
+}
+
+function closeAdsNoticeModal() {
+  try {
+    localStorage.setItem('astd_ads_notice_dismissed', '1');
+  } catch (e) {}
+
+  const modal = document.getElementById('ads-notice-modal');
+  const dialog = document.getElementById('ads-notice-dialog');
+  if (!modal || modal.classList.contains('hidden')) return;
+
+  const onClosed = () => {
+    const unitModal = document.getElementById('unit-modal');
+    const communityModal = document.getElementById('community-modal');
+    const isOtherModalOpen = (unitModal && !unitModal.classList.contains('hidden')) ||
+                             (communityModal && !communityModal.classList.contains('hidden'));
+    if (!isOtherModalOpen) {
+      document.documentElement.classList.remove('modal-open');
+      document.body.classList.remove('modal-open');
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+  };
+
+  if (dialog) {
+    dialog.classList.remove('modal-enter');
+    dialog.classList.add('modal-exit');
+    modal.classList.add('closing');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      modal.classList.remove('closing');
+      dialog.classList.remove('modal-exit');
+      onClosed();
+    }, 150);
+  } else {
+    modal.classList.add('hidden');
+    onClosed();
+  }
+}
+
+function checkAdsNotice() {
+  try {
+    const dismissed = localStorage.getItem('astd_ads_notice_dismissed');
+    if (!dismissed) {
+      setTimeout(() => {
+        openAdsNoticeModal();
+      }, 400);
+    }
+  } catch (e) {}
+}
+
 // Initialize application
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
   setupEventListeners();
   initSafeAds();
+  checkAdsNotice();
 });
 
 // Load all JSON datasets
@@ -1697,8 +1804,19 @@ function setupEventListeners() {
       e.preventDefault();
       focusMainSearch();
     }
-    if (e.key === 'Escape') closeUnitModal();
+    if (e.key === 'Escape') {
+      closeAdsNoticeModal();
+      closeUnitModal();
+    }
   });
+
+  // Modal notice publicitaire backdrop click
+  const adsNoticeModal = document.getElementById('ads-notice-modal');
+  if (adsNoticeModal) {
+    adsNoticeModal.addEventListener('click', (e) => {
+      if (e.target === adsNoticeModal) closeAdsNoticeModal();
+    });
+  }
 
   // Modal backdrop click & focus trap
   const modal = document.getElementById('unit-modal');
@@ -4401,6 +4519,8 @@ if (typeof window !== 'undefined') {
   window.showToast = showToast;
   window.initSafeAds = initSafeAds;
   window.focusMainSearch = focusMainSearch;
+  window.openAdsNoticeModal = openAdsNoticeModal;
+  window.closeAdsNoticeModal = closeAdsNoticeModal;
 
   // I18N Bilingue (FR / EN)
   window.I18N = I18N;
@@ -4418,4 +4538,3 @@ if (typeof window !== 'undefined') {
   window.translateReward = translateReward;
   window.translateOrbEffect = translateOrbEffect;
 }
-
