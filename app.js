@@ -3471,7 +3471,6 @@ function setViewMode(mode) {
   if (mode === 'table') {
     gridEl?.classList.add('hidden');
     tableContainer?.classList.remove('hidden');
-    loadMoreBtn?.classList.add('hidden');
 
     if (btnTable) {
       btnTable.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 tap-scale';
@@ -3624,6 +3623,7 @@ function applyUnitFilters() {
   });
 
   displayedCount = pageSize;
+  displayedTableCount = tablePageSize;
 
   if (currentViewMode === 'table') {
     renderUnitsTable();
@@ -3672,19 +3672,12 @@ function renderUnitsList() {
   }
 }
 
-function renderUnitsTable() {
-  const tbody = document.getElementById('units-table-tbody');
-  const countEl = document.getElementById('results-count');
-  if (countEl) {
-    const unitWord = currentLang === 'en' ? (FILTERED_UNITS.length > 1 ? 'units' : 'unit') : (FILTERED_UNITS.length > 1 ? 'unités' : 'unité');
-    countEl.textContent = `${FILTERED_UNITS.length} ${unitWord}`;
-  }
+let tablePageSize = 35;
+let displayedTableCount = 35;
 
-  if (!tbody) return;
-
+function createUnitTableRowHTML(u) {
   const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
-
-  tbody.innerHTML = FILTERED_UNITS.slice(0, 150).map(u => `
+  return `
     <tr class="hover:bg-slate-800/60 transition-colors duration-100 cursor-pointer" onclick="openUnitModal('${u.id}')" tabindex="0" role="button" aria-label="${u.name}, ${u.star}★. ${t('table_view_sheet', 'Voir la fiche.')}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openUnitModal('${u.id}');}">
       <td class="p-3 flex items-center space-x-2.5">
         <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 p-0.5 shrink-0 flex items-center justify-center">
@@ -3721,7 +3714,49 @@ function renderUnitsTable() {
         </button>
       </td>
     </tr>
-  `).join('');
+  `;
+}
+
+function renderUnitsTable() {
+  const tbody = document.getElementById('units-table-tbody');
+  const countEl = document.getElementById('results-count');
+  const loadMoreBtn = document.getElementById('load-more-container');
+  if (countEl) {
+    const unitWord = currentLang === 'en' ? (FILTERED_UNITS.length > 1 ? 'units' : 'unit') : (FILTERED_UNITS.length > 1 ? 'unités' : 'unité');
+    countEl.textContent = `${FILTERED_UNITS.length} ${unitWord}`;
+  }
+
+  if (!tbody) return;
+
+  displayedTableCount = tablePageSize;
+  const initialBatch = FILTERED_UNITS.slice(0, displayedTableCount);
+  tbody.innerHTML = initialBatch.map(createUnitTableRowHTML).join('');
+
+  if (loadMoreBtn) {
+    loadMoreBtn.classList.toggle('hidden', displayedTableCount >= FILTERED_UNITS.length);
+  }
+
+  safeCreateIcons(tbody);
+}
+
+function loadMoreTableUnits() {
+  const tbody = document.getElementById('units-table-tbody');
+  const loadMoreBtn = document.getElementById('load-more-container');
+  if (!tbody) return;
+
+  const nextBatch = FILTERED_UNITS.slice(displayedTableCount, displayedTableCount + tablePageSize);
+  if (nextBatch.length === 0) {
+    if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
+    return;
+  }
+
+  const fragment = nextBatch.map(createUnitTableRowHTML).join('');
+  tbody.insertAdjacentHTML('beforeend', fragment);
+  displayedTableCount += nextBatch.length;
+
+  if (loadMoreBtn) {
+    loadMoreBtn.classList.toggle('hidden', displayedTableCount >= FILTERED_UNITS.length);
+  }
 
   safeCreateIcons(tbody);
 }
@@ -3734,8 +3769,12 @@ function setupInfiniteScroll() {
   _loadMoreObserver = new IntersectionObserver((entries) => {
     const entry = entries[0];
     if (entry && entry.isIntersecting) {
-      if (currentTab === 'units' && currentViewMode === 'grid' && displayedCount < FILTERED_UNITS.length) {
-        loadMoreUnits();
+      if (currentTab === 'units') {
+        if (currentViewMode === 'grid' && displayedCount < FILTERED_UNITS.length) {
+          loadMoreUnits();
+        } else if (currentViewMode === 'table' && displayedTableCount < FILTERED_UNITS.length) {
+          loadMoreTableUnits();
+        }
       }
     }
   }, { rootMargin: '250px' });
@@ -3743,6 +3782,10 @@ function setupInfiniteScroll() {
 }
 
 function loadMoreUnits() {
+  if (currentViewMode === 'table') {
+    loadMoreTableUnits();
+    return;
+  }
   const grid = document.getElementById('units-grid');
   const loadMoreBtn = document.getElementById('load-more-container');
   if (!grid) return;
