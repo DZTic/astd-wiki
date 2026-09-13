@@ -490,6 +490,7 @@ const I18N = {
     compare_choose_second: "— choisissez la 2nde unité",
     compare_no_unit: "Aucune unité sélectionnée pour le moment.",
     loading_data: "Chargement des données...",
+    loading_details: "Chargement des paliers et aptitudes...",
     loading_units: "Chargement des unités en cours...",
     no_units_found: "Aucune unité trouvée",
     toast_added_to_compare: "« {name} » ajouté au comparateur",
@@ -1120,6 +1121,7 @@ const I18N = {
     compare_choose_second: "— select the 2nd unit",
     compare_no_unit: "No unit selected yet.",
     loading_data: "Loading data...",
+    loading_details: "Loading upgrades and abilities...",
     loading_units: "Loading units...",
     no_units_found: "No units found",
     toast_added_to_compare: "\"{name}\" added to comparator",
@@ -3114,10 +3116,12 @@ const ASTDCache = {
 // ==========================================
 const renderedTabs = new Set();
 const loadedDatasets = new Set();
+if (typeof window !== 'undefined') window.loadedDatasets = loadedDatasets;
 
 function showTabLoadingSkeleton(tabId) {
   let targetContainer = null;
-  if (tabId === 'tierlist') targetContainer = document.getElementById('tierlist-categories-container');
+  if (tabId === 'units') targetContainer = document.getElementById('units-grid');
+  else if (tabId === 'tierlist') targetContainer = document.getElementById('tierlist-categories-container');
   else if (tabId === 'codes') targetContainer = document.getElementById('active-codes-container');
   else if (tabId === 'orbs') targetContainer = document.getElementById('orbs-grid');
   else if (tabId === 'gamemodes') targetContainer = document.getElementById('gamemodes-grid');
@@ -3201,6 +3205,188 @@ function applyDataset(key, data) {
     case 'gamemodes':
       GAMEMODES_DATA = Array.isArray(data) ? data : [];
       break;
+    case 'units_summary':
+      applyUnitsData(data, false);
+      break;
+    case 'units':
+    case 'units_full':
+      applyUnitsData(data, true);
+      break;
+  }
+}
+
+let _unitsSummaryPromise = null;
+let _fullUnitsPromise = null;
+
+function applyUnitsData(list, isFull) {
+  if (!Array.isArray(list)) return;
+
+  if (ALL_UNITS.length === 0 || !isFull) {
+    list.forEach(u => {
+      if (u.anime_origin) u.anime_origin = u.anime_origin.replace(/<[^>]*>/g, '').trim();
+      if (u.character_origin) u.character_origin = u.character_origin.replace(/<[^>]*>/g, '').trim();
+    });
+    ALL_UNITS = list;
+    window.ALL_UNITS = ALL_UNITS;
+    rebuildUnitsIndex();
+  }
+
+  if (isFull) {
+    const fullMap = new Map();
+    list.forEach(fu => fullMap.set(fu.id, fu));
+
+    ALL_UNITS.forEach(u => {
+      const fu = fullMap.get(u.id);
+      if (fu) {
+        u.upgrades = fu.upgrades;
+        u.abilities = fu.abilities;
+        u.evolution = fu.evolution;
+        if (fu.overview) u.overview = fu.overview;
+        if (fu.obtain) u.obtain = fu.obtain;
+        if (fu.obtain_source) u.obtain_source = fu.obtain_source;
+        if (fu.obtain_chain) u.obtain_chain = fu.obtain_chain;
+      }
+    });
+
+    rebuildUnitsIndex();
+
+    if (currentModalUnit) {
+      const fu = fullMap.get(currentModalUnit.id);
+      if (fu) {
+        currentModalUnit.upgrades = fu.upgrades;
+        currentModalUnit.abilities = fu.abilities;
+        currentModalUnit.evolution = fu.evolution;
+        if (fu.overview) currentModalUnit.overview = fu.overview;
+        if (fu.obtain) currentModalUnit.obtain = fu.obtain;
+        if (fu.obtain_source) currentModalUnit.obtain_source = fu.obtain_source;
+        if (fu.obtain_chain) currentModalUnit.obtain_chain = fu.obtain_chain;
+        renderModalHeaderStats();
+        renderUpgradesTable();
+        renderModalAbilities(currentModalUnit);
+        if (typeof renderModalEvolution === 'function') {
+          renderModalEvolution(currentModalUnit);
+        }
+        const overviewEl = document.getElementById('modal-overview-text');
+        if (overviewEl) {
+          overviewEl.textContent = translateOverview(stripWikiMarkup(currentModalUnit.overview), currentModalUnit) || t('no_overview', 'Aucune description détaillée enregistrée pour cette unité.');
+        }
+        safeCreateIcons(document.getElementById('unit-modal'));
+      }
+    }
+
+    if (currentTab === 'compare') {
+      renderCompareView();
+    }
+  }
+}
+
+async function ensureUnitsLoaded(loadFull = false) {
+  if (loadedDatasets.has('units_full')) return true;
+  if (!loadFull && loadedDatasets.has('units_summary')) return true;
+
+  const dataPrefix = window.location.pathname.includes('/public/') ? '../data/' : './data/';
+  const cachedMeta = await ASTDCache.get('meta');
+  const isCacheFresh = META_DATA && META_DATA.last_updated && cachedMeta && cachedMeta.last_updated === META_DATA.last_updated;
+
+  // 1. Vérification du cache IndexedDB
+  if (isCacheFresh) {
+    const cachedFull = await ASTDCache.get('units');
+    if (cachedFull && Array.isArray(cachedFull) && cachedFull.length > 0) {
+      applyUnitsData(cachedFull, true);
+      loadedDatasets.add('units_summary');
+      loadedDatasets.add('units_full');
+      return true;
+    }
+    if (!loadFull) {
+      const cachedSummary = await ASTDCache.get('units_summary');
+      if (cachedSummary && Array.isArray(cachedSummary) && cachedSummary.length > 0) {
+        applyUnitsData(cachedSummary, false);
+        loadedDatasets.add('units_summary');
+        preloadFullUnitsInBackground();
+        return true;
+      }
+    }
+  }
+
+  // 2. Téléchargement réseau du sommaire léger
+  if (!loadFull) {
+    if (_unitsSummaryPromise) return _unitsSummaryPromise;
+    _unitsSummaryPromise = (async () => {
+      try {
+        const summary = await fetch(`${dataPrefix}units_summary.json`).then(r => r.json());
+        if (Array.isArray(summary) && summary.length > 0) {
+          applyUnitsData(summary, false);
+          ASTDCache.set('units_summary', summary);
+          loadedDatasets.add('units_summary');
+          preloadFullUnitsInBackground();
+          return true;
+        }
+      } catch (err) {
+        console.warn('Fallback units.json suite à erreur units_summary.json:', err);
+      }
+      return false;
+    })();
+
+    const success = await _unitsSummaryPromise;
+    _unitsSummaryPromise = null;
+    if (success) return true;
+  }
+
+  return ensureFullUnitsLoaded();
+}
+
+async function ensureFullUnitsLoaded() {
+  if (loadedDatasets.has('units_full')) return true;
+  if (_fullUnitsPromise) return _fullUnitsPromise;
+
+  _fullUnitsPromise = (async () => {
+    const dataPrefix = window.location.pathname.includes('/public/') ? '../data/' : './data/';
+    const cachedMeta = await ASTDCache.get('meta');
+    const isCacheFresh = META_DATA && META_DATA.last_updated && cachedMeta && cachedMeta.last_updated === META_DATA.last_updated;
+
+    let fullRes = null;
+    if (isCacheFresh) {
+      const cached = await ASTDCache.get('units');
+      if (cached && Array.isArray(cached) && cached.length > 0) {
+        fullRes = cached;
+      }
+    }
+
+    if (!fullRes) {
+      try {
+        fullRes = await fetch(`${dataPrefix}units.json`).then(r => r.json());
+        if (Array.isArray(fullRes) && fullRes.length > 0) {
+          ASTDCache.set('units', fullRes);
+        }
+      } catch (err) {
+        console.warn('Impossible de charger units.json:', err);
+        _fullUnitsPromise = null;
+        return false;
+      }
+    }
+
+    if (Array.isArray(fullRes) && fullRes.length > 0) {
+      applyUnitsData(fullRes, true);
+      loadedDatasets.add('units_full');
+      loadedDatasets.add('units_summary');
+      return true;
+    }
+    _fullUnitsPromise = null;
+    return false;
+  })();
+
+  return _fullUnitsPromise;
+}
+
+function preloadFullUnitsInBackground() {
+  if (typeof window === 'undefined' || loadedDatasets.has('units_full')) return;
+  const runner = () => {
+    ensureFullUnitsLoaded();
+  };
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(runner, { timeout: 3000 });
+  } else {
+    setTimeout(runner, 500);
   }
 }
 
@@ -3211,6 +3397,10 @@ async function renderTabContent(tabId) {
   switch (tabId) {
     case 'units':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('units_summary') && !loadedDatasets.has('units_full')) {
+          showTabLoadingSkeleton('units');
+          await ensureUnitsLoaded(false);
+        }
         applyUnitFilters();
         renderedTabs.add('units');
       }
@@ -3220,6 +3410,9 @@ async function renderTabContent(tabId) {
         if (!loadedDatasets.has('tierlist')) {
           showTabLoadingSkeleton('tierlist');
           await ensureDatasetLoaded('tierlist');
+        }
+        if (!loadedDatasets.has('units_summary') && !loadedDatasets.has('units_full')) {
+          await ensureUnitsLoaded(false);
         }
         renderTierList();
         renderedTabs.add('tierlist');
@@ -3257,11 +3450,17 @@ async function renderTabContent(tabId) {
       break;
     case 'teambuilder':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('units_summary') && !loadedDatasets.has('units_full')) {
+          await ensureUnitsLoaded(false);
+        }
         renderTeamBuilder();
         renderedTabs.add('teambuilder');
       }
       break;
     case 'compare':
+      if (!loadedDatasets.has('units_summary') && !loadedDatasets.has('units_full')) {
+        await ensureUnitsLoaded(false);
+      }
       renderCompareView();
       renderedTabs.add('compare');
       break;
@@ -3296,52 +3495,63 @@ async function loadData() {
     const cachedMeta = await ASTDCache.get('meta');
     const isCacheFresh = remoteMeta && remoteMeta.last_updated && cachedMeta && cachedMeta.last_updated === remoteMeta.last_updated;
 
-    let unitsRes, matImagesRes;
-
-    if (isCacheFresh) {
-      // CACHE HIT : Restauration instantanée des unités depuis IndexedDB (< 20ms, 0 octet réseau)
-      const [cachedUnits, cachedMatImages] = await Promise.all([
-        ASTDCache.get('units'),
-        ASTDCache.get('material_images')
-      ]);
-
-      if (cachedUnits && Array.isArray(cachedUnits) && cachedUnits.length > 0) {
-        unitsRes = cachedUnits;
-        matImagesRes = cachedMatImages || {};
-      }
+    META_DATA = remoteMeta;
+    if (remoteMeta && remoteMeta.last_updated) {
+      ASTDCache.set('meta', remoteMeta);
     }
 
-    // Si Cache Miss ou première visite : téléchargement réseau des unités uniquement (Lazy Data Fetching - Issue #16)
-    if (!unitsRes) {
-      [unitsRes, matImagesRes] = await Promise.all([
-        fetch(`${dataPrefix}units.json`).then(r => r.json()),
-        fetch(`${dataPrefix}material_images.json`).then(r => r.json()).catch(() => ({}))
-      ]);
+    // Déterminer l'onglet initial depuis le hash d'URL
+    const hash = (typeof window !== 'undefined' && window.location && window.location.hash) ? window.location.hash.replace('#', '') : '';
+    let initialTab = 'units';
+    const validTabs = ['units', 'tierlist', 'codes', 'orbs', 'gamemodes', 'teambuilder', 'compare', 'community'];
+    if (validTabs.includes(hash)) {
+      initialTab = hash;
+    } else if (hash.startsWith('compare')) {
+      initialTab = 'compare';
+    } else if (hash.startsWith('unit/')) {
+      initialTab = 'units';
+    }
 
-      // Sauvegarde asynchrone dans IndexedDB sans bloquer l'affichage
-      if (Array.isArray(unitsRes) && unitsRes.length > 0) {
-        ASTDCache.set('units', unitsRes);
-        ASTDCache.set('material_images', matImagesRes);
-        if (remoteMeta && remoteMeta.last_updated) {
-          ASTDCache.set('meta', remoteMeta);
+    // 2. Chargement des données strictement requises par l'onglet initial (Lazy Data Fetching - Issue #16)
+    const unitsTabs = ['units', 'tierlist', 'teambuilder', 'compare'];
+    const needsUnitsImmediately = unitsTabs.includes(initialTab) || hash.startsWith('unit/');
+
+    let matImagesPromise = (async () => {
+      let cachedMat = isCacheFresh ? await ASTDCache.get('material_images') : null;
+      if (cachedMat) return cachedMat;
+      try {
+        const res = await fetch(`${dataPrefix}material_images.json`).then(r => r.json());
+        if (res) ASTDCache.set('material_images', res);
+        return res;
+      } catch (e) {
+        return {};
+      }
+    })();
+
+    if (needsUnitsImmediately) {
+      await Promise.all([
+        ensureUnitsLoaded(false),
+        matImagesPromise.then(res => { MATERIAL_IMAGES = res || {}; })
+      ]);
+      if (initialTab === 'tierlist') {
+        await ensureDatasetLoaded('tierlist');
+      }
+    } else {
+      matImagesPromise.then(res => { MATERIAL_IMAGES = res || {}; });
+      await ensureDatasetLoaded(initialTab);
+      // Préchargement asynchrone non-bloquant du sommaire des unités
+      if (typeof window !== 'undefined') {
+        const deferUnits = () => ensureUnitsLoaded(false);
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(deferUnits, { timeout: 1500 });
+        } else {
+          setTimeout(deferUnits, 100);
         }
       }
     }
 
-    if (Array.isArray(unitsRes)) {
-      unitsRes.forEach(u => {
-        if (u.anime_origin) u.anime_origin = u.anime_origin.replace(/<[^>]*>/g, '').trim();
-        if (u.character_origin) u.character_origin = u.character_origin.replace(/<[^>]*>/g, '').trim();
-      });
-    }
-    ALL_UNITS = unitsRes;
-    rebuildUnitsIndex();
-    loadedDatasets.add('units');
-    META_DATA = remoteMeta;
-    MATERIAL_IMAGES = matImagesRes || {};
-
     // Préchargement asynchrone non-bloquant des codes pour le ticker du header
-    if (typeof window !== 'undefined') {
+    if (!loadedDatasets.has('codes') && typeof window !== 'undefined') {
       const preloadCodes = () => ensureDatasetLoaded('codes');
       if ('requestIdleCallback' in window) {
         window.requestIdleCallback(preloadCodes, { timeout: 2000 });
@@ -3403,15 +3613,6 @@ async function loadData() {
       if (codeName) codeName.textContent = topCode.code;
     }
 
-    // Render Initial Views (Lazy Rendering - Issue #6)
-    const hash = window.location.hash.replace('#', '');
-    let initialTab = 'units';
-    const validTabs = ['units', 'tierlist', 'codes', 'orbs', 'gamemodes', 'teambuilder', 'compare', 'community'];
-    if (validTabs.includes(hash)) {
-      initialTab = hash;
-    } else if (hash.startsWith('compare')) {
-      initialTab = 'compare';
-    }
     renderTabContent(initialTab);
 
     // Check URL Hash
@@ -4362,6 +4563,9 @@ function openUnitModal(unitId) {
 
   currentModalUnit = unit;
   window.location.hash = `unit/${unit.id}`;
+  if (!unit.upgrades && !loadedDatasets.has('units_full')) {
+    ensureFullUnitsLoaded();
+  }
 
   const modal = document.getElementById('unit-modal');
   const nameEl = document.getElementById('modal-unit-name');
@@ -4466,6 +4670,47 @@ function openUnitModal(unitId) {
   // Visual Damage Progression Range (re-rendered per level in renderModalHeaderStats)
   renderModalHeaderStats();
 
+  // Render Evolution Section
+  renderModalEvolution(unit);
+
+  // Render Abilities Section
+  renderModalAbilities(unit);
+
+  // Render Community Tips
+  if (window.CommunityManager) {
+    CommunityManager.renderUnitCommunityTips(unit.id);
+  }
+
+  // Upgrades table & level toggle state are (re)rendered by setLevelView(1) above
+
+  // Set inert on background elements to trap focus within modal dialog
+  const headerEl = document.getElementById('app-header');
+  const mainEl = document.getElementById('main-content');
+  const footerEl = document.querySelector('footer');
+  if (headerEl) headerEl.setAttribute('inert', '');
+  if (mainEl) mainEl.setAttribute('inert', '');
+  if (footerEl) footerEl.setAttribute('inert', '');
+
+  const dialog = document.getElementById('unit-modal-dialog');
+  modal.classList.remove('hidden', 'closing');
+  if (dialog) {
+    dialog.classList.remove('modal-exit');
+    dialog.classList.add('modal-enter');
+  }
+  document.documentElement.classList.add('modal-open');
+  document.body.classList.add('modal-open');
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+  safeCreateIcons(modal);
+
+  // Send keyboard focus to the modal close button
+  requestAnimationFrame(() => {
+    const closeBtn = document.getElementById('modal-close-btn');
+    if (closeBtn) closeBtn.focus();
+  });
+}
+
+function renderModalEvolution(unit) {
   // Render Evolution Section
   const evoSection = document.getElementById('modal-evolution-section');
   const evoContent = document.getElementById('modal-evolution-content');
@@ -4616,42 +4861,6 @@ function openUnitModal(unitId) {
       preevoSection.classList.add('hidden');
     }
   }
-
-  // Render Abilities Section
-  renderModalAbilities(unit);
-
-  // Render Community Tips
-  if (window.CommunityManager) {
-    CommunityManager.renderUnitCommunityTips(unit.id);
-  }
-
-  // Upgrades table & level toggle state are (re)rendered by setLevelView(1) above
-
-  // Set inert on background elements to trap focus within modal dialog
-  const headerEl = document.getElementById('app-header');
-  const mainEl = document.getElementById('main-content');
-  const footerEl = document.querySelector('footer');
-  if (headerEl) headerEl.setAttribute('inert', '');
-  if (mainEl) mainEl.setAttribute('inert', '');
-  if (footerEl) footerEl.setAttribute('inert', '');
-
-  const dialog = document.getElementById('unit-modal-dialog');
-  modal.classList.remove('hidden', 'closing');
-  if (dialog) {
-    dialog.classList.remove('modal-exit');
-    dialog.classList.add('modal-enter');
-  }
-  document.documentElement.classList.add('modal-open');
-  document.body.classList.add('modal-open');
-  document.documentElement.style.overflow = 'hidden';
-  document.body.style.overflow = 'hidden';
-  safeCreateIcons(modal);
-
-  // Send keyboard focus to the modal close button
-  requestAnimationFrame(() => {
-    const closeBtn = document.getElementById('modal-close-btn');
-    if (closeBtn) closeBtn.focus();
-  });
 }
 
 // Switch the upgrade table between Level 1 and Level 175 card stats
@@ -4861,10 +5070,14 @@ function renderUpgradesTable() {
       `;
     }).join('');
   } else {
+    const isLoading = !loadedDatasets.has('units_full');
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="p-4 text-center text-slate-500 font-sans">
-          ${t('upgrades_empty', 'Statistiques de paliers détaillées non documentées pour cette unité.')}
+        <td colspan="${showBuffCol ? 8 : 7}" class="p-8 text-center text-slate-400 font-sans">
+          ${isLoading ? `
+            <div class="w-6 h-6 rounded-full border-2 border-sky-500 border-t-transparent animate-spin mx-auto mb-2"></div>
+            <p class="text-xs text-slate-400 font-mono-num animate-pulse">${t('loading_details', 'Chargement des paliers et aptitudes...')}</p>
+          ` : t('upgrades_empty', 'Statistiques de paliers détaillées non documentées pour cette unité.')}
         </td>
       </tr>
     `;
