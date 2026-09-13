@@ -146,7 +146,6 @@ body {
   transition-property: transform, opacity, box-shadow, background-color, border-color, color;
   transition-duration: var(--duration-interactive);
   transition-timing-function: var(--ease-fluid);
-  will-change: transform;
 }
 .tap-scale:active:not(:disabled) {
   transform: scale(0.97);
@@ -156,7 +155,6 @@ body {
   transition-property: transform, opacity, box-shadow, background-color, border-color;
   transition-duration: var(--duration-interactive);
   transition-timing-function: var(--ease-fluid);
-  will-change: transform;
 }
 .tap-scale-subtle:active:not(:disabled) {
   transform: scale(0.99);
@@ -164,9 +162,7 @@ body {
 
 /* Tactical Surface Cards - Clean, unified, structured design without neon glows */
 .tactical-card {
-  background-color: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: #0f1629;
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-elevation-1);
   transition-property: transform, box-shadow, border-color, background-color;
@@ -313,7 +309,6 @@ body {
   transition-property: transform, background-color, border-color, box-shadow, color;
   transition-duration: var(--duration-interactive);
   transition-timing-function: var(--ease-fluid);
-  will-change: transform;
 }
 .btn-pill:hover {
   background-color: #1e293b;
@@ -799,6 +794,5 @@ select.comm-upg-input {
   border-color: rgba(100, 116, 139, 0.5);
   color: #cbd5e1;
 }
-
 
 
