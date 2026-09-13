@@ -3094,6 +3094,7 @@ function setupEventListeners() {
   const quickSearch = document.getElementById('quick-search');
 
   const debouncedApplyUnitFilters = debounce(applyUnitFilters, 150);
+  setupInfiniteScroll();
 
   if (searchInput) {
     searchInput.addEventListener('input', () => {
@@ -3679,9 +3680,42 @@ function renderUnitsTable() {
   if (window.lucide) lucide.createIcons();
 }
 
+let _loadMoreObserver = null;
+function setupInfiniteScroll() {
+  const container = document.getElementById('load-more-container');
+  if (!container || !('IntersectionObserver' in window)) return;
+  if (_loadMoreObserver) _loadMoreObserver.disconnect();
+  _loadMoreObserver = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+    if (entry && entry.isIntersecting) {
+      if (currentTab === 'units' && currentViewMode === 'grid' && displayedCount < FILTERED_UNITS.length) {
+        loadMoreUnits();
+      }
+    }
+  }, { rootMargin: '250px' });
+  _loadMoreObserver.observe(container);
+}
+
 function loadMoreUnits() {
-  displayedCount += pageSize;
-  renderUnitsList();
+  const grid = document.getElementById('units-grid');
+  const loadMoreBtn = document.getElementById('load-more-container');
+  if (!grid) return;
+
+  const nextUnits = FILTERED_UNITS.slice(displayedCount, displayedCount + pageSize);
+  if (nextUnits.length === 0) {
+    if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
+    return;
+  }
+
+  const fragmentHTML = nextUnits.map(u => createUnitCardHTML(u)).join('');
+  grid.insertAdjacentHTML('beforeend', fragmentHTML);
+  displayedCount += nextUnits.length;
+
+  if (loadMoreBtn) {
+    loadMoreBtn.classList.toggle('hidden', displayedCount >= FILTERED_UNITS.length);
+  }
+
+  if (window.lucide) lucide.createIcons({ root: grid });
 }
 
 // Safety net: strip any leftover wiki markup at render time
