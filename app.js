@@ -1734,19 +1734,201 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAdsNotice();
 });
 
-// Load all JSON datasets
+// ==========================================
+// CLIENT-SIDE PERSISTENT CACHE (INDEXEDDB) - ISSUE #5
+// ==========================================
+const ASTDCache = {
+  DB_NAME: 'astd_wiki_cache',
+  STORE_NAME: 'datasets',
+  DB_VERSION: 1,
+  _db: null,
+
+  async open() {
+    if (this._db) return this._db;
+    return new Promise((resolve) => {
+      if (!window.indexedDB) return resolve(null);
+      try {
+        const req = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+            db.createObjectStore(this.STORE_NAME);
+          }
+        };
+        req.onsuccess = (e) => {
+          this._db = e.target.result;
+          resolve(this._db);
+        };
+        req.onerror = () => resolve(null);
+      } catch (err) {
+        resolve(null);
+      }
+    });
+  },
+
+  async get(key) {
+    try {
+      const db = await this.open();
+      if (!db) return null;
+      return new Promise((resolve) => {
+        const tx = db.transaction(this.STORE_NAME, 'readonly');
+        const store = tx.objectStore(this.STORE_NAME);
+        const req = store.get(key);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      });
+    } catch (e) {
+      return null;
+    }
+  },
+
+  async set(key, value) {
+    try {
+      const db = await this.open();
+      if (!db) return false;
+      return new Promise((resolve) => {
+        const tx = db.transaction(this.STORE_NAME, 'readwrite');
+        const store = tx.objectStore(this.STORE_NAME);
+        store.put(value, key);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    } catch (e) {
+      return false;
+    }
+  }
+};
+
+// ==========================================
+// LAZY RENDERING DES ONGLETS (ISSUE #6)
+// ==========================================
+const renderedTabs = new Set();
+
+function renderTabContent(tabId) {
+  if (!tabId) tabId = 'units';
+  const isAlreadyRendered = renderedTabs.has(tabId);
+
+  switch (tabId) {
+    case 'units':
+      if (!isAlreadyRendered) {
+        applyUnitFilters();
+        renderedTabs.add('units');
+      }
+      break;
+    case 'tierlist':
+      if (!isAlreadyRendered) {
+        renderTierList();
+        renderedTabs.add('tierlist');
+      }
+      break;
+    case 'codes':
+      if (!isAlreadyRendered) {
+        renderCodes();
+        renderedTabs.add('codes');
+      }
+      break;
+    case 'orbs':
+      if (!isAlreadyRendered) {
+        renderOrbs();
+        renderedTabs.add('orbs');
+      }
+      break;
+    case 'gamemodes':
+      if (!isAlreadyRendered) {
+        renderGameModes();
+        renderedTabs.add('gamemodes');
+      }
+      break;
+    case 'teambuilder':
+      if (!isAlreadyRendered) {
+        renderTeamBuilder();
+        renderedTabs.add('teambuilder');
+      }
+      break;
+    case 'compare':
+      renderCompareView();
+      renderedTabs.add('compare');
+      break;
+    case 'community':
+      if (window.CommunityManager) CommunityManager.renderCommunityHub();
+      renderedTabs.add('community');
+      break;
+  }
+}
+
+function invalidateRenderedTabs(keepTab) {
+  renderedTabs.clear();
+  if (keepTab) {
+    renderTabContent(keepTab);
+  }
+}
+window.invalidateRenderedTabs = invalidateRenderedTabs;
+
+// Load all JSON datasets with IndexedDB cache acceleration (Issue #5) & Lazy Rendering (Issue #6)
 async function loadData() {
   try {
     const dataPrefix = window.location.pathname.includes('/public/') ? '../data/' : './data/';
-    const [unitsRes, codesRes, orbsRes, tierRes, modesRes, metaRes, matImagesRes] = await Promise.all([
-      fetch(`${dataPrefix}units.json`).then(r => r.json()),
-      fetch(`${dataPrefix}codes.json`).then(r => r.json()),
-      fetch(`${dataPrefix}orbs.json`).then(r => r.json()),
-      fetch(`${dataPrefix}tierlist.json`).then(r => r.json()),
-      fetch(`${dataPrefix}gamemodes.json`).then(r => r.json()),
-      fetch(`${dataPrefix}meta.json`).then(r => r.json()).catch(() => ({})),
-      fetch(`${dataPrefix}material_images.json`).then(r => r.json()).catch(() => ({}))
-    ]);
+    
+    // 1. Sonde de fraîcheur des métadonnées (275 octets)
+    let remoteMeta = {};
+    try {
+      remoteMeta = await fetch(`${dataPrefix}meta.json?t=${Date.now()}`).then(r => r.json());
+    } catch (e) {
+      remoteMeta = {};
+    }
+
+    const cachedMeta = await ASTDCache.get('meta');
+    const isCacheFresh = remoteMeta && remoteMeta.last_updated && cachedMeta && cachedMeta.last_updated === remoteMeta.last_updated;
+
+    let unitsRes, codesRes, orbsRes, tierRes, modesRes, metaRes, matImagesRes;
+
+    if (isCacheFresh) {
+      // CACHE HIT : Restauration instantanée depuis IndexedDB (< 20ms, 0 octet réseau)
+      const [cachedUnits, cachedCodes, cachedOrbs, cachedTier, cachedModes, cachedMatImages] = await Promise.all([
+        ASTDCache.get('units'),
+        ASTDCache.get('codes'),
+        ASTDCache.get('orbs'),
+        ASTDCache.get('tierlist'),
+        ASTDCache.get('gamemodes'),
+        ASTDCache.get('material_images')
+      ]);
+
+      if (cachedUnits && Array.isArray(cachedUnits) && cachedCodes && cachedOrbs && cachedTier && cachedModes) {
+        unitsRes = cachedUnits;
+        codesRes = cachedCodes;
+        orbsRes = cachedOrbs;
+        tierRes = cachedTier;
+        modesRes = cachedModes;
+        metaRes = remoteMeta;
+        matImagesRes = cachedMatImages || {};
+      }
+    }
+
+    // Si Cache Miss ou première visite : téléchargement réseau complet
+    if (!unitsRes) {
+      [unitsRes, codesRes, orbsRes, tierRes, modesRes, metaRes, matImagesRes] = await Promise.all([
+        fetch(`${dataPrefix}units.json`).then(r => r.json()),
+        fetch(`${dataPrefix}codes.json`).then(r => r.json()),
+        fetch(`${dataPrefix}orbs.json`).then(r => r.json()),
+        fetch(`${dataPrefix}tierlist.json`).then(r => r.json()),
+        fetch(`${dataPrefix}gamemodes.json`).then(r => r.json()),
+        Promise.resolve(remoteMeta && remoteMeta.last_updated ? remoteMeta : fetch(`${dataPrefix}meta.json`).then(r => r.json()).catch(() => ({}))),
+        fetch(`${dataPrefix}material_images.json`).then(r => r.json()).catch(() => ({}))
+      ]);
+
+      // Sauvegarde asynchrone dans IndexedDB sans bloquer l'affichage
+      if (Array.isArray(unitsRes) && unitsRes.length > 0) {
+        ASTDCache.set('units', unitsRes);
+        ASTDCache.set('codes', codesRes);
+        ASTDCache.set('orbs', orbsRes);
+        ASTDCache.set('tierlist', tierRes);
+        ASTDCache.set('gamemodes', modesRes);
+        ASTDCache.set('material_images', matImagesRes);
+        if (metaRes && metaRes.last_updated) {
+          ASTDCache.set('meta', metaRes);
+        }
+      }
+    }
 
     if (Array.isArray(unitsRes)) {
       unitsRes.forEach(u => {
@@ -1790,7 +1972,7 @@ async function loadData() {
       ribbonUpdated.textContent = `${d}/${m}/${y}`;
     }
 
-    // Populate the anime/franchise filter (sorted by number of units, then A-Z)
+    // Populate the anime/franchise filter (DocumentFragment pour 1 seul reflow)
     const animeSelect = document.getElementById('filter-anime');
     if (animeSelect) {
       const counts = {};
@@ -1798,14 +1980,16 @@ async function loadData() {
         const a = (u.anime_origin || '').replace(/<[^>]*>/g, '').trim();
         if (a) counts[a] = (counts[a] || 0) + 1;
       });
+      const fragment = document.createDocumentFragment();
       Object.entries(counts)
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
         .forEach(([name, count]) => {
           const opt = document.createElement('option');
           opt.value = name;
           opt.textContent = `${name} (${count})`;
-          animeSelect.appendChild(opt);
+          fragment.appendChild(opt);
         });
+      animeSelect.appendChild(fragment);
       animeSelect.addEventListener('change', applyUnitFilters);
     }
 
@@ -1819,13 +2003,16 @@ async function loadData() {
       if (codeName) codeName.textContent = topCode.code;
     }
 
-    // Render Initial Views
-    applyUnitFilters();
-    renderTierList();
-    renderCodes();
-    renderOrbs();
-    renderGameModes();
-    renderTeamBuilder();
+    // Render Initial Views (Lazy Rendering - Issue #6)
+    const hash = window.location.hash.replace('#', '');
+    let initialTab = 'units';
+    const validTabs = ['units', 'tierlist', 'codes', 'orbs', 'gamemodes', 'teambuilder', 'compare', 'community'];
+    if (validTabs.includes(hash)) {
+      initialTab = hash;
+    } else if (hash.startsWith('compare')) {
+      initialTab = 'compare';
+    }
+    renderTabContent(initialTab);
 
     // Check URL Hash
     handleHashNavigation();
@@ -2068,16 +2255,15 @@ function switchTab(tabId) {
   const targetSection = document.getElementById(`tab-${tabId}`);
   if (targetSection) targetSection.classList.remove('hidden');
 
-  if (tabId === 'compare') {
-    renderCompareView();
-  }
-  if (tabId === 'community') {
-    if (window.CommunityManager) CommunityManager.renderCommunityHub();
-  }
+  // Lazy Rendering : rendu à la demande au premier affichage (Issue #6)
+  renderTabContent(tabId);
 
   updateNavActiveState(tabId);
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (window.lucide) lucide.createIcons();
+  if (window.lucide) {
+    const rootEl = targetSection || document;
+    lucide.createIcons({ root: rootEl });
+  }
 }
 
 function updateNavActiveState(tabId) {
