@@ -3,8 +3,8 @@
 ASTD Wiki — Automatisation d'intégration des issues GitHub
 ==========================================================
 Ce script est exécuté par GitHub Actions lorsqu'une issue de contribution
-est validée (par ajout de label 'validé'/'approved', commentaire '/valider',
-ou clôture).
+est validée (par ajout de label 'validé'/'approved' par un modérateur,
+ou par commentaire '/valider' par un membre autorisé).
 
 Il extrait le payload JSON embarqué dans l'issue, valide les données,
 met à jour data/units.json (ou data/codes.json) et valide les modifications.
@@ -97,6 +97,22 @@ def close_issue(repo, issue_number, token):
         log(f"Issue #{issue_number} fermée avec succès.")
     except Exception as e:
         log(f"Impossible de fermer l'issue : {e}")
+
+
+def is_user_collaborator(repo, username, token):
+    """Vérifie si un utilisateur dispose des droits de modération sur le dépôt."""
+    if not username:
+        return False
+    if not token:
+        return True
+    url = f"https://api.github.com/repos/{repo}/collaborators/{username}/permission"
+    try:
+        data = github_api_request(url, token=token)
+        perm = data.get('permission', '')
+        return perm in {'admin', 'maintain', 'write', 'triage'}
+    except Exception as e:
+        log(f"Impossible de vérifier les permissions de {username} : {e}")
+        return False
 
 
 def extract_payload(issue_body):
@@ -479,15 +495,16 @@ def main():
         issue = event_data.get('issue', {})
         label = event_data.get('label', {})
         label_name = str(label.get('name', '')).lower()
+        sender = event_data.get('sender', {})
+        sender_login = sender.get('login', '')
 
         if action == 'labeled' and (label_name in VALIDATION_LABELS or 'valid' in label_name):
-            should_process = True
-            validation_source = f"Ajout du label '{label_name}'"
-        elif action == 'closed':
-            # Si fermée comme completed avec payload valide
-            if issue.get('state_reason') == 'completed' or not issue.get('state_reason'):
+            if is_user_collaborator(repo, sender_login, token):
                 should_process = True
-                validation_source = "Fermeture de l'issue (Close as completed)"
+                validation_source = f"Ajout du label '{label_name}' par {sender_login}"
+            else:
+                log(f"Ajout de label rejeté : l'utilisateur {sender_login} n'a pas les droits de modération.")
+                return 0
 
     elif event_name == 'issue_comment':
         action = event_data.get('action')

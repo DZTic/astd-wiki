@@ -2,7 +2,7 @@ name: Intégration Automatique des Issues Validées
 
 on:
   issues:
-    types: [labeled, closed]
+    types: [labeled]
   issue_comment:
     types: [created]
   workflow_dispatch:
@@ -47,13 +47,14 @@ jobs:
 
       - name: Publication des modifications sur main
         shell: bash
+        env:
+          ISSUE_NUM: ${{ github.event.issue.number || inputs.issue_number }}
         run: |
           # Vérifier si des fichiers ont été modifiés dans data/
           if [ -n "$(git status --porcelain data/)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add data/
-            ISSUE_NUM="${{ github.event.issue.number || inputs.issue_number }}"
             git commit -m "Auto: Intégration de la proposition validée (Issue #${ISSUE_NUM})"
             git push origin main
             echo "✓ Modifications validées et poussées sur main. Le workflow de déploiement GitHub Pages va démarrer."

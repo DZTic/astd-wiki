@@ -26,9 +26,11 @@ jobs:
 
       - name: Injection sécurisée de ads.txt (Option A)
         shell: bash
+        env:
+          ADS_TXT_CONTENT: ${{ secrets.ADS_TXT }}
         run: |
-          if [ -n "${{ secrets.ADS_TXT }}" ]; then
-            echo "${{ secrets.ADS_TXT }}" > ads.txt
+          if [ -n "$ADS_TXT_CONTENT" ]; then
+            printf '%s\n' "$ADS_TXT_CONTENT" > ads.txt
             echo "✓ ads.txt injecté avec succès pour GitHub Pages."
           else
             echo "ℹ Secret ADS_TXT non configuré ou fork détecté - déploiement sans ads.txt."
