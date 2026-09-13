@@ -62,30 +62,40 @@ const CommunityManager = (function() {
       originalTierlistBackup = JSON.parse(JSON.stringify(currentTier));
     }
 
-    // 2. Tenter de charger depuis l'API locale du serveur
-    try {
-      const res = await fetch(API_ENDPOINT, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && typeof data === 'object') {
-          state.units = data.units || {};
-          state.deleted_units = data.deleted_units || [];
-          state.orbs = data.orbs || {};
-          state.deleted_orbs = data.deleted_orbs || [];
-          state.codes = data.codes || [];
-          state.tips = data.tips || {};
-          state.tierlist = data.tierlist || null;
-          state.custom_tierlists = data.custom_tierlists || {};
-          isServerAvailable = true;
-          saveToLocalStorage();
-        }
-      } else {
-        loadFromLocalStorage();
-      }
-    } catch (e) {
-      // Serveur injoignable (ex: GitHub Pages ou hors ligne) -> fallback localStorage
+    // 2. Tenter de charger depuis l'API locale du serveur uniquement hors hébergement statique (GitHub Pages / file://)
+    const isStaticHost = typeof window !== 'undefined' && (
+      (window.location.hostname && window.location.hostname.includes('github.io')) ||
+      window.location.protocol === 'file:'
+    );
+
+    if (isStaticHost) {
       isServerAvailable = false;
       loadFromLocalStorage();
+    } else {
+      try {
+        const res = await fetch(API_ENDPOINT, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data === 'object') {
+            state.units = data.units || {};
+            state.deleted_units = data.deleted_units || [];
+            state.orbs = data.orbs || {};
+            state.deleted_orbs = data.deleted_orbs || [];
+            state.codes = data.codes || [];
+            state.tips = data.tips || {};
+            state.tierlist = data.tierlist || null;
+            state.custom_tierlists = data.custom_tierlists || {};
+            isServerAvailable = true;
+            saveToLocalStorage();
+          }
+        } else {
+          loadFromLocalStorage();
+        }
+      } catch (e) {
+        // Serveur injoignable -> fallback localStorage
+        isServerAvailable = false;
+        loadFromLocalStorage();
+      }
     }
 
     updateCommunityBadge();
@@ -121,7 +131,11 @@ const CommunityManager = (function() {
   // Sauvegarde sur le serveur local si disponible
   async function syncWithServer(action, payload = {}) {
     saveToLocalStorage();
-    if (!isServerAvailable) return;
+    const isStaticHost = typeof window !== 'undefined' && (
+      (window.location.hostname && window.location.hostname.includes('github.io')) ||
+      window.location.protocol === 'file:'
+    );
+    if (isStaticHost || !isServerAvailable) return;
     try {
       await fetch(API_ENDPOINT, {
         method: 'POST',
