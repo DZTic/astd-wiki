@@ -333,7 +333,7 @@
             </div>
 
             <!-- Bouton Proposer une Unité -->
-            <button type="button" onclick="CommunityUI.openUnitModalForAdd()" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tap-scale flex items-center gap-1.5 shadow-sm shrink-0" title="Proposer une nouvelle unité ou création communautaire">
+            <button type="button" onclick="CommunityUI.openUnitModalForAdd()" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tap-scale flex items-center gap-1.5 shadow-sm shrink-0" title="Proposer une nouvelle unité ou création communautaire" data-i18n-title="btn_propose_unit_title">
               <i data-lucide="plus-circle" class="w-3.5 h-3.5" stroke-width="2"></i>
               <span class="hidden sm:inline" data-i18n="btn_propose_unit">Proposer une Unité</span>
               <span class="sm:hidden" data-i18n="btn_propose_unit_short">Ajouter</span>
@@ -418,7 +418,7 @@
                 <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('max_range')" title="Distance d'attaque maximale (hauteur = portée accrue)" data-i18n="th_range">Portée ↕</th>
                 <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('min_spa')" title="SPA : Secondes Par Attaque (délai entre deux attaques, plus c'est bas plus c'est rapide)" data-i18n="th_spa">SPA ↕</th>
                 <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('max_dps')" title="DPS : Dégâts Par Seconde au palier maximum" data-i18n="th_max_dps">DPS Max ↕</th>
-                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('total_cost')" title="Somme du déploiement et de toutes les améliorations" data-i18n="th_total_cost">Coût Total ↕</th>
+                <th class="p-3 font-mono-num cursor-pointer" scope="col" onclick="sortTableBy('total_cost')" title="Somme du déploiement et de toutes les améliorations" data-i18n-title="units_th_cost_title" data-i18n="th_total_cost">Coût Total ↕</th>
                 <th class="p-3 text-right" scope="col" data-i18n="th_action">Action</th>
               </tr>
             </thead>
@@ -624,9 +624,9 @@
           </div>
           <button type="button" onclick="CommunityUI.openOrbSelectorForEdit()" class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold tap-scale flex items-center gap-1.5 shadow-sm shrink-0" title="Modifier un orbe existant">
             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-            <span>Modifier un Orbe</span>
+            <span data-i18n="btn_edit_orb">Modifier un Orbe</span>
           </button>
-          <button type="button" onclick="CommunityUI.openOrbModalForAdd()" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tap-scale flex items-center gap-1.5 shadow-sm shrink-0" title="Ajouter un nouvel orbe à la communauté">
+          <button type="button" onclick="CommunityUI.openOrbModalForAdd()" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tap-scale flex items-center gap-1.5 shadow-sm shrink-0" title="Ajouter un nouvel orbe à la communauté" data-i18n-title="add_orb_btn_title">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
             <span data-i18n="add_orb_btn">Ajouter un Orbe</span>
           </button>
@@ -945,7 +945,7 @@
                   <i data-lucide="edit-3" class="w-3 h-3" stroke-width="2"></i>
                   <span data-i18n="modal_btn_edit">Modifier</span>
                 </button>
-                <button id="modal-delete-unit-btn" onclick="if(currentModalUnit) CommunityManager.deleteUnit(currentModalUnit.id)" class="py-1.5 px-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-white font-semibold text-xs flex items-center justify-center gap-1 tap-scale transition-colors" title="Masquer cette unité">
+                <button id="modal-delete-unit-btn" onclick="if(currentModalUnit) CommunityManager.deleteUnit(currentModalUnit.id)" class="py-1.5 px-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-white font-semibold text-xs flex items-center justify-center gap-1 tap-scale transition-colors" title="Masquer cette unité" data-i18n-title="modal_btn_hide_title">
                   <i data-lucide="trash-2" class="w-3 h-3" stroke-width="2"></i>
                   <span data-i18n="modal_btn_hide">Masquer</span>
                 </button>

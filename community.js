@@ -4,6 +4,8 @@
 // Architecture hybride : persistance serveur local (server.py) + localStorage
 // ==========================================================================
 
+
+
 function stripHtml(str) {
   if (!str) return '';
   return String(str)
@@ -1076,7 +1078,7 @@ const CommunityManager = (function() {
         <div class="flex items-center gap-2">
           <span class="text-slate-400 font-medium">${window.t ? window.t('comm_tools_label', 'Gestion des données :') : 'Gestion des données :'}</span>
           <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isServerAvailable ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
-            ${isServerAvailable ? 'Serveur Local Connecté' : 'Mode LocalStorage (En Ligne)'}
+            ${isServerAvailable ? t('comm_server_connected', 'Serveur Local Connecté') : t('comm_server_localstorage', 'Mode LocalStorage (En Ligne)')}
           </span>
         </div>
         <div class="flex items-center flex-wrap gap-1.5">
@@ -1148,7 +1150,7 @@ const CommunityManager = (function() {
                       <button onclick="CommunityManager.copyForDiscord('unit', ${JSON.stringify(u).replace(/"/g, '&quot;')})" class="p-1 rounded bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white tap-scale" title="Copier le résumé pour Discord">
                         <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
                       </button>
-                      <button onclick="CommunityManager.deleteUnit('${u.id}')" class="p-1 rounded bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white tap-scale" title="Supprimer ou masquer">
+                      <button onclick="CommunityManager.deleteUnit('${u.id}')" class="p-1 rounded bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white tap-scale" title="${t('comm_btn_hide_tip', 'Supprimer ou masquer')}">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                       </button>
                     </div>
@@ -1168,7 +1170,7 @@ const CommunityManager = (function() {
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 font-mono-num">${modifiedOrbsList.length}</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <button onclick="CommunityUI.openOrbSelectorForEdit()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 tap-scale" title="Modifier un orbe officiel ou existant">
+              <button onclick="CommunityUI.openOrbSelectorForEdit()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 tap-scale" title="${t('comm_btn_edit_orb_title', 'Modifier un orbe officiel ou existant')}">
                 <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
                 <span>${window.t ? window.t('comm_btn_edit_existing', 'Modifier existant') : 'Modifier existant'}</span>
               </button>
@@ -1185,7 +1187,7 @@ const CommunityManager = (function() {
               <div class="flex items-center justify-center gap-2 pt-1">
                 <button onclick="CommunityUI.openOrbModalForAdd()" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center gap-1.5 tap-scale shadow-sm">
                   <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                  <span>Créer un Nouvel Orbe</span>
+                  <span>${t('comm_btn_create_orb', 'Créer un Nouvel Orbe')}</span>
                 </button>
                 <button onclick="CommunityUI.openOrbSelectorForEdit()" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold flex items-center gap-1.5 tap-scale shadow-sm">
                   <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
@@ -1204,7 +1206,7 @@ const CommunityManager = (function() {
                         <span class="font-bold text-white text-xs truncate">${escapeHtml(o.name)}</span>
                         <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase">Orbe</span>
                       </div>
-                      <div class="text-[10px] text-amber-300 font-medium truncate mt-0.5">${escapeHtml(o.effect || 'Bonus spécial')}</div>
+                      <div class="text-[10px] text-amber-300 font-medium truncate mt-0.5">${escapeHtml(o.effect || t('comm_special_bonus', 'Bonus spécial'))}</div>
                       <div class="text-[10px] text-slate-400 truncate mt-0.5">Compatible: <span class="text-sky-300">${escapeHtml(o.require || 'All units')}</span></div>
                     </div>
                   </div>
@@ -1219,7 +1221,7 @@ const CommunityManager = (function() {
                       <button onclick="CommunityManager.copyForDiscord('orb', ${JSON.stringify(o).replace(/"/g, '&quot;')})" class="p-1 rounded bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white tap-scale" title="Copier le résumé pour Discord">
                         <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
                       </button>
-                      <button onclick="CommunityManager.deleteOrb(decodeURIComponent('${encodeURIComponent(o.name)}'))" class="p-1 rounded bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white tap-scale" title="Supprimer ou masquer">
+                      <button onclick="CommunityManager.deleteOrb(decodeURIComponent('${encodeURIComponent(o.name)}'))" class="p-1 rounded bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white tap-scale" title="${t('comm_btn_hide_tip', 'Supprimer ou masquer')}">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                       </button>
                     </div>
@@ -1303,14 +1305,14 @@ const CommunityManager = (function() {
                   <div class="flex items-center justify-between">
                     <span class="font-mono-num font-bold text-white text-sm bg-slate-900 px-2 py-0.5 rounded border border-slate-800">${c.code}</span>
                     <span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.status === 'active' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'} uppercase">
-                      ${c.status === 'active' ? 'Actif' : 'Expiré'}
+                      ${c.status === 'active' ? t('comm_status_active', 'Actif') : t('comm_status_expired', 'Expiré')}
                     </span>
                   </div>
                   <div class="text-slate-300 text-[11px]">${c.reward}</div>
                   <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[10px]">
                     <button onclick="CommunityManager.toggleCodeExpired('${c.code}')" class="text-slate-400 hover:text-amber-300 font-semibold flex items-center gap-1 tap-scale">
                       <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-                      <span>${c.status === 'active' ? 'Marquer expiré' : 'Marquer actif'}</span>
+                      <span>${c.status === 'active' ? t('comm_btn_mark_expired', 'Marquer expiré') : t('comm_btn_mark_active', 'Marquer actif')}</span>
                     </button>
                     <div class="flex items-center gap-1">
                       <a href="${generateGitHubIssueURL('code', c)}" target="_blank" rel="noopener noreferrer" class="p-1 rounded bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white flex items-center justify-center" title="Soumettre sur GitHub">
@@ -1343,15 +1345,15 @@ const CommunityManager = (function() {
                 <span>${window.t ? window.t('comm_btn_edit_tierlist', 'Éditer en direct') : 'Éditer en direct'}</span>
               </button>
               ${state.tierlist ? `
-                <button onclick="CommunityUI.proposeTierListToGitHub()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1 tap-scale" title="Proposer vos rangs à la communauté ASTD sur GitHub">
+                <button onclick="CommunityUI.proposeTierListToGitHub()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1 tap-scale" title="${t('comm_btn_propose_tierlist_gh', 'Proposer vos rangs à la communauté ASTD sur GitHub')}">
                   <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                   <span>${window.t ? window.t('tierlist_btn_github', 'Soumettre sur GitHub') : 'Soumettre sur GitHub'}</span>
                 </button>
-                <button onclick="CommunityUI.exportTierListJSON()" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 tap-scale" title="Télécharger le fichier JSON">
+                <button onclick="CommunityUI.exportTierListJSON()" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 tap-scale" title="${t('comm_btn_download_json', 'Télécharger le fichier JSON')}">
                   <i data-lucide="download" class="w-3 h-3"></i>
                   <span>JSON</span>
                 </button>
-                <button onclick="CommunityManager.resetTierList()" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white text-xs font-semibold flex items-center gap-1 tap-scale" title="Restaurer la tier list officielle">
+                <button onclick="CommunityManager.resetTierList()" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white text-xs font-semibold flex items-center gap-1 tap-scale" title="${t('comm_btn_restore_official_tierlist', 'Restaurer la tier list officielle')}">
                   <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                   <span>${window.t ? window.t('tierlist_btn_reset', 'Réinitialiser') : 'Réinitialiser'}</span>
                 </button>
@@ -1410,10 +1412,10 @@ const CommunityManager = (function() {
     }
 
     const typeLabels = {
-      meta: 'Méta & Classement',
-      raid: 'Raids & Donjons',
-      orbs: 'Orbe Recommandé',
-      synergy: 'Synergie de Deck'
+      meta: t('comm_tip_cat_meta', 'Méta & Classement'),
+      raid: t('comm_tip_cat_raid', 'Raids & Donjons'),
+      orbs: t('comm_tip_cat_orbs', 'Orbe Recommandé'),
+      synergy: t('comm_tip_cat_synergy', 'Synergie de Deck')
     };
 
     tipsContainer.innerHTML = tips.map(tip => `
@@ -1421,14 +1423,14 @@ const CommunityManager = (function() {
         <div class="flex items-center justify-between text-[11px]">
           <div class="flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span class="font-bold text-slate-200">${tip.author || 'Joueur ASTD'}</span>
+            <span class="font-bold text-slate-200">${tip.author || t('comm_default_author', 'Joueur ASTD')}</span>
             <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-amber-500/15 text-amber-300 border border-amber-500/30">
               ${typeLabels[tip.type] || tip.type}
             </span>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-slate-500 text-[10px] font-mono-num">${tip.date || ''}</span>
-            <button onclick="CommunityManager.deleteTip('${unitId}', '${tip.id}')" class="text-slate-500 hover:text-rose-400 p-0.5 tap-scale opacity-0 group-hover:opacity-100 transition-opacity" title="Supprimer ce conseil">
+            <button onclick="CommunityManager.deleteTip('${unitId}', '${tip.id}')" class="text-slate-500 hover:text-rose-400 p-0.5 tap-scale opacity-0 group-hover:opacity-100 transition-opacity" title="${t('comm_btn_delete_tip', 'Supprimer ce conseil')}">
               <i data-lucide="trash-2" class="w-3 h-3"></i>
             </button>
           </div>
@@ -2298,7 +2300,7 @@ const CommunityUI = (function() {
               ${window.t ? window.t('comm_field_overview', 'Description / Remarque') : 'Description / Remarque'}
             </label>
             <textarea id="comm-unit-overview" rows="2"
-                      placeholder="Présentation de l'unité, capacités notables, obtention..."
+                      placeholder="${t('comm_ph_unit_overview', "Présentation de l'unité, capacités notables, obtention...")}"
                       class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-sky-500 text-xs">${existing?.overview || ''}</textarea>
           </div>
 
@@ -2320,7 +2322,7 @@ const CommunityUI = (function() {
             ${window.t ? window.t('cancel', 'Annuler') : 'Annuler'}
           </button>
           <div class="flex items-center gap-2">
-            <button type="button" onclick="CommunityUI.submitAndProposeToGitHub()" class="px-3.5 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 font-bold text-xs flex items-center gap-1.5 tap-scale transition-colors shadow-sm" title="Enregistrer et ouvrir l'issue GitHub pré-remplie pour le Wiki">
+            <button type="button" onclick="CommunityUI.submitAndProposeToGitHub()" class="px-3.5 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 font-bold text-xs flex items-center gap-1.5 tap-scale transition-colors shadow-sm" title="${t('comm_btn_propose_unit_gh_tip', "Enregistrer et ouvrir l'issue GitHub pré-remplie pour le Wiki")}">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
               <span>${window.t ? window.t('comm_btn_propose_gh', 'Proposer sur GitHub') : 'Proposer sur GitHub'}</span>
             </button>
@@ -2634,10 +2636,10 @@ const CommunityUI = (function() {
             ${window.t ? window.t('comm_field_tip_type', 'Catégorie du conseil') : 'Catégorie du conseil'}
           </label>
           <select id="comm-tip-type" class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500">
-            <option value="meta">Méta & Classement</option>
-            <option value="raid">Raids & Donjons</option>
-            <option value="orbs">Orbe Recommandé</option>
-            <option value="synergy">Synergie de Deck</option>
+            <option value="meta">${t('comm_tip_cat_meta', 'Méta & Classement')}</option>
+            <option value="raid">${t('comm_tip_cat_raid', 'Raids & Donjons')}</option>
+            <option value="orbs">${t('comm_tip_cat_orbs', 'Orbe Recommandé')}</option>
+            <option value="synergy">${t('comm_tip_cat_synergy', 'Synergie de Deck')}</option>
           </select>
         </div>
 
@@ -2646,7 +2648,7 @@ const CommunityUI = (function() {
             ${window.t ? window.t('comm_field_tip_text', 'Votre conseil tactique *') : 'Votre conseil tactique *'}
           </label>
           <textarea id="comm-tip-text" required rows="3"
-                    placeholder="Ex: Équipez l'orbe Fire Orb pour doubler ses dégâts en Raid 2. Très efficace combiné avec Idol pour le buff Shine..."
+                    placeholder="${t('comm_ph_tip_text', "Ex: Équipez l'orbe Fire Orb pour doubler ses dégâts en Raid 2. Très efficace combiné avec Idol pour le buff Shine...")}"
                     class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-amber-500"></textarea>
         </div>
 
@@ -2734,18 +2736,18 @@ const CommunityUI = (function() {
         <!-- Sélecteur Rapide Mode Création / Édition d'un orbe existant -->
         <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
           <div class="flex items-center gap-2 min-w-0">
-            <span class="text-xs font-bold text-slate-300 whitespace-nowrap">Mode actuel :</span>
+            <span class="text-xs font-bold text-slate-300 whitespace-nowrap">${t('comm_current_mode_label', 'Mode actuel :')}</span>
             <span class="px-2.5 py-1 rounded text-xs font-bold ${isEdit ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'} flex items-center gap-1.5 truncate">
               <i data-lucide="${isEdit ? 'edit-3' : 'plus-circle'}" class="w-3.5 h-3.5 shrink-0"></i>
-              <span class="truncate">${isEdit ? `Modification : ${escapeHtml(existing.name)}` : 'Création d\'un nouvel orbe'}</span>
+              <span class="truncate">${isEdit ? `${t('comm_mode_modifying', 'Modification : {name}').replace('{name}', escapeHtml(existing.name))}` : 'Création d\'un nouvel orbe'}</span>
             </span>
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
-            <label for="comm-orb-target-switcher" class="text-xs text-slate-400 font-medium whitespace-nowrap">Changer :</label>
+            <label for="comm-orb-target-switcher" class="text-xs text-slate-400 font-medium whitespace-nowrap">${t('comm_switch_label', 'Changer :')}</label>
             <select id="comm-orb-target-switcher" onchange="CommunityUI.onOrbModalSwitchTarget(this.value)"
                     class="flex-1 sm:flex-none bg-[#0a0f1d] border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 cursor-pointer max-w-xs truncate">
-              <option value="__NEW__" ${!isEdit ? 'selected' : ''}>➕ Nouvel orbe (vierge)</option>
-              <optgroup label="Modifier un orbe existant (${allOrbs.length})">
+              <option value="__NEW__" ${!isEdit ? 'selected' : ''}>${t('comm_opt_new_orb', '➕ Nouvel orbe (vierge)')}</option>
+              <optgroup label="${t('comm_orb_edit_header', 'Modifier un orbe existant ({count})').replace('{count}', allOrbs.length)}">
                 ${allOrbs.map(o => `<option value="${encodeURIComponent(o.name)}" ${isEdit && existing.name.toLowerCase() === o.name.toLowerCase() ? 'selected' : ''}>✏️ ${escapeHtml(o.name)}</option>`).join('')}
               </optgroup>
             </select>
@@ -2773,7 +2775,7 @@ const CommunityUI = (function() {
                 ${window.t ? window.t('comm_field_orb_name', 'Nom de l\'orbe *') : 'Nom de l\'orbe *'}
               </label>
               <input type="text" id="comm-orb-name" required value="${escapeHtml(existing?.name || '')}"
-                     placeholder="Ex: Fire Orb, Cost Orb, Death Orb..."
+                     placeholder="${t('comm_ph_orb_name', 'Ex: Fire Orb, Cost Orb, Death Orb...')}"
                      class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
                      oninput="CommunityUI.updateLiveOrbPreview()">
             </div>
@@ -2784,7 +2786,7 @@ const CommunityUI = (function() {
                 ${window.t ? window.t('comm_field_orb_effect', 'Effet / Bonus Statistique *') : 'Effet / Bonus Statistique *'}
               </label>
               <textarea id="comm-orb-effect" required rows="2"
-                        placeholder="Ex: +15% Portée & +10% Dégâts sur tous les paliers..."
+                        placeholder="${t('comm_ph_orb_effect', 'Ex: +15% Portée & +10% Dégâts sur tous les paliers...')}"
                         class="w-full bg-[#0a0f1d] border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-500"
                         oninput="CommunityUI.updateLiveOrbPreview()">${escapeHtml(existing?.effect || '')}</textarea>
             </div>
@@ -2808,12 +2810,12 @@ const CommunityUI = (function() {
                 <div class="mt-1.5 space-y-1.5">
                   <div class="flex flex-wrap items-center gap-1 text-[11px]">
                     <span class="text-[10px] text-slate-500 font-semibold mr-0.5">Suggestions :</span>
-                    <button type="button" onclick="CommunityUI.fillOrbRequire('All units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">Toutes</button>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('All units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">${t('comm_orb_require_all', 'Toutes')}</button>
                     <button type="button" onclick="CommunityUI.fillOrbRequire('6 Star Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">6★</button>
                     <button type="button" onclick="CommunityUI.fillOrbRequire('7 Star Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">7★</button>
-                    <button type="button" onclick="CommunityUI.fillOrbRequire('Ground Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">Sol</button>
-                    <button type="button" onclick="CommunityUI.fillOrbRequire('Air Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">Air</button>
-                    <button type="button" onclick="CommunityUI.fillOrbRequire('Hill Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">Colline</button>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('Ground Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">${t('comm_orb_require_ground', 'Sol')}</button>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('Air Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">${t('comm_orb_require_air', 'Air')}</button>
+                    <button type="button" onclick="CommunityUI.fillOrbRequire('Hill Units')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-200 text-[10px] tap-scale transition-colors">${t('comm_orb_require_hill', 'Colline')}</button>
                   </div>
 
                   <!-- Sélecteur de conditions existantes pour aide -->
@@ -2822,7 +2824,7 @@ const CommunityUI = (function() {
                             class="w-full bg-[#070b14] border border-slate-700/80 rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none focus:border-cyan-500 cursor-pointer">
                       <option value="">-- Ou choisir une condition d'orbe existant --</option>
                       ${orbUniqueRequires.length > 0 ? `
-                        <optgroup label="Conditions Spécifiques">
+                        <optgroup label="${t('comm_orb_custom_req_opt', 'Conditions Spécifiques')}">
                           ${orbUniqueRequires.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('')}
                         </optgroup>
                       ` : ''}
@@ -3251,7 +3253,7 @@ const CommunityUI = (function() {
             <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute start-2.5 top-2.5" stroke-width="2"></i>
           </div>
           <div class="flex items-center gap-1 overflow-x-auto py-0.5 shrink-0" id="tier-unit-rarity-filters">
-            <button type="button" onclick="CommunityUI.setAddUnitStarFilter('all', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-sky-500 text-white shadow-sm shrink-0">Tous</button>
+            <button type="button" onclick="CommunityUI.setAddUnitStarFilter('all', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-sky-500 text-white shadow-sm shrink-0">${t('tierlist_filter_all', 'Tous')}</button>
             <button type="button" onclick="CommunityUI.setAddUnitStarFilter('7', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">7★</button>
             <button type="button" onclick="CommunityUI.setAddUnitStarFilter('6', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">6★</button>
             <button type="button" onclick="CommunityUI.setAddUnitStarFilter('5', this)" class="px-2 py-1 rounded text-[11px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">5★</button>
@@ -3308,7 +3310,7 @@ const CommunityUI = (function() {
       return (u.name || '').toLowerCase().includes(q) || (u.anime_origin || '').toLowerCase().includes(q);
     });
 
-    if (countEl) countEl.textContent = `${filtered.length} unités trouvées`;
+    if (countEl) countEl.textContent = `${t('tierlist_units_found', '{count} unité(s) trouvée(s)').replace('{count}', filtered.length)}`;
 
     if (filtered.length === 0) {
       grid.innerHTML = `
@@ -3326,7 +3328,7 @@ const CommunityUI = (function() {
 
       return `
         <button type="button"
-                onclick="${isAlreadyAdded ? `if(window.showToast) window.showToast('Cette unité est déjà dans cette catégorie');` : `CommunityUI.addUnitToTier('${currentTargetTierCategory.replace(/'/g, "\\'")}', '${escapeUName}')`}"
+                onclick="${isAlreadyAdded ? `if(window.showToast) window.showToast(t('tierlist_already_in_cat', 'Cette unité est déjà dans cette catégorie'));` : `CommunityUI.addUnitToTier('${currentTargetTierCategory.replace(/'/g, "\\'")}', '${escapeUName}')`}"
                 class="p-2 rounded-xl border text-left flex items-center gap-2 tap-scale transition-all ${isAlreadyAdded ? 'bg-slate-900/40 border-slate-800/40 opacity-50 cursor-not-allowed' : 'bg-[#0e162a] hover:bg-sky-600/20 border-slate-800 hover:border-sky-500/50 group'}">
           <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
             <img src="${thumb || ''}" alt="${escapeHtml(u.name)}" loading="lazy"
@@ -3361,14 +3363,14 @@ const CommunityUI = (function() {
     window.TIERLIST_DATA[categoryName].push(unitName);
     CommunityManager.saveTierList(window.TIERLIST_DATA);
     closeModal();
-    if (window.showToast) window.showToast(`Unité ${unitName} ajoutée à ${categoryName} !`);
+    if (window.showToast) window.showToast(t('tierlist_unit_added_toast', 'Unité {name} ajoutée à {cat} !').replace('{name}', unitName).replace('{cat}', categoryName));
   }
 
   function removeUnitFromTier(categoryName, unitName) {
     if (!categoryName || !unitName || !window.TIERLIST_DATA[categoryName]) return;
     window.TIERLIST_DATA[categoryName] = window.TIERLIST_DATA[categoryName].filter(n => n.toLowerCase() !== unitName.toLowerCase());
     CommunityManager.saveTierList(window.TIERLIST_DATA);
-    if (window.showToast) window.showToast(`Unité ${unitName} retirée de ${categoryName}.`);
+    if (window.showToast) window.showToast(t('tierlist_unit_removed_toast', 'Unité {name} retirée de {cat}.').replace('{name}', unitName).replace('{cat}', categoryName));
   }
 
   function openAddTierCategoryModal() {
@@ -3379,7 +3381,7 @@ const CommunityUI = (function() {
       <form id="comm-add-cat-form" onsubmit="event.preventDefault(); CommunityUI.submitAddTierCategory();" class="space-y-4 text-xs">
         <div>
           <label class="block font-bold text-slate-200 mb-1.5">Nom de la Catégorie :</label>
-          <input type="text" id="comm-new-cat-name" required placeholder="Ex: S+ (Transcendant), GOD TIER, Méta Donjons..."
+          <input type="text" id="comm-new-cat-name" required placeholder="${t('tierlist_new_cat_ph', 'Ex: S+ (Transcendant), GOD TIER, Méta Donjons...')}"
                  class="w-full bg-[#070b14] border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
         </div>
 
@@ -3425,7 +3427,7 @@ const CommunityUI = (function() {
     if (!catName) return;
 
     if (window.TIERLIST_DATA[catName]) {
-      alert(`La catégorie "${catName}" existe déjà dans cette Tier List.`);
+      alert(t('tierlist_cat_exists', 'La catégorie "{name}" existe déjà dans cette Tier List.').replace('{name}', catName));
       return;
     }
 
@@ -3442,11 +3444,11 @@ const CommunityUI = (function() {
 
     CommunityManager.saveTierList(window.TIERLIST_DATA);
     closeModal();
-    if (window.showToast) window.showToast(`Catégorie "${catName}" créée avec succès !`);
+    if (window.showToast) window.showToast(t('tierlist_cat_created_toast', 'Catégorie "{name}" créée avec succès !').replace('{name}', catName));
   }
 
   function openRenameTierCategoryModal(oldName) {
-    const modalTitle = `Renommer la catégorie : ${oldName}`;
+    const modalTitle = `${t('tierlist_rename_cat_title', 'Renommer la catégorie : {name}').replace('{name}', oldName)}`;
     const modalBody = `
       <form id="comm-rename-cat-form" onsubmit="event.preventDefault(); CommunityUI.submitRenameTierCategory('${oldName.replace(/'/g, "\\'")}');" class="space-y-4 text-xs">
         <div>
@@ -3476,7 +3478,7 @@ const CommunityUI = (function() {
     }
 
     if (window.TIERLIST_DATA[newName]) {
-      alert(`Une catégorie intitulée "${newName}" existe déjà.`);
+      alert(t('tierlist_cat_rename_exists', 'Une catégorie intitulée "{name}" existe déjà.').replace('{name}', newName));
       return;
     }
 
@@ -3492,7 +3494,7 @@ const CommunityUI = (function() {
 
     CommunityManager.saveTierList(window.TIERLIST_DATA);
     closeModal();
-    if (window.showToast) window.showToast(`Catégorie renommée en "${newName}" !`);
+    if (window.showToast) window.showToast(t('tierlist_cat_renamed_toast', 'Catégorie renommée en "{name}" !').replace('{name}', newName));
   }
 
   function deleteTierCategory(categoryName) {
@@ -3503,7 +3505,7 @@ const CommunityUI = (function() {
 
     delete window.TIERLIST_DATA[categoryName];
     CommunityManager.saveTierList(window.TIERLIST_DATA);
-    if (window.showToast) window.showToast(`Catégorie "${categoryName}" supprimée.`);
+    if (window.showToast) window.showToast(t('tierlist_cat_deleted_toast', 'Catégorie "{name}" supprimée.').replace('{name}', categoryName));
   }
 
   function moveTierCategory(categoryName, direction) {
@@ -3532,7 +3534,7 @@ const CommunityUI = (function() {
       return;
     }
 
-    const modalTitle = `Déplacer "${unitName}" vers une autre catégorie`;
+    const modalTitle = `${t('tierlist_move_unit_title', 'Déplacer "{name}" vers une autre catégorie').replace('{name}', unitName)}`;
     const modalBody = `
       <div class="space-y-4 text-xs">
         <div>
@@ -3568,7 +3570,7 @@ const CommunityUI = (function() {
     }
     CommunityManager.saveTierList(window.TIERLIST_DATA);
     closeModal();
-    if (window.showToast) window.showToast(`"${unitName}" déplacé de ${sourceCat} vers ${targetCat} !`);
+    if (window.showToast) window.showToast(t('tierlist_unit_moved_toast', '"{name}" déplacé de {src} vers {target} !').replace('{name}', unitName).replace('{src}', sourceCat).replace('{target}', targetCat));
   }
 
   function openManageUnitInTierModal(unitName) {
@@ -3577,7 +3579,7 @@ const CommunityUI = (function() {
     const star = unitMatch ? unitMatch.star : 6;
     const thumb = unitMatch ? (window.tierThumbUrl ? window.tierThumbUrl(unitMatch) : unitMatch.image) : '';
 
-    const modalTitle = `Gérer "${unitName}" dans les Tier Lists`;
+    const modalTitle = `${t('tierlist_manage_unit_title', 'Gérer "{name}" dans les Tier Lists').replace('{name}', unitName)}`;
     const modalBody = `
       <div class="space-y-4 text-xs">
         <!-- Résumé unité -->
@@ -3645,7 +3647,7 @@ const CommunityUI = (function() {
 
     CommunityManager.saveTierList(window.TIERLIST_DATA);
     closeModal();
-    if (window.showToast) window.showToast(`Catégories de "${unitName}" mises à jour !`);
+    if (window.showToast) window.showToast(t('tierlist_unit_cats_updated', 'Catégories de "{name}" mises à jour !').replace('{name}', unitName));
   }
 
   // --- HANDLERS DRAG & DROP AVEC INDICATEUR VISUEL D'INSERTION DYNAMIQUE ---
@@ -3829,7 +3831,7 @@ const CommunityUI = (function() {
         CommunityManager.saveTierList(window.TIERLIST_DATA);
         if (window.renderTierList) window.renderTierList();
         if (window.showToast) {
-          window.showToast(`Position de "${unitName}" mise à jour dans ${targetCat} !`);
+          window.showToast(t('tierlist_pos_updated_toast', 'Position de "{name}" mise à jour dans {target} !').replace('{name}', unitName).replace('{target}', targetCat));
         }
         return;
       }
@@ -3856,7 +3858,7 @@ const CommunityUI = (function() {
     CommunityManager.saveTierList(window.TIERLIST_DATA);
     if (window.renderTierList) window.renderTierList();
     if (window.showToast) {
-      window.showToast(`"${unitName}" déplacé vers ${targetCat} (rang ${targetIndex + 1}) !`);
+      window.showToast(t('tierlist_moved_pos_toast', '"{name}" déplacé vers {target} (rang {rank}) !').replace('{name}', unitName).replace('{target}', targetCat).replace('{rank}', targetIndex + 1));
     }
   }
 
@@ -3894,7 +3896,7 @@ const CommunityUI = (function() {
       if (!isTierListEditMode) {
         toggleTierListEditMode(true);
       }
-      if (window.showToast) window.showToast('Modèle Standard (S+ / S / A / B / C / D) activé !');
+      if (window.showToast) window.showToast(t('tierlist_preset_standard_toast', 'Modèle Standard (S+ / S / A / B / C / D) activé !'));
     }
   }
 
@@ -3932,7 +3934,7 @@ const CommunityUI = (function() {
     a.download = `astd_tierlist_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    if (window.showToast) window.showToast('Fichier JSON de Tier List exporté avec succès !');
+    if (window.showToast) window.showToast(t('tierlist_export_success', 'Fichier JSON de Tier List exporté avec succès !'));
   }
 
   function importTierListJSON(file) {
@@ -3947,7 +3949,7 @@ const CommunityUI = (function() {
         }
         window.TIERLIST_DATA = cats;
         CommunityManager.saveTierList(cats);
-        if (window.showToast) window.showToast('Tier List importée avec succès !');
+        if (window.showToast) window.showToast(t('tierlist_import_success', 'Tier List importée avec succès !'));
       } catch (err) {
         alert('Erreur lors de l\'importation de la Tier List : ' + err.message);
       }
