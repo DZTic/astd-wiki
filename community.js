@@ -1389,7 +1389,9 @@ const CommunityManager = (function() {
       </div>
     `;
 
-    if (window.lucide) lucide.createIcons();
+    const sec = document.getElementById('community-contributions-section');
+    if (window.safeCreateIcons) safeCreateIcons(sec);
+    else if (window.lucide) lucide.createIcons(sec ? { root: sec } : undefined);
   }
 
   // --- RENDU DES CONSEILS DANS LA MODALE D'UNITÉ ---
@@ -1441,7 +1443,8 @@ const CommunityManager = (function() {
       </div>
     `).join('');
 
-    if (window.lucide) lucide.createIcons();
+    if (window.safeCreateIcons) safeCreateIcons(tipsContainer);
+    else if (window.lucide) lucide.createIcons({ root: tipsContainer });
   }
 
   return {
@@ -1642,7 +1645,9 @@ const CommunityUI = (function() {
     const bodyEl = document.getElementById('community-modal-body');
     if (titleEl) titleEl.textContent = title;
     if (bodyEl) bodyEl.innerHTML = html;
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   // --- GESTION ET CALCUL DES PALIERS D'AMÉLIORATION MANUELS ---
@@ -1814,7 +1819,9 @@ const CommunityUI = (function() {
     }).join('');
 
     updateTiersSummaryBadges();
-    if (window.lucide) lucide.createIcons();
+    const container = document.getElementById('upgrades-editor-container');
+    if (window.safeCreateIcons) safeCreateIcons(container);
+    else if (window.lucide) lucide.createIcons(container ? { root: container } : undefined);
   }
 
   function addUpgradeRow() {
@@ -1989,7 +1996,8 @@ const CommunityUI = (function() {
       previewWrap.innerHTML = '';
     }
 
-    if (window.lucide) lucide.createIcons();
+    if (window.safeCreateIcons) safeCreateIcons(previewWrap);
+    else if (window.lucide) lucide.createIcons(previewWrap ? { root: previewWrap } : undefined);
   }
 
   // --- FORMULAIRE UNITÉ AVEC LIVE PREVIEW ---
@@ -2339,7 +2347,9 @@ const CommunityUI = (function() {
     renderImagePreviewWidget();
     renderUpgradeRows();
     updateLivePreview();
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   function onTopTowerTypeChange(val) {
@@ -2586,7 +2596,9 @@ const CommunityUI = (function() {
       </form>
     `;
 
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   async function submitCodeForm() {
@@ -2664,7 +2676,9 @@ const CommunityUI = (function() {
       </form>
     `;
 
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   async function submitTipForm(unitId) {
@@ -2925,7 +2939,9 @@ const CommunityUI = (function() {
 
     renderOrbImagePreviewWidget();
     updateLiveOrbPreview();
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   function handleOrbImageFileUpload(file) {
@@ -3022,7 +3038,8 @@ const CommunityUI = (function() {
       previewWrap.innerHTML = '';
     }
 
-    if (window.lucide) lucide.createIcons();
+    if (window.safeCreateIcons) safeCreateIcons(previewWrap);
+    else if (window.lucide) lucide.createIcons(previewWrap ? { root: previewWrap } : undefined);
   }
 
   function fillOrbRequire(val) {
@@ -3366,7 +3383,8 @@ const CommunityUI = (function() {
       `;
     }).join('');
 
-    if (window.lucide) lucide.createIcons();
+    if (window.safeCreateIcons) safeCreateIcons(grid);
+    else if (window.lucide) lucide.createIcons(grid ? { root: grid } : undefined);
   }
 
   function addUnitToTier(categoryName, unitName) {

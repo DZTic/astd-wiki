@@ -53,6 +53,20 @@ function debounce(fn, delay = 150) {
 }
 window.debounce = debounce;
 
+function safeCreateIcons(root) {
+  if (!window.lucide || typeof window.lucide.createIcons !== 'function') return;
+  if (root && root instanceof Element) {
+    window.lucide.createIcons({ root });
+  } else if (typeof root === 'string') {
+    const el = document.getElementById(root) || document.querySelector(root);
+    if (el) window.lucide.createIcons({ root: el });
+  } else {
+    const main = document.getElementById('main-content') || document.body;
+    window.lucide.createIcons({ root: main });
+  }
+}
+window.safeCreateIcons = safeCreateIcons;
+
 // ==========================================
 // INTERNATIONALIZATION (I18N) - FR & EN
 // ==========================================
@@ -1428,7 +1442,7 @@ function setLanguage(lang) {
       const editBtn = document.getElementById('tierlist-edit-toggle-btn');
       if (editBtn) {
         editBtn.innerHTML = '<i data-lucide="eye" class="w-3.5 h-3.5"></i> <span>' + t('tierlist_btn_edit_active', 'Mode Lecture') + '</span>';
-        if (window.lucide) lucide.createIcons();
+        safeCreateIcons(editBtn);
       }
     }
     updateModalNotesLang();
@@ -1455,7 +1469,7 @@ function updateModalNotesLang() {
     const pct = typeof buffProviderPercent === 'function' ? (buffProviderPercent() || 0) : 130;
     const tpl = t('modal_idolbuff_note_tpl', 'Simulation <strong class="text-sky-300">Buff Idol (Shine)</strong> active : les dégâts et le DPS ci-dessus intègrent le <strong class="text-sky-300">buff de dégâts d\'Idol</strong> au palier maximum (<span id="modal-idolbuff-pct" class="font-mono-num text-amber-300">+{pct}%</span> pour le niveau de carte affiché). Seules les unités placées dans la portée d\'Idol en bénéficient.');
     idolNote.innerHTML = '<i data-lucide="music" class="w-3 h-3 text-sky-400 shrink-0 mt-0.5" stroke-width="2"></i> <span>' + tpl.replace('{pct}', pct) + '</span>';
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(idolNote);
   }
 }
 
@@ -2730,7 +2744,7 @@ function openAdsNoticeModal() {
   }
   document.documentElement.classList.add('modal-open');
   document.body.classList.add('modal-open');
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(modal);
 
   const confirmBtn = document.getElementById('ads-notice-confirm-btn');
   if (confirmBtn) {
@@ -3381,7 +3395,7 @@ function toggleMobileMenu() {
     drawer.classList.toggle('hidden');
     if (icon) {
       icon.setAttribute('data-lucide', isHidden ? 'x' : 'menu');
-      if (window.lucide) lucide.createIcons();
+      safeCreateIcons(icon.parentElement || icon);
     }
   }
 }
@@ -3394,7 +3408,7 @@ function switchTabAndCloseDrawer(tabId) {
     drawer.classList.add('hidden');
     if (icon) {
       icon.setAttribute('data-lucide', 'menu');
-      if (window.lucide) lucide.createIcons();
+      safeCreateIcons(icon.parentElement || icon);
     }
   }
 }
@@ -3612,7 +3626,7 @@ function renderUnitsList() {
       </div>
     `;
     if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(grid);
     return;
   }
 
@@ -3622,8 +3636,6 @@ function renderUnitsList() {
   if (loadMoreBtn) {
     loadMoreBtn.classList.toggle('hidden', displayedCount >= FILTERED_UNITS.length);
   }
-
-  if (window.lucide) lucide.createIcons();
 }
 
 function renderUnitsTable() {
@@ -3677,7 +3689,7 @@ function renderUnitsTable() {
     </tr>
   `).join('');
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(tbody);
 }
 
 let _loadMoreObserver = null;
@@ -3714,8 +3726,6 @@ function loadMoreUnits() {
   if (loadMoreBtn) {
     loadMoreBtn.classList.toggle('hidden', displayedCount >= FILTERED_UNITS.length);
   }
-
-  if (window.lucide) lucide.createIcons({ root: grid });
 }
 
 // Safety net: strip any leftover wiki markup at render time
@@ -3810,11 +3820,11 @@ function createUnitCardHTML(unit) {
       <!-- Action Buttons -->
       <div class="mt-3 flex items-center space-x-1.5" onclick="event.stopPropagation()">
         <button onclick="openUnitModal('${unit.id}')" aria-label="${t('btn_card', 'Fiche')} : ${unit.name}" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1 transition-colors">
-          <i data-lucide="eye" class="w-3 h-3" stroke-width="2"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
           <span>${t('btn_card', 'Fiche')}</span>
         </button>
         <button onclick="startCompareWith('${unit.id}')" aria-label="${t('btn_compare_title', 'Comparer cette unité')} ${unit.name}" class="px-2 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="${t('btn_compare_title', 'Comparer cette unité')}">
-          <i data-lucide="arrow-left-right" class="w-3 h-3" stroke-width="2"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
         </button>
         <button onclick="addUnitToTeam('${unit.id}')" aria-label="${t('btn_add_deck_title', 'Ajouter au deck')} ${unit.name}" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="${t('btn_add_deck_title', 'Ajouter au deck')}">
           +
@@ -4269,7 +4279,7 @@ function openUnitModal(unitId) {
   document.body.classList.add('modal-open');
   document.documentElement.style.overflow = 'hidden';
   document.body.style.overflow = 'hidden';
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(modal);
 
   // Send keyboard focus to the modal close button
   requestAnimationFrame(() => {
@@ -4303,7 +4313,7 @@ function setLevelView(level) {
 
   renderModalHeaderStats();
   renderUpgradesTable();
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(document.getElementById('modal-upgrades-table'));
 }
 
 // Rebuild the upgrades table for currentModalUnit at the selected card level
@@ -4494,7 +4504,7 @@ function renderUpgradesTable() {
     `;
   }
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(document.getElementById('modal-upgrades-table'));
 }
 
 function closeUnitModal() {
@@ -4562,7 +4572,7 @@ function toggleUpgradeAbility(idx) {
     icon.classList.toggle('text-amber-400', !nowHidden);
     icon.classList.toggle('text-sky-400', nowHidden);
   }
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(detailRow);
 }
 
 // // Toggle the pre-evolutions block on the unit modal
@@ -4640,7 +4650,7 @@ function renderTierList() {
         </button>
       </div>
     `;
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(container);
     return;
   }
 
@@ -4665,7 +4675,7 @@ function renderTierList() {
         <button onclick="document.getElementById('tierlist-filter-search').value=''; CommunityUI.onTierListSearch('');" class="text-xs text-sky-400 hover:underline tap-scale font-semibold">${t('filter_reset_btn', 'Réinitialiser le filtre')}</button>
       </div>
     `;
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(container);
     return;
   }
 
@@ -4811,7 +4821,7 @@ function renderTierList() {
     `;
   }).join('');
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(container);
 }
 
 function openUnitByName(name) {
@@ -4878,7 +4888,7 @@ function renderCodes() {
     renderExpiredCodesList(CODES_DATA.expired);
   }
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(document.getElementById('codes-section'));
 }
 
 function renderExpiredCodesList(list) {
@@ -4931,11 +4941,9 @@ function copyCodeText(text, btnElement) {
     showToast(t('toast_code_copied', 'Code "{code}" copié !').replace('{code}', text));
     if (btn) {
       const origHTML = btn.innerHTML;
-      btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i><span>${t('copied', 'Copié !')}</span>`;
-      if (window.lucide) lucide.createIcons();
+      btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-slate-950"><polyline points="20 6 9 17 4 12"/></svg><span>${t('copied', 'Copié !')}</span>`;
       setTimeout(() => {
         btn.innerHTML = origHTML;
-        if (window.lucide) lucide.createIcons();
       }, 1800);
     }
   };
@@ -5008,7 +5016,7 @@ function renderOrbCard(o) {
 
       <div class="flex items-center justify-end pt-2 border-t border-slate-800/80 text-[11px]">
         <button onclick="if(window.CommunityUI) CommunityUI.openOrbModalForEdit(decodeURIComponent('${encodedName}'))" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-600 hover:text-white text-slate-300 font-semibold text-xs tap-scale flex items-center gap-1.5 transition-colors" title="${t('comm_btn_edit_orb_title', 'Modifier cet orbe')}">
-          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-amber-400"><path d="M12 20h9"/><path d="16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
           <span>${t('comm_action_edit', 'Éditer')}</span>
         </button>
       </div>
@@ -5020,7 +5028,7 @@ function renderOrbs() {
   const grid = document.getElementById('orbs-grid');
   if (!grid) return;
   grid.innerHTML = ORBS_DATA.map(renderOrbCard).join('');
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(grid);
 }
 
 const debouncedFilterOrbs = debounce(function() {
@@ -5053,7 +5061,7 @@ const debouncedFilterOrbs = debounce(function() {
   } else {
     grid.innerHTML = filtered.map(renderOrbCard).join('');
   }
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(grid);
 }, 150);
 
 function filterOrbs(immediate = false) {
@@ -5101,7 +5109,7 @@ function renderGameModes() {
     `;
   }).join('');
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(grid);
 }
 
 // ==========================================
@@ -5152,8 +5160,8 @@ function renderTeamBuilder() {
   }).join('');
 
   updateTeamStats();
-  renderTeamPicker();
-  if (window.lucide) lucide.createIcons();
+  renderTeamPicker(true);
+  safeCreateIcons(document.getElementById('team-section'));
 }
 
 function updateTeamStats() {
@@ -5523,7 +5531,7 @@ function _doCompareSearch(slot) {
   `).join('');
 
   dropdown.classList.remove('hidden');
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(dropdown);
 }
 
 function hideCompareDropdown(slot) {
@@ -5733,7 +5741,7 @@ function renderCompareView() {
         </div>
       </div>
     `;
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(container);
     return;
   }
 
@@ -5974,7 +5982,7 @@ function renderCompareView() {
     </div>
   `;
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(container);
 }
 
 // ==========================================
@@ -6003,7 +6011,7 @@ function showToast(message) {
     }, 150);
   }, 2200);
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(toast);
 }
 
 // ==========================================
