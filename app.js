@@ -14,7 +14,7 @@ var MATERIAL_IMAGES = {};
 
 window.ALL_UNITS = ALL_UNITS;
 window.getGlobalUnits = () => ALL_UNITS;
-window.setGlobalUnits = (list) => { ALL_UNITS = list; window.ALL_UNITS = list; };
+window.setGlobalUnits = (list) => { ALL_UNITS = list; window.ALL_UNITS = list; rebuildUnitsIndex(); };
 
 window.ORBS_DATA = ORBS_DATA;
 window.getGlobalOrbs = () => ORBS_DATA;
@@ -34,6 +34,71 @@ let currentModalUnit = null;
 let teamSlots = [null, null, null, null, null, null];
 let currentLevelView = 1; // 1 | 175 : niveau de carte affiché dans la fiche unité
 let lastFocusedElement = null;
+
+// ==========================================
+// UTILITIES
+// ==========================================
+function debounce(fn, delay = 150) {
+  let timer;
+  const debounced = function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+  debounced.cancel = () => clearTimeout(timer);
+  debounced.now = (...args) => {
+    clearTimeout(timer);
+    return fn.apply(this, args);
+  };
+  return debounced;
+}
+window.debounce = debounce;
+
+let unitsByIdMap = new Map();
+let unitsByNameMap = new Map();
+
+function rebuildUnitsIndex() {
+  unitsByIdMap.clear();
+  unitsByNameMap.clear();
+  for (let i = 0; i < ALL_UNITS.length; i++) {
+    const u = ALL_UNITS[i];
+    if (u.id) unitsByIdMap.set(u.id, u);
+    if (u.name) unitsByNameMap.set(u.name.toLowerCase(), u);
+  }
+}
+
+function findUnitById(id) {
+  if (!id) return null;
+  return unitsByIdMap.get(id) || null;
+}
+
+function findUnitByName(name) {
+  if (!name) return null;
+  return unitsByNameMap.get(name.toLowerCase()) || null;
+}
+
+function findUnitByIdOrName(val) {
+  if (!val) return null;
+  return unitsByIdMap.get(val) || unitsByNameMap.get(val.toLowerCase()) || null;
+}
+
+window.findUnitById = findUnitById;
+window.findUnitByName = findUnitByName;
+window.findUnitByIdOrName = findUnitByIdOrName;
+window.rebuildUnitsIndex = rebuildUnitsIndex;
+
+function safeCreateIcons(root) {
+  if (!window.lucide || typeof window.lucide.createIcons !== 'function') return;
+  if (root && root instanceof Element) {
+    window.lucide.createIcons({ root });
+  } else if (typeof root === 'string') {
+    const el = document.getElementById(root) || document.querySelector(root);
+    if (el) window.lucide.createIcons({ root: el });
+  } else {
+    const main = document.getElementById('main-content') || document.body;
+    window.lucide.createIcons({ root: main });
+  }
+}
+window.safeCreateIcons = safeCreateIcons;
 
 // ==========================================
 // INTERNATIONALIZATION (I18N) - FR & EN
@@ -424,6 +489,7 @@ const I18N = {
     compare_empty_desc: "Utilisez les champs de recherche ci-dessus pour désigner les deux unités à confronter, ou lancez un duel populaire en un clic.",
     compare_choose_second: "— choisissez la 2nde unité",
     compare_no_unit: "Aucune unité sélectionnée pour le moment.",
+    loading_data: "Chargement des données...",
     loading_units: "Chargement des unités en cours...",
     no_units_found: "Aucune unité trouvée",
     toast_added_to_compare: "« {name} » ajouté au comparateur",
@@ -1053,6 +1119,7 @@ const I18N = {
     compare_empty_desc: "Use the search inputs above to choose two units to compare, or start a popular duel in one click.",
     compare_choose_second: "— select the 2nd unit",
     compare_no_unit: "No unit selected yet.",
+    loading_data: "Loading data...",
     loading_units: "Loading units...",
     no_units_found: "No units found",
     toast_added_to_compare: "\"{name}\" added to comparator",
@@ -1410,7 +1477,7 @@ function setLanguage(lang) {
       const editBtn = document.getElementById('tierlist-edit-toggle-btn');
       if (editBtn) {
         editBtn.innerHTML = '<i data-lucide="eye" class="w-3.5 h-3.5"></i> <span>' + t('tierlist_btn_edit_active', 'Mode Lecture') + '</span>';
-        if (window.lucide) lucide.createIcons();
+        safeCreateIcons(editBtn);
       }
     }
     updateModalNotesLang();
@@ -1437,7 +1504,7 @@ function updateModalNotesLang() {
     const pct = typeof buffProviderPercent === 'function' ? (buffProviderPercent() || 0) : 130;
     const tpl = t('modal_idolbuff_note_tpl', 'Simulation <strong class="text-sky-300">Buff Idol (Shine)</strong> active : les dégâts et le DPS ci-dessus intègrent le <strong class="text-sky-300">buff de dégâts d\'Idol</strong> au palier maximum (<span id="modal-idolbuff-pct" class="font-mono-num text-amber-300">+{pct}%</span> pour le niveau de carte affiché). Seules les unités placées dans la portée d\'Idol en bénéficient.');
     idolNote.innerHTML = '<i data-lucide="music" class="w-3 h-3 text-sky-400 shrink-0 mt-0.5" stroke-width="2"></i> <span>' + tpl.replace('{pct}', pct) + '</span>';
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(idolNote);
   }
 }
 
@@ -2712,7 +2779,7 @@ function openAdsNoticeModal() {
   }
   document.documentElement.classList.add('modal-open');
   document.body.classList.add('modal-open');
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(modal);
 
   const confirmBtn = document.getElementById('ads-notice-confirm-btn');
   if (confirmBtn) {
@@ -2848,8 +2915,80 @@ const ASTDCache = {
 // LAZY RENDERING DES ONGLETS (ISSUE #6)
 // ==========================================
 const renderedTabs = new Set();
+const loadedDatasets = new Set();
 
-function renderTabContent(tabId) {
+function showTabLoadingSkeleton(tabId) {
+  let targetContainer = null;
+  if (tabId === 'tierlist') targetContainer = document.getElementById('tierlist-categories-container');
+  else if (tabId === 'codes') targetContainer = document.getElementById('active-codes-container');
+  else if (tabId === 'orbs') targetContainer = document.getElementById('orbs-grid');
+  else if (tabId === 'gamemodes') targetContainer = document.getElementById('gamemodes-grid');
+
+  if (!targetContainer) return;
+  targetContainer.innerHTML = `
+    <div class="col-span-full py-12 text-center flex flex-col items-center justify-center space-y-3">
+      <div class="w-8 h-8 rounded-full border-2 border-sky-500 border-t-transparent animate-spin"></div>
+      <p class="text-xs text-slate-400 font-mono-num animate-pulse">${t('loading_data', 'Chargement des données...')}</p>
+    </div>
+  `;
+}
+
+async function ensureDatasetLoaded(datasetKey) {
+  if (loadedDatasets.has(datasetKey)) return true;
+
+  const dataPrefix = window.location.pathname.includes('/public/') ? '../data/' : './data/';
+  const cachedMeta = await ASTDCache.get('meta');
+  const isCacheFresh = META_DATA && META_DATA.last_updated && cachedMeta && cachedMeta.last_updated === META_DATA.last_updated;
+
+  if (isCacheFresh) {
+    const cached = await ASTDCache.get(datasetKey);
+    if (cached) {
+      applyDataset(datasetKey, cached);
+      loadedDatasets.add(datasetKey);
+      return true;
+    }
+  }
+
+  try {
+    const res = await fetch(`${dataPrefix}${datasetKey}.json`).then(r => r.json());
+    if (res) {
+      applyDataset(datasetKey, res);
+      ASTDCache.set(datasetKey, res);
+      loadedDatasets.add(datasetKey);
+      return true;
+    }
+  } catch (err) {
+    console.warn(`Impossible de charger ${datasetKey}:`, err);
+  }
+  return false;
+}
+
+function applyDataset(key, data) {
+  switch (key) {
+    case 'codes':
+      if (Array.isArray(data.active)) {
+        data.active.sort((a, b) => codeTimestamp(b) - codeTimestamp(a));
+      }
+      CODES_DATA = data;
+      if (data.active && data.active.length > 0) {
+        const heroCodeEl = document.getElementById('hero-code-name');
+        if (heroCodeEl) heroCodeEl.textContent = data.active[0].code;
+      }
+      break;
+    case 'orbs':
+      ORBS_DATA = Array.isArray(data) ? data : [];
+      break;
+    case 'tierlist':
+      TIERLIST_DATA = data || {};
+      window.TIERLIST_DATA = TIERLIST_DATA;
+      break;
+    case 'gamemodes':
+      GAMEMODES_DATA = Array.isArray(data) ? data : [];
+      break;
+  }
+}
+
+async function renderTabContent(tabId) {
   if (!tabId) tabId = 'units';
   const isAlreadyRendered = renderedTabs.has(tabId);
 
@@ -2862,24 +3001,40 @@ function renderTabContent(tabId) {
       break;
     case 'tierlist':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('tierlist')) {
+          showTabLoadingSkeleton('tierlist');
+          await ensureDatasetLoaded('tierlist');
+        }
         renderTierList();
         renderedTabs.add('tierlist');
       }
       break;
     case 'codes':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('codes')) {
+          showTabLoadingSkeleton('codes');
+          await ensureDatasetLoaded('codes');
+        }
         renderCodes();
         renderedTabs.add('codes');
       }
       break;
     case 'orbs':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('orbs')) {
+          showTabLoadingSkeleton('orbs');
+          await ensureDatasetLoaded('orbs');
+        }
         renderOrbs();
         renderedTabs.add('orbs');
       }
       break;
     case 'gamemodes':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('gamemodes')) {
+          showTabLoadingSkeleton('gamemodes');
+          await ensureDatasetLoaded('gamemodes');
+        }
         renderGameModes();
         renderedTabs.add('gamemodes');
       }
@@ -2925,52 +3080,34 @@ async function loadData() {
     const cachedMeta = await ASTDCache.get('meta');
     const isCacheFresh = remoteMeta && remoteMeta.last_updated && cachedMeta && cachedMeta.last_updated === remoteMeta.last_updated;
 
-    let unitsRes, codesRes, orbsRes, tierRes, modesRes, metaRes, matImagesRes;
+    let unitsRes, matImagesRes;
 
     if (isCacheFresh) {
-      // CACHE HIT : Restauration instantanée depuis IndexedDB (< 20ms, 0 octet réseau)
-      const [cachedUnits, cachedCodes, cachedOrbs, cachedTier, cachedModes, cachedMatImages] = await Promise.all([
+      // CACHE HIT : Restauration instantanée des unités depuis IndexedDB (< 20ms, 0 octet réseau)
+      const [cachedUnits, cachedMatImages] = await Promise.all([
         ASTDCache.get('units'),
-        ASTDCache.get('codes'),
-        ASTDCache.get('orbs'),
-        ASTDCache.get('tierlist'),
-        ASTDCache.get('gamemodes'),
         ASTDCache.get('material_images')
       ]);
 
-      if (cachedUnits && Array.isArray(cachedUnits) && cachedCodes && cachedOrbs && cachedTier && cachedModes) {
+      if (cachedUnits && Array.isArray(cachedUnits) && cachedUnits.length > 0) {
         unitsRes = cachedUnits;
-        codesRes = cachedCodes;
-        orbsRes = cachedOrbs;
-        tierRes = cachedTier;
-        modesRes = cachedModes;
-        metaRes = remoteMeta;
         matImagesRes = cachedMatImages || {};
       }
     }
 
-    // Si Cache Miss ou première visite : téléchargement réseau complet
+    // Si Cache Miss ou première visite : téléchargement réseau des unités uniquement (Lazy Data Fetching - Issue #16)
     if (!unitsRes) {
-      [unitsRes, codesRes, orbsRes, tierRes, modesRes, metaRes, matImagesRes] = await Promise.all([
+      [unitsRes, matImagesRes] = await Promise.all([
         fetch(`${dataPrefix}units.json`).then(r => r.json()),
-        fetch(`${dataPrefix}codes.json`).then(r => r.json()),
-        fetch(`${dataPrefix}orbs.json`).then(r => r.json()),
-        fetch(`${dataPrefix}tierlist.json`).then(r => r.json()),
-        fetch(`${dataPrefix}gamemodes.json`).then(r => r.json()),
-        Promise.resolve(remoteMeta && remoteMeta.last_updated ? remoteMeta : fetch(`${dataPrefix}meta.json`).then(r => r.json()).catch(() => ({}))),
         fetch(`${dataPrefix}material_images.json`).then(r => r.json()).catch(() => ({}))
       ]);
 
       // Sauvegarde asynchrone dans IndexedDB sans bloquer l'affichage
       if (Array.isArray(unitsRes) && unitsRes.length > 0) {
         ASTDCache.set('units', unitsRes);
-        ASTDCache.set('codes', codesRes);
-        ASTDCache.set('orbs', orbsRes);
-        ASTDCache.set('tierlist', tierRes);
-        ASTDCache.set('gamemodes', modesRes);
         ASTDCache.set('material_images', matImagesRes);
-        if (metaRes && metaRes.last_updated) {
-          ASTDCache.set('meta', metaRes);
+        if (remoteMeta && remoteMeta.last_updated) {
+          ASTDCache.set('meta', remoteMeta);
         }
       }
     }
@@ -2982,17 +3119,20 @@ async function loadData() {
       });
     }
     ALL_UNITS = unitsRes;
-    // Le tableau du wiki n'est pas trié par date : on met les codes les plus récents en premier
-    if (Array.isArray(codesRes.active)) {
-      codesRes.active.sort((a, b) => codeTimestamp(b) - codeTimestamp(a));
-    }
-    CODES_DATA = codesRes;
-    ORBS_DATA = orbsRes;
-    TIERLIST_DATA = tierRes;
-    window.TIERLIST_DATA = tierRes;
-    GAMEMODES_DATA = modesRes;
-    META_DATA = metaRes;
+    rebuildUnitsIndex();
+    loadedDatasets.add('units');
+    META_DATA = remoteMeta;
     MATERIAL_IMAGES = matImagesRes || {};
+
+    // Préchargement asynchrone non-bloquant des codes pour le ticker du header
+    if (typeof window !== 'undefined') {
+      const preloadCodes = () => ensureDatasetLoaded('codes');
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(preloadCodes, { timeout: 2000 });
+      } else {
+        setTimeout(preloadCodes, 100);
+      }
+    }
 
     // Intégrer les ajouts et modifications de la communauté
     if (window.CommunityManager) {
@@ -3005,7 +3145,7 @@ async function loadData() {
     if (unitsCountEl) unitsCountEl.textContent = ALL_UNITS.length.toLocaleString();
 
     const orbsCountEl = document.getElementById('stat-orbs-count');
-    if (orbsCountEl) orbsCountEl.textContent = ORBS_DATA.length;
+    if (orbsCountEl) orbsCountEl.textContent = (META_DATA && META_DATA.total_orbs) ? META_DATA.total_orbs : (ORBS_DATA.length || 49);
 
     const activeBadge = document.getElementById('badge-active-codes');
     if (activeBadge) activeBadge.textContent = CODES_DATA.active.length;
@@ -3075,10 +3215,13 @@ function setupEventListeners() {
   const obtainableCheck = document.getElementById('filter-obtainable');
   const quickSearch = document.getElementById('quick-search');
 
+  const debouncedApplyUnitFilters = debounce(applyUnitFilters, 150);
+  setupInfiniteScroll();
+
   if (searchInput) {
     searchInput.addEventListener('input', () => {
       document.getElementById('clear-search')?.classList.toggle('hidden', !searchInput.value);
-      applyUnitFilters();
+      debouncedApplyUnitFilters();
     });
   }
 
@@ -3088,7 +3231,7 @@ function setupEventListeners() {
       if (searchInput) {
         searchInput.value = e.target.value;
         document.getElementById('clear-search')?.classList.toggle('hidden', !searchInput.value);
-        applyUnitFilters();
+        debouncedApplyUnitFilters();
       }
     });
   }
@@ -3100,7 +3243,7 @@ function setupEventListeners() {
       if (searchInput) {
         searchInput.value = e.target.value;
         document.getElementById('clear-search')?.classList.toggle('hidden', !searchInput.value);
-        applyUnitFilters();
+        debouncedApplyUnitFilters();
       }
     });
   }
@@ -3360,7 +3503,7 @@ function toggleMobileMenu() {
     drawer.classList.toggle('hidden');
     if (icon) {
       icon.setAttribute('data-lucide', isHidden ? 'x' : 'menu');
-      if (window.lucide) lucide.createIcons();
+      safeCreateIcons(icon.parentElement || icon);
     }
   }
 }
@@ -3373,7 +3516,7 @@ function switchTabAndCloseDrawer(tabId) {
     drawer.classList.add('hidden');
     if (icon) {
       icon.setAttribute('data-lucide', 'menu');
-      if (window.lucide) lucide.createIcons();
+      safeCreateIcons(icon.parentElement || icon);
     }
   }
 }
@@ -3402,7 +3545,6 @@ function setViewMode(mode) {
   if (mode === 'table') {
     gridEl?.classList.add('hidden');
     tableContainer?.classList.remove('hidden');
-    loadMoreBtn?.classList.add('hidden');
 
     if (btnTable) {
       btnTable.className = 'flex-1 py-1 ps-2 pe-2.5 rounded text-xs font-semibold text-white bg-sky-600 flex items-center justify-center space-x-1 tap-scale';
@@ -3555,6 +3697,7 @@ function applyUnitFilters() {
   });
 
   displayedCount = pageSize;
+  displayedTableCount = tablePageSize;
 
   if (currentViewMode === 'table') {
     renderUnitsTable();
@@ -3591,7 +3734,7 @@ function renderUnitsList() {
       </div>
     `;
     if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(grid);
     return;
   }
 
@@ -3601,27 +3744,18 @@ function renderUnitsList() {
   if (loadMoreBtn) {
     loadMoreBtn.classList.toggle('hidden', displayedCount >= FILTERED_UNITS.length);
   }
-
-  if (window.lucide) lucide.createIcons();
 }
 
-function renderUnitsTable() {
-  const tbody = document.getElementById('units-table-tbody');
-  const countEl = document.getElementById('results-count');
-  if (countEl) {
-    const unitWord = currentLang === 'en' ? (FILTERED_UNITS.length > 1 ? 'units' : 'unit') : (FILTERED_UNITS.length > 1 ? 'unités' : 'unité');
-    countEl.textContent = `${FILTERED_UNITS.length} ${unitWord}`;
-  }
+let tablePageSize = 35;
+let displayedTableCount = 35;
 
-  if (!tbody) return;
-
+function createUnitTableRowHTML(u) {
   const fallbackImg = "https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png";
-
-  tbody.innerHTML = FILTERED_UNITS.slice(0, 150).map(u => `
+  return `
     <tr class="hover:bg-slate-800/60 transition-colors duration-100 cursor-pointer" onclick="openUnitModal('${u.id}')" tabindex="0" role="button" aria-label="${u.name}, ${u.star}★. ${t('table_view_sheet', 'Voir la fiche.')}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openUnitModal('${u.id}');}">
       <td class="p-3 flex items-center space-x-2.5">
         <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 p-0.5 shrink-0 flex items-center justify-center">
-          <img src="${u.image || fallbackImg}" alt="" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+          <img src="${u.image || fallbackImg}" alt="" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
         </div>
         <div class="min-w-0 font-sans">
           <div class="font-bold text-white truncate">${u.name}</div>
@@ -3654,14 +3788,95 @@ function renderUnitsTable() {
         </button>
       </td>
     </tr>
-  `).join('');
+  `;
+}
 
-  if (window.lucide) lucide.createIcons();
+function renderUnitsTable() {
+  const tbody = document.getElementById('units-table-tbody');
+  const countEl = document.getElementById('results-count');
+  const loadMoreBtn = document.getElementById('load-more-container');
+  if (countEl) {
+    const unitWord = currentLang === 'en' ? (FILTERED_UNITS.length > 1 ? 'units' : 'unit') : (FILTERED_UNITS.length > 1 ? 'unités' : 'unité');
+    countEl.textContent = `${FILTERED_UNITS.length} ${unitWord}`;
+  }
+
+  if (!tbody) return;
+
+  displayedTableCount = tablePageSize;
+  const initialBatch = FILTERED_UNITS.slice(0, displayedTableCount);
+  tbody.innerHTML = initialBatch.map(createUnitTableRowHTML).join('');
+
+  if (loadMoreBtn) {
+    loadMoreBtn.classList.toggle('hidden', displayedTableCount >= FILTERED_UNITS.length);
+  }
+
+  safeCreateIcons(tbody);
+}
+
+function loadMoreTableUnits() {
+  const tbody = document.getElementById('units-table-tbody');
+  const loadMoreBtn = document.getElementById('load-more-container');
+  if (!tbody) return;
+
+  const nextBatch = FILTERED_UNITS.slice(displayedTableCount, displayedTableCount + tablePageSize);
+  if (nextBatch.length === 0) {
+    if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
+    return;
+  }
+
+  const fragment = nextBatch.map(createUnitTableRowHTML).join('');
+  tbody.insertAdjacentHTML('beforeend', fragment);
+  displayedTableCount += nextBatch.length;
+
+  if (loadMoreBtn) {
+    loadMoreBtn.classList.toggle('hidden', displayedTableCount >= FILTERED_UNITS.length);
+  }
+
+  safeCreateIcons(tbody);
+}
+
+let _loadMoreObserver = null;
+function setupInfiniteScroll() {
+  const container = document.getElementById('load-more-container');
+  if (!container || !('IntersectionObserver' in window)) return;
+  if (_loadMoreObserver) _loadMoreObserver.disconnect();
+  _loadMoreObserver = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+    if (entry && entry.isIntersecting) {
+      if (currentTab === 'units') {
+        if (currentViewMode === 'grid' && displayedCount < FILTERED_UNITS.length) {
+          loadMoreUnits();
+        } else if (currentViewMode === 'table' && displayedTableCount < FILTERED_UNITS.length) {
+          loadMoreTableUnits();
+        }
+      }
+    }
+  }, { rootMargin: '250px' });
+  _loadMoreObserver.observe(container);
 }
 
 function loadMoreUnits() {
-  displayedCount += pageSize;
-  renderUnitsList();
+  if (currentViewMode === 'table') {
+    loadMoreTableUnits();
+    return;
+  }
+  const grid = document.getElementById('units-grid');
+  const loadMoreBtn = document.getElementById('load-more-container');
+  if (!grid) return;
+
+  const nextUnits = FILTERED_UNITS.slice(displayedCount, displayedCount + pageSize);
+  if (nextUnits.length === 0) {
+    if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
+    return;
+  }
+
+  const fragmentHTML = nextUnits.map(u => createUnitCardHTML(u)).join('');
+  grid.insertAdjacentHTML('beforeend', fragmentHTML);
+  displayedCount += nextUnits.length;
+
+  if (loadMoreBtn) {
+    loadMoreBtn.classList.toggle('hidden', displayedCount >= FILTERED_UNITS.length);
+  }
 }
 
 // Safety net: strip any leftover wiki markup at render time
@@ -3718,7 +3933,7 @@ function createUnitCardHTML(unit) {
 
       <!-- Avatar Framed with concentric radius & neutral outline -->
       <div class="w-full h-32 rounded-lg bg-[#070b14] border border-slate-800/80 p-2 my-1 flex items-center justify-center relative overflow-hidden group-hover:border-sky-500/40 transition-colors duration-150">
-        <img src="${imgSrc}" alt="" loading="lazy"
+        <img src="${imgSrc}" alt="" width="128" height="128" loading="lazy" decoding="async"
              onerror="this.src='${fallbackImg}'"
              class="max-h-full max-w-full object-contain filter drop-shadow img-outline rounded-md group-hover:scale-105 transition-transform duration-150 ease-out">
       </div>
@@ -3756,11 +3971,11 @@ function createUnitCardHTML(unit) {
       <!-- Action Buttons -->
       <div class="mt-3 flex items-center space-x-1.5" onclick="event.stopPropagation()">
         <button onclick="openUnitModal('${unit.id}')" aria-label="${t('btn_card', 'Fiche')} : ${unit.name}" class="flex-1 ps-2.5 pe-3 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center space-x-1 transition-colors">
-          <i data-lucide="eye" class="w-3 h-3" stroke-width="2"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
           <span>${t('btn_card', 'Fiche')}</span>
         </button>
         <button onclick="startCompareWith('${unit.id}')" aria-label="${t('btn_compare_title', 'Comparer cette unité')} ${unit.name}" class="px-2 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-semibold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="${t('btn_compare_title', 'Comparer cette unité')}">
-          <i data-lucide="arrow-left-right" class="w-3 h-3" stroke-width="2"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
         </button>
         <button onclick="addUnitToTeam('${unit.id}')" aria-label="${t('btn_add_deck_title', 'Ajouter au deck')} ${unit.name}" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-sky-600 hover:text-white border border-slate-800 text-[11px] font-bold text-slate-300 tap-scale flex items-center justify-center transition-colors" title="${t('btn_add_deck_title', 'Ajouter au deck')}">
           +
@@ -3884,7 +4099,7 @@ function renderModalAbilities(unit) {
         <div class="shrink-0 flex sm:flex-col items-center justify-center">
           <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center justify-center overflow-hidden p-1 shadow-md">
             ${ab.icon_url ? `
-              <img src="${ab.icon_url}" alt="${localizedName}" class="max-w-full max-h-full object-contain img-outline rounded-lg"
+              <img src="${ab.icon_url}" alt="${localizedName}" width="48" height="48" loading="lazy" decoding="async" class="max-w-full max-h-full object-contain img-outline rounded-lg"
                    onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
               <i data-lucide="${cfg.icon}" class="w-6 h-6 ${cfg.iconColor} hidden"></i>
             ` : `
@@ -3924,7 +4139,7 @@ function renderModalAbilities(unit) {
 // ==========================================
 
 function openUnitModal(unitId) {
-  const unit = ALL_UNITS.find(u => u.id === unitId || u.name.toLowerCase() === unitId.toLowerCase());
+  const unit = findUnitByIdOrName(unitId);
   if (!unit) return;
 
   // Save active element to restore focus on modal close
@@ -4058,7 +4273,7 @@ function openUnitModal(unitId) {
                   title="Voir la fiche de ${evoTargetUnit.name}"
                   class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-amber-500/40 hover:border-amber-400 hover:bg-slate-800 tap-scale transition-colors shadow-sm group">
             <span class="w-7 h-7 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
-              <img src="${evoTargetUnit.image || fallbackImg}" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
+              <img src="${evoTargetUnit.image || fallbackImg}" width="28" height="28" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
             </span>
             <span class="text-xs font-bold text-amber-400 group-hover:text-amber-300 transition-colors">${evoTargetUnit.name}</span>
             <span class="inline-block text-[10px] font-mono-num font-bold star-${evoTargetUnit.star}-badge px-1 rounded">${evoTargetUnit.star}★</span>
@@ -4099,7 +4314,7 @@ function openUnitModal(unitId) {
                           title="Voir la fiche de ${matUnit.name}"
                           class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700/90 hover:border-sky-500/60 hover:bg-slate-800 tap-scale transition-colors shadow-sm group text-left">
                     <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
-                      <img src="${imgSrc}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
+                      <img src="${imgSrc}" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
                     </span>
                     <span class="min-w-0 pr-0.5">
                       <span class="block text-xs font-semibold text-slate-200 group-hover:text-white truncate max-w-[130px] sm:max-w-[160px]">${mName}</span>
@@ -4115,7 +4330,7 @@ function openUnitModal(unitId) {
                 return `
                   <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-700/70 shadow-sm text-left">
                     <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
-                      <img src="${imgSrc}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
+                      <img src="${imgSrc}" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
                     </span>
                     <span class="min-w-0 pr-0.5">
                       <span class="block text-xs font-semibold text-slate-200 truncate max-w-[130px] sm:max-w-[160px]">${mName}</span>
@@ -4171,7 +4386,7 @@ function openUnitModal(unitId) {
             <button onclick="openUnitModal('${p.id}')"
                     class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-sky-500/50 hover:bg-slate-800 tap-scale transition-colors shadow-sm">
               <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
-                <img src="${p.image || fallbackImg}" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
+                <img src="${p.image || fallbackImg}" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
               </span>
               <span class="text-left min-w-0">
                 <span class="block text-[11px] font-bold text-white truncate max-w-[150px]" title="${p.name}">${p.name}</span>
@@ -4215,7 +4430,7 @@ function openUnitModal(unitId) {
   document.body.classList.add('modal-open');
   document.documentElement.style.overflow = 'hidden';
   document.body.style.overflow = 'hidden';
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(modal);
 
   // Send keyboard focus to the modal close button
   requestAnimationFrame(() => {
@@ -4249,7 +4464,7 @@ function setLevelView(level) {
 
   renderModalHeaderStats();
   renderUpgradesTable();
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(document.getElementById('modal-upgrades-table'));
 }
 
 // Rebuild the upgrades table for currentModalUnit at the selected card level
@@ -4440,7 +4655,7 @@ function renderUpgradesTable() {
     `;
   }
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(document.getElementById('modal-upgrades-table'));
 }
 
 function closeUnitModal() {
@@ -4508,7 +4723,7 @@ function toggleUpgradeAbility(idx) {
     icon.classList.toggle('text-amber-400', !nowHidden);
     icon.classList.toggle('text-sky-400', nowHidden);
   }
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(detailRow);
 }
 
 // // Toggle the pre-evolutions block on the unit modal
@@ -4586,7 +4801,7 @@ function renderTierList() {
         </button>
       </div>
     `;
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(container);
     return;
   }
 
@@ -4597,7 +4812,7 @@ function renderTierList() {
       const unitNames = TIERLIST_DATA[catName] || [];
       return unitNames.some(uName => {
         if (uName.toLowerCase().includes(filterQuery)) return true;
-        const uObj = ALL_UNITS.find(u => u.name.toLowerCase() === uName.toLowerCase());
+        const uObj = findUnitByName(uName);
         return uObj && (uObj.anime_origin || '').toLowerCase().includes(filterQuery);
       });
     });
@@ -4611,7 +4826,7 @@ function renderTierList() {
         <button onclick="document.getElementById('tierlist-filter-search').value=''; CommunityUI.onTierListSearch('');" class="text-xs text-sky-400 hover:underline tap-scale font-semibold">${t('filter_reset_btn', 'Réinitialiser le filtre')}</button>
       </div>
     `;
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(container);
     return;
   }
 
@@ -4626,7 +4841,7 @@ function renderTierList() {
     if (filterQuery && !catName.toLowerCase().includes(filterQuery)) {
       unitNames = unitNames.filter(uName => {
         if (uName.toLowerCase().includes(filterQuery)) return true;
-        const uObj = ALL_UNITS.find(u => u.name.toLowerCase() === uName.toLowerCase());
+        const uObj = findUnitByName(uName);
         return uObj && (uObj.anime_origin || '').toLowerCase().includes(filterQuery);
       });
     }
@@ -4680,7 +4895,7 @@ function renderTierList() {
           ` : ''}
 
           ${unitNames.map(name => {
-            const unitMatch = ALL_UNITS.find(u => u.name.toLowerCase() === name.toLowerCase());
+            const unitMatch = findUnitByName(name);
             const escapeName = name.replace(/'/g, "\\'");
             const isDraggableAttr = isEditMode ? `draggable="true" ondragstart="CommunityUI.onTierDragStart(event, '${escapeName}', '${escapeCat}')" ondragend="CommunityUI.onTierDragEnd(event)"` : '';
             const dragClass = isEditMode ? 'tier-item-draggable group cursor-grab' : 'group';
@@ -4734,7 +4949,7 @@ function renderTierList() {
                 <button onclick="openUnitModal('${unitMatch.id}')"
                         class="w-[92px] rounded-xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-1.5 flex flex-col items-center gap-1 tap-scale transition-colors">
                   <div class="w-full h-[76px] rounded-lg bg-[#070b14] border border-slate-800/80 flex items-center justify-center overflow-hidden">
-                    <img src="${thumb}" alt="${escapeHtml(name)}" loading="lazy"
+                    <img src="${thumb}" alt="${escapeHtml(name)}" width="76" height="76" loading="lazy" decoding="async"
                          onerror="this.onerror=null;this.closest('div').classList.add('tier-img-fallback');this.style.display='none'"
                          class="max-h-full max-w-full object-contain img-outline rounded group-hover:scale-105 transition-transform duration-150 ease-out pointer-events-none">
                   </div>
@@ -4757,11 +4972,11 @@ function renderTierList() {
     `;
   }).join('');
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(container);
 }
 
 function openUnitByName(name) {
-  const unit = ALL_UNITS.find(u => u.name.toLowerCase() === name.toLowerCase());
+  const unit = findUnitByName(name);
   if (unit) {
     openUnitModal(unit.id);
   } else {
@@ -4824,7 +5039,7 @@ function renderCodes() {
     renderExpiredCodesList(CODES_DATA.expired);
   }
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(document.getElementById('codes-section'));
 }
 
 function renderExpiredCodesList(list) {
@@ -4841,10 +5056,18 @@ function renderExpiredCodesList(list) {
   `).join('');
 }
 
-function filterExpiredCodes() {
+const debouncedFilterExpiredCodes = debounce(function() {
   const query = (document.getElementById('search-expired-codes')?.value || '').toLowerCase().trim();
   const filtered = CODES_DATA.expired.filter(c => c.code.toLowerCase().includes(query));
   renderExpiredCodesList(filtered);
+}, 150);
+
+function filterExpiredCodes(immediate = false) {
+  if (immediate) {
+    debouncedFilterExpiredCodes.now();
+  } else {
+    debouncedFilterExpiredCodes();
+  }
 }
 
 function toggleExpiredCodes() {
@@ -4869,11 +5092,9 @@ function copyCodeText(text, btnElement) {
     showToast(t('toast_code_copied', 'Code "{code}" copié !').replace('{code}', text));
     if (btn) {
       const origHTML = btn.innerHTML;
-      btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-slate-950" stroke-width="2.5"></i><span>${t('copied', 'Copié !')}</span>`;
-      if (window.lucide) lucide.createIcons();
+      btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-slate-950"><polyline points="20 6 9 17 4 12"/></svg><span>${t('copied', 'Copié !')}</span>`;
       setTimeout(() => {
         btn.innerHTML = origHTML;
-        if (window.lucide) lucide.createIcons();
       }, 1800);
     }
   };
@@ -4915,7 +5136,7 @@ function renderOrbCard(o) {
       <div>
         <div class="flex items-center space-x-3 mb-2.5">
           <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center shrink-0">
-            <img src="${o.image || fallback}" alt="${o.name}" class="max-h-full max-w-full object-contain img-outline rounded"
+            <img src="${o.image || fallback}" alt="${o.name}" width="40" height="40" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded"
                  onerror="this.src='${fallback}'">
           </div>
           <div class="min-w-0 flex-1">
@@ -4946,7 +5167,7 @@ function renderOrbCard(o) {
 
       <div class="flex items-center justify-end pt-2 border-t border-slate-800/80 text-[11px]">
         <button onclick="if(window.CommunityUI) CommunityUI.openOrbModalForEdit(decodeURIComponent('${encodedName}'))" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-600 hover:text-white text-slate-300 font-semibold text-xs tap-scale flex items-center gap-1.5 transition-colors" title="${t('comm_btn_edit_orb_title', 'Modifier cet orbe')}">
-          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-amber-400"><path d="M12 20h9"/><path d="16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
           <span>${t('comm_action_edit', 'Éditer')}</span>
         </button>
       </div>
@@ -4958,10 +5179,10 @@ function renderOrbs() {
   const grid = document.getElementById('orbs-grid');
   if (!grid) return;
   grid.innerHTML = ORBS_DATA.map(renderOrbCard).join('');
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(grid);
 }
 
-function filterOrbs() {
+const debouncedFilterOrbs = debounce(function() {
   const query = (document.getElementById('search-orbs')?.value || '').toLowerCase().trim();
   const grid = document.getElementById('orbs-grid');
   if (!grid) return;
@@ -4991,7 +5212,15 @@ function filterOrbs() {
   } else {
     grid.innerHTML = filtered.map(renderOrbCard).join('');
   }
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(grid);
+}, 150);
+
+function filterOrbs(immediate = false) {
+  if (immediate) {
+    debouncedFilterOrbs.now();
+  } else {
+    debouncedFilterOrbs();
+  }
 }
 
 // ==========================================
@@ -5031,7 +5260,7 @@ function renderGameModes() {
     `;
   }).join('');
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(grid);
 }
 
 // ==========================================
@@ -5057,7 +5286,7 @@ function renderTeamBuilder() {
             <i data-lucide="x" class="w-3.5 h-3.5" stroke-width="2.5"></i>
           </button>
           <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
-            <img src="${unit.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${unit.name}">
+            <img src="${unit.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" width="64" height="64" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="${unit.name}">
           </div>
           <div class="font-bold text-xs text-white truncate w-full" title="${unit.name}">
             ${unit.name}
@@ -5082,8 +5311,8 @@ function renderTeamBuilder() {
   }).join('');
 
   updateTeamStats();
-  renderTeamPicker();
-  if (window.lucide) lucide.createIcons();
+  renderTeamPicker(true);
+  safeCreateIcons(document.getElementById('team-section'));
 }
 
 function updateTeamStats() {
@@ -5135,7 +5364,17 @@ function updateTeamStats() {
   }
 }
 
-function renderTeamPicker() {
+const debouncedRenderTeamPicker = debounce(_doRenderTeamPicker, 150);
+
+function renderTeamPicker(immediate = false) {
+  if (immediate) {
+    debouncedRenderTeamPicker.now();
+  } else {
+    debouncedRenderTeamPicker();
+  }
+}
+
+function _doRenderTeamPicker() {
   const query = (document.getElementById('team-search-input')?.value || '').toLowerCase().trim();
   const pickerGrid = document.getElementById('team-picker-grid');
   if (!pickerGrid) return;
@@ -5149,7 +5388,7 @@ function renderTeamPicker() {
   pickerGrid.innerHTML = filtered.map(u => `
     <div class="tactical-card p-2.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 text-center flex flex-col items-center justify-between group">
       <div class="w-12 h-12 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
-        <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${u.name}">
+        <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" width="48" height="48" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="${u.name}">
       </div>
       <div class="text-[11px] font-bold text-white truncate w-full" title="${u.name}">${u.name}</div>
       <span class="text-[10px] star-${u.star}-badge px-1.5 py-0.5 rounded my-1 font-mono-num font-bold">${u.star}★</span>
@@ -5165,7 +5404,7 @@ function focusTeamSearch() {
 }
 
 function addUnitToTeam(unitId) {
-  const unit = ALL_UNITS.find(u => u.id === unitId);
+  const unit = findUnitById(unitId);
   if (!unit) return;
 
   const emptyIndex = teamSlots.findIndex(s => s === null);
@@ -5384,7 +5623,18 @@ function startCompareWithModalUnit() {
   }
 }
 
-function handleCompareSearch(slot) {
+const _compareTimers = { a: null, b: null };
+function handleCompareSearch(slot, immediate = false) {
+  if (immediate) {
+    if (_compareTimers[slot]) clearTimeout(_compareTimers[slot]);
+    _doCompareSearch(slot);
+    return;
+  }
+  if (_compareTimers[slot]) clearTimeout(_compareTimers[slot]);
+  _compareTimers[slot] = setTimeout(() => _doCompareSearch(slot), 150);
+}
+
+function _doCompareSearch(slot) {
   const input = document.getElementById(`compare-search-${slot}`);
   const dropdown = document.getElementById(`compare-dropdown-${slot}`);
   if (!input || !dropdown) return;
@@ -5417,7 +5667,7 @@ function handleCompareSearch(slot) {
          role="option" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setCompareUnit('${slot}','${u.id}');}">
       <div class="flex items-center space-x-2.5 min-w-0">
         <div class="w-8 h-8 rounded-lg bg-[#070b14] border border-slate-800 p-0.5 shrink-0 flex items-center justify-center overflow-hidden">
-          <img src="${u.image || fallbackImg}" alt="" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+          <img src="${u.image || fallbackImg}" alt="" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
         </div>
         <div class="min-w-0">
           <div class="text-xs font-bold text-white truncate">${u.name}</div>
@@ -5432,7 +5682,7 @@ function handleCompareSearch(slot) {
   `).join('');
 
   dropdown.classList.remove('hidden');
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(dropdown);
 }
 
 function hideCompareDropdown(slot) {
@@ -5642,7 +5892,7 @@ function renderCompareView() {
         </div>
       </div>
     `;
-    if (window.lucide) lucide.createIcons();
+    safeCreateIcons(container);
     return;
   }
 
@@ -5671,7 +5921,7 @@ function renderCompareView() {
         <div class="flex items-start justify-between gap-3">
           <div class="flex items-center space-x-3 min-w-0">
             <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800 p-1 flex items-center justify-center shrink-0 overflow-hidden">
-              <img src="${compareUnitA.image || fallbackImg}" alt="${compareUnitA.name}" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+              <img src="${compareUnitA.image || fallbackImg}" alt="${compareUnitA.name}" width="64" height="64" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
@@ -5708,7 +5958,7 @@ function renderCompareView() {
         <div class="flex items-start justify-between gap-3">
           <div class="flex items-center space-x-3 min-w-0">
             <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800 p-1 flex items-center justify-center shrink-0 overflow-hidden">
-              <img src="${compareUnitB.image || fallbackImg}" alt="${compareUnitB.name}" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+              <img src="${compareUnitB.image || fallbackImg}" alt="${compareUnitB.name}" width="64" height="64" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
@@ -5883,7 +6133,7 @@ function renderCompareView() {
     </div>
   `;
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(container);
 }
 
 // ==========================================
@@ -5912,7 +6162,7 @@ function showToast(message) {
     }, 150);
   }, 2200);
 
-  if (window.lucide) lucide.createIcons();
+  safeCreateIcons(toast);
 }
 
 // ==========================================

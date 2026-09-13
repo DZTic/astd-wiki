@@ -62,30 +62,40 @@ const CommunityManager = (function() {
       originalTierlistBackup = JSON.parse(JSON.stringify(currentTier));
     }
 
-    // 2. Tenter de charger depuis l'API locale du serveur
-    try {
-      const res = await fetch(API_ENDPOINT, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && typeof data === 'object') {
-          state.units = data.units || {};
-          state.deleted_units = data.deleted_units || [];
-          state.orbs = data.orbs || {};
-          state.deleted_orbs = data.deleted_orbs || [];
-          state.codes = data.codes || [];
-          state.tips = data.tips || {};
-          state.tierlist = data.tierlist || null;
-          state.custom_tierlists = data.custom_tierlists || {};
-          isServerAvailable = true;
-          saveToLocalStorage();
-        }
-      } else {
-        loadFromLocalStorage();
-      }
-    } catch (e) {
-      // Serveur injoignable (ex: GitHub Pages ou hors ligne) -> fallback localStorage
+    // 2. Tenter de charger depuis l'API locale du serveur uniquement hors hébergement statique (GitHub Pages / file://)
+    const isStaticHost = typeof window !== 'undefined' && (
+      (window.location.hostname && window.location.hostname.includes('github.io')) ||
+      window.location.protocol === 'file:'
+    );
+
+    if (isStaticHost) {
       isServerAvailable = false;
       loadFromLocalStorage();
+    } else {
+      try {
+        const res = await fetch(API_ENDPOINT, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data === 'object') {
+            state.units = data.units || {};
+            state.deleted_units = data.deleted_units || [];
+            state.orbs = data.orbs || {};
+            state.deleted_orbs = data.deleted_orbs || [];
+            state.codes = data.codes || [];
+            state.tips = data.tips || {};
+            state.tierlist = data.tierlist || null;
+            state.custom_tierlists = data.custom_tierlists || {};
+            isServerAvailable = true;
+            saveToLocalStorage();
+          }
+        } else {
+          loadFromLocalStorage();
+        }
+      } catch (e) {
+        // Serveur injoignable -> fallback localStorage
+        isServerAvailable = false;
+        loadFromLocalStorage();
+      }
     }
 
     updateCommunityBadge();
@@ -121,7 +131,11 @@ const CommunityManager = (function() {
   // Sauvegarde sur le serveur local si disponible
   async function syncWithServer(action, payload = {}) {
     saveToLocalStorage();
-    if (!isServerAvailable) return;
+    const isStaticHost = typeof window !== 'undefined' && (
+      (window.location.hostname && window.location.hostname.includes('github.io')) ||
+      window.location.protocol === 'file:'
+    );
+    if (isStaticHost || !isServerAvailable) return;
     try {
       await fetch(API_ENDPOINT, {
         method: 'POST',
@@ -138,41 +152,46 @@ const CommunityManager = (function() {
     const currentList = window.getGlobalUnits ? window.getGlobalUnits() : window.ALL_UNITS;
     if (Array.isArray(currentList)) {
       if (!originalUnitsBackup) {
-        originalUnitsBackup = JSON.parse(JSON.stringify(currentList));
+        originalUnitsBackup = currentList.slice();
       }
 
-      // Recommencer à partir de la sauvegarde officielle
-      let workingList = JSON.parse(JSON.stringify(originalUnitsBackup));
+      const hasUnitChanges = (state.units && Object.keys(state.units).length > 0) ||
+                             (state.deleted_units && state.deleted_units.length > 0);
 
-      // 1. Filtrer les unités supprimées / masquées par la communauté
-      const deletedSet = new Set(state.deleted_units || []);
-      workingList = workingList.filter(u => !deletedSet.has(u.id));
-
-      // 2. Appliquer les unités modifiées ou ajoutées
-      const communityUnits = Object.values(state.units || {});
-      communityUnits.forEach(commUnit => {
-        if (deletedSet.has(commUnit.id)) return;
-        const existingIdx = workingList.findIndex(u => u.id === commUnit.id);
-        if (existingIdx >= 0) {
-          // Unité modifiée
-          workingList[existingIdx] = {
-            ...workingList[existingIdx],
-            ...commUnit,
-            _is_community_modified: true
-          };
+      if (!hasUnitChanges) {
+        if (window.setGlobalUnits) {
+          window.setGlobalUnits(originalUnitsBackup);
         } else {
-          // Nouvelle unité ajoutée
-          workingList.unshift({
-            ...commUnit,
-            _is_community_new: true
-          });
+          window.ALL_UNITS = originalUnitsBackup;
         }
-      });
-
-      if (window.setGlobalUnits) {
-        window.setGlobalUnits(workingList);
       } else {
-        window.ALL_UNITS = workingList;
+        let workingList = originalUnitsBackup.slice();
+        const deletedSet = new Set(state.deleted_units || []);
+        workingList = workingList.filter(u => !deletedSet.has(u.id));
+
+        const communityUnits = Object.values(state.units || {});
+        communityUnits.forEach(commUnit => {
+          if (deletedSet.has(commUnit.id)) return;
+          const existingIdx = workingList.findIndex(u => u.id === commUnit.id);
+          if (existingIdx >= 0) {
+            workingList[existingIdx] = {
+              ...workingList[existingIdx],
+              ...commUnit,
+              _is_community_modified: true
+            };
+          } else {
+            workingList.unshift({
+              ...commUnit,
+              _is_community_new: true
+            });
+          }
+        });
+
+        if (window.setGlobalUnits) {
+          window.setGlobalUnits(workingList);
+        } else {
+          window.ALL_UNITS = workingList;
+        }
       }
     }
 
@@ -180,40 +199,51 @@ const CommunityManager = (function() {
     const currentOrbs = window.getGlobalOrbs ? window.getGlobalOrbs() : window.ORBS_DATA;
     if (Array.isArray(currentOrbs)) {
       if (!originalOrbsBackup && currentOrbs.length > 0) {
-        originalOrbsBackup = JSON.parse(JSON.stringify(currentOrbs));
+        originalOrbsBackup = currentOrbs.slice();
       }
       if (originalOrbsBackup) {
-        let workingOrbs = JSON.parse(JSON.stringify(originalOrbsBackup));
-        const deletedOrbsSet = new Set((state.deleted_orbs || []).map(n => (n || '').toLowerCase()));
-        workingOrbs = workingOrbs.filter(o => !deletedOrbsSet.has((o.name || '').toLowerCase()));
-
-        const communityOrbs = Object.values(state.orbs || {});
-        communityOrbs.forEach(commOrb => {
-          if (!commOrb || !commOrb.name) return;
-          if (deletedOrbsSet.has(commOrb.name.toLowerCase())) return;
-          const existingIdx = workingOrbs.findIndex(o => (o.name || '').toLowerCase() === commOrb.name.toLowerCase());
-          if (existingIdx >= 0) {
-            workingOrbs[existingIdx] = {
-              ...workingOrbs[existingIdx],
-              ...commOrb,
-              _is_community_modified: true
-            };
+        const hasOrbChanges = (state.orbs && Object.keys(state.orbs).length > 0) ||
+                              (state.deleted_orbs && state.deleted_orbs.length > 0);
+        if (!hasOrbChanges) {
+          if (window.setGlobalOrbs) {
+            window.setGlobalOrbs(originalOrbsBackup);
           } else {
-            workingOrbs.unshift({
-              ...commOrb,
-              _is_community_new: true
-            });
+            window.ORBS_DATA = originalOrbsBackup;
           }
-        });
-
-        if (window.setGlobalOrbs) {
-          window.setGlobalOrbs(workingOrbs);
         } else {
-          window.ORBS_DATA = workingOrbs;
+          let workingOrbs = originalOrbsBackup.slice();
+          const deletedOrbsSet = new Set((state.deleted_orbs || []).map(n => (n || '').toLowerCase()));
+          workingOrbs = workingOrbs.filter(o => !deletedOrbsSet.has((o.name || '').toLowerCase()));
+
+          const communityOrbs = Object.values(state.orbs || {});
+          communityOrbs.forEach(commOrb => {
+            if (!commOrb || !commOrb.name) return;
+            if (deletedOrbsSet.has(commOrb.name.toLowerCase())) return;
+            const existingIdx = workingOrbs.findIndex(o => (o.name || '').toLowerCase() === commOrb.name.toLowerCase());
+            if (existingIdx >= 0) {
+              workingOrbs[existingIdx] = {
+                ...workingOrbs[existingIdx],
+                ...commOrb,
+                _is_community_modified: true
+              };
+            } else {
+              workingOrbs.unshift({
+                ...commOrb,
+                _is_community_new: true
+              });
+            }
+          });
+
+          if (window.setGlobalOrbs) {
+            window.setGlobalOrbs(workingOrbs);
+          } else {
+            window.ORBS_DATA = workingOrbs;
+          }
         }
 
+        const currentWorkingOrbs = window.getGlobalOrbs ? window.getGlobalOrbs() : window.ORBS_DATA;
         const statOrbsEl = document.getElementById('stat-orbs-count');
-        if (statOrbsEl) statOrbsEl.textContent = workingOrbs.length;
+        if (statOrbsEl) statOrbsEl.textContent = (currentWorkingOrbs || []).length;
         if (window.renderOrbs) window.renderOrbs();
       }
     }
@@ -235,17 +265,17 @@ const CommunityManager = (function() {
     // 5. Appliquer les modifications de Tier List
     if (state.tierlist && typeof state.tierlist === 'object') {
       if (window.setGlobalTierList) {
-        window.setGlobalTierList(JSON.parse(JSON.stringify(state.tierlist)));
+        window.setGlobalTierList(state.tierlist);
       } else {
-        window.TIERLIST_DATA = JSON.parse(JSON.stringify(state.tierlist));
+        window.TIERLIST_DATA = state.tierlist;
       }
       const badgeModified = document.getElementById('tierlist-badge-modified');
       if (badgeModified) badgeModified.classList.remove('hidden');
     } else if (originalTierlistBackup) {
       if (window.setGlobalTierList) {
-        window.setGlobalTierList(JSON.parse(JSON.stringify(originalTierlistBackup)));
+        window.setGlobalTierList(originalTierlistBackup);
       } else {
-        window.TIERLIST_DATA = JSON.parse(JSON.stringify(originalTierlistBackup));
+        window.TIERLIST_DATA = originalTierlistBackup;
       }
       const badgeModified = document.getElementById('tierlist-badge-modified');
       if (badgeModified) badgeModified.classList.add('hidden');
@@ -1124,7 +1154,7 @@ const CommunityManager = (function() {
               ${modifiedUnitsList.map(u => `
                 <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex flex-col justify-between space-y-2 hover:border-sky-500/40 transition-colors">
                   <div class="flex items-start gap-2.5">
-                    <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="w-12 h-12 rounded-lg bg-slate-900 border border-slate-800 p-1 object-contain shrink-0">
+                    <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" width="48" height="48" loading="lazy" decoding="async" class="w-12 h-12 rounded-lg bg-slate-900 border border-slate-800 p-1 object-contain shrink-0" alt="${u.name}">
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-1.5">
                         <span class="font-bold text-white text-xs truncate">${u.name}</span>
@@ -1200,7 +1230,7 @@ const CommunityManager = (function() {
               ${modifiedOrbsList.map(o => `
                 <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex flex-col justify-between space-y-2 hover:border-cyan-500/40 transition-colors">
                   <div class="flex items-start gap-2.5">
-                    <img src="${o.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="w-12 h-12 rounded-lg bg-slate-900 border border-slate-800 p-1 object-contain shrink-0" onerror="this.src='https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'">
+                    <img src="${o.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" width="48" height="48" loading="lazy" decoding="async" class="w-12 h-12 rounded-lg bg-slate-900 border border-slate-800 p-1 object-contain shrink-0" alt="${o.name}" onerror="this.src='https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'">
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-1.5">
                         <span class="font-bold text-white text-xs truncate">${escapeHtml(o.name)}</span>
@@ -1389,7 +1419,9 @@ const CommunityManager = (function() {
       </div>
     `;
 
-    if (window.lucide) lucide.createIcons();
+    const sec = document.getElementById('community-contributions-section');
+    if (window.safeCreateIcons) safeCreateIcons(sec);
+    else if (window.lucide) lucide.createIcons(sec ? { root: sec } : undefined);
   }
 
   // --- RENDU DES CONSEILS DANS LA MODALE D'UNITÉ ---
@@ -1441,7 +1473,8 @@ const CommunityManager = (function() {
       </div>
     `).join('');
 
-    if (window.lucide) lucide.createIcons();
+    if (window.safeCreateIcons) safeCreateIcons(tipsContainer);
+    else if (window.lucide) lucide.createIcons({ root: tipsContainer });
   }
 
   return {
@@ -1642,7 +1675,9 @@ const CommunityUI = (function() {
     const bodyEl = document.getElementById('community-modal-body');
     if (titleEl) titleEl.textContent = title;
     if (bodyEl) bodyEl.innerHTML = html;
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   // --- GESTION ET CALCUL DES PALIERS D'AMÉLIORATION MANUELS ---
@@ -1814,7 +1849,9 @@ const CommunityUI = (function() {
     }).join('');
 
     updateTiersSummaryBadges();
-    if (window.lucide) lucide.createIcons();
+    const container = document.getElementById('upgrades-editor-container');
+    if (window.safeCreateIcons) safeCreateIcons(container);
+    else if (window.lucide) lucide.createIcons(container ? { root: container } : undefined);
   }
 
   function addUpgradeRow() {
@@ -1989,7 +2026,8 @@ const CommunityUI = (function() {
       previewWrap.innerHTML = '';
     }
 
-    if (window.lucide) lucide.createIcons();
+    if (window.safeCreateIcons) safeCreateIcons(previewWrap);
+    else if (window.lucide) lucide.createIcons(previewWrap ? { root: previewWrap } : undefined);
   }
 
   // --- FORMULAIRE UNITÉ AVEC LIVE PREVIEW ---
@@ -2339,7 +2377,9 @@ const CommunityUI = (function() {
     renderImagePreviewWidget();
     renderUpgradeRows();
     updateLivePreview();
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   function onTopTowerTypeChange(val) {
@@ -2384,7 +2424,7 @@ const CommunityUI = (function() {
           </div>
 
           <div class="w-full h-28 rounded-lg bg-[#070b14] border border-slate-800 p-2 my-1 flex items-center justify-center overflow-hidden">
-            <img src="${image}" onerror="this.src='https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'"
+            <img src="${image}" width="112" height="112" loading="lazy" decoding="async" onerror="this.src='https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'"
                  class="max-h-full max-w-full object-contain filter drop-shadow rounded">
           </div>
 
@@ -2586,7 +2626,9 @@ const CommunityUI = (function() {
       </form>
     `;
 
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   async function submitCodeForm() {
@@ -2664,7 +2706,9 @@ const CommunityUI = (function() {
       </form>
     `;
 
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   async function submitTipForm(unitId) {
@@ -2925,7 +2969,9 @@ const CommunityUI = (function() {
 
     renderOrbImagePreviewWidget();
     updateLiveOrbPreview();
-    if (window.lucide) lucide.createIcons();
+    const modal = document.getElementById('community-modal');
+    if (window.safeCreateIcons) safeCreateIcons(modal);
+    else if (window.lucide) lucide.createIcons(modal ? { root: modal } : undefined);
   }
 
   function handleOrbImageFileUpload(file) {
@@ -3022,7 +3068,8 @@ const CommunityUI = (function() {
       previewWrap.innerHTML = '';
     }
 
-    if (window.lucide) lucide.createIcons();
+    if (window.safeCreateIcons) safeCreateIcons(previewWrap);
+    else if (window.lucide) lucide.createIcons(previewWrap ? { root: previewWrap } : undefined);
   }
 
   function fillOrbRequire(val) {
@@ -3071,7 +3118,7 @@ const CommunityUI = (function() {
         <div>
           <div class="flex items-center space-x-3 mb-2.5">
             <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center shrink-0">
-              <img src="${image}" alt="${escapeHtml(name)}" class="max-h-full max-w-full object-contain img-outline rounded"
+              <img src="${image}" alt="${escapeHtml(name)}" width="40" height="40" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded"
                    onerror="this.src='${fallbackImg}'">
             </div>
             <div class="min-w-0 flex-1">
@@ -3221,10 +3268,19 @@ const CommunityUI = (function() {
     return isTierListEditMode;
   }
 
-  function onTierListSearch(query) {
+  const _debouncedTierListSearch = (typeof debounce === 'function' ? debounce : (fn) => fn)(function(query) {
     tierListSearchQuery = (query || '').trim();
     if (window.renderTierList) {
       window.renderTierList();
+    }
+  }, 150);
+
+  function onTierListSearch(query) {
+    if (!query) {
+      tierListSearchQuery = '';
+      if (window.renderTierList) window.renderTierList();
+    } else {
+      _debouncedTierListSearch(query);
     }
   }
 
@@ -3276,7 +3332,7 @@ const CommunityUI = (function() {
     `;
 
     showCustomModalContent(modalTitle, modalBody);
-    renderAddUnitList('');
+    renderAddUnitList('', true);
   }
 
   function setAddUnitStarFilter(star, btnEl) {
@@ -3290,10 +3346,20 @@ const CommunityUI = (function() {
       if (btnEl) btnEl.className = 'px-2 py-1 rounded text-[11px] font-bold bg-sky-500 text-white shadow-sm shrink-0';
     }
     const searchVal = document.getElementById('tier-unit-search-input')?.value || '';
-    renderAddUnitList(searchVal);
+    renderAddUnitList(searchVal, true);
   }
 
-  function renderAddUnitList(query) {
+  const _debouncedRenderAddUnitList = (typeof debounce === 'function' ? debounce : (fn) => fn)(_doRenderAddUnitList, 150);
+
+  function renderAddUnitList(query, immediate = false) {
+    if (immediate || !query) {
+      _doRenderAddUnitList(query);
+    } else {
+      _debouncedRenderAddUnitList(query);
+    }
+  }
+
+  function _doRenderAddUnitList(query) {
     const grid = document.getElementById('tier-unit-selector-grid');
     const countEl = document.getElementById('tier-unit-selector-count');
     if (!grid) return;
@@ -3331,7 +3397,7 @@ const CommunityUI = (function() {
                 onclick="${isAlreadyAdded ? `if(window.showToast) window.showToast(t('tierlist_already_in_cat', 'Cette unité est déjà dans cette catégorie'));` : `CommunityUI.addUnitToTier('${currentTargetTierCategory.replace(/'/g, "\\'")}', '${escapeUName}')`}"
                 class="p-2 rounded-xl border text-left flex items-center gap-2 tap-scale transition-all ${isAlreadyAdded ? 'bg-slate-900/40 border-slate-800/40 opacity-50 cursor-not-allowed' : 'bg-[#0e162a] hover:bg-sky-600/20 border-slate-800 hover:border-sky-500/50 group'}">
           <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
-            <img src="${thumb || ''}" alt="${escapeHtml(u.name)}" loading="lazy"
+            <img src="${thumb || ''}" alt="${escapeHtml(u.name)}" width="40" height="40" loading="lazy" decoding="async"
                  onerror="this.style.display='none'"
                  class="max-h-full max-w-full object-contain">
           </div>
@@ -3347,7 +3413,8 @@ const CommunityUI = (function() {
       `;
     }).join('');
 
-    if (window.lucide) lucide.createIcons();
+    if (window.safeCreateIcons) safeCreateIcons(grid);
+    else if (window.lucide) lucide.createIcons(grid ? { root: grid } : undefined);
   }
 
   function addUnitToTier(categoryName, unitName) {
@@ -3585,7 +3652,7 @@ const CommunityUI = (function() {
         <!-- Résumé unité -->
         <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex items-center gap-3">
           <div class="w-12 h-12 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
-            <img src="${thumb || ''}" alt="${escapeHtml(unitName)}" class="max-h-full max-w-full object-contain">
+            <img src="${thumb || ''}" alt="${escapeHtml(unitName)}" width="48" height="48" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain">
           </div>
           <div>
             <div class="flex items-center gap-1.5">

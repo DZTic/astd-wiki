@@ -787,7 +787,7 @@
           </div>
           <div class="relative">
             <label for="compare-search-a" class="sr-only" data-i18n="compare_slot_a_sr">Rechercher le premier personnage</label>
-            <input type="text" id="compare-search-a" oninput="handleCompareSearch('a')" onfocus="handleCompareSearch('a')" placeholder="Choisir une unité (ex: Demon Of Emotion)..."
+            <input type="text" id="compare-search-a" oninput="handleCompareSearch('a')" onfocus="handleCompareSearch('a', true)" placeholder="Choisir une unité (ex: Demon Of Emotion)..."
                    data-i18n-placeholder="compare_slot_a_placeholder"
                    aria-label="Rechercher le premier personnage"
                    data-i18n-aria="compare_slot_a_sr"
@@ -819,7 +819,7 @@
           </div>
           <div class="relative">
             <label for="compare-search-b" class="sr-only" data-i18n="compare_slot_b_sr">Rechercher le second personnage</label>
-            <input type="text" id="compare-search-b" oninput="handleCompareSearch('b')" onfocus="handleCompareSearch('b')" placeholder="Choisir une unité (ex: Joke Da Fool)..."
+            <input type="text" id="compare-search-b" oninput="handleCompareSearch('b')" onfocus="handleCompareSearch('b', true)" placeholder="Choisir une unité (ex: Joke Da Fool)..."
                    data-i18n-placeholder="compare_slot_b_placeholder"
                    aria-label="Rechercher le second personnage"
                    data-i18n-aria="compare_slot_b_sr"
@@ -912,7 +912,7 @@
           <!-- Portrait -->
           <div class="w-full sm:w-48 shrink-0 flex flex-col items-center">
             <div id="modal-img-wrapper" class="w-36 h-36 sm:w-44 sm:h-44 rounded-xl bg-slate-900 border border-slate-800 p-2 overflow-hidden flex items-center justify-center shadow-md relative">
-              <img id="modal-unit-image" src="" alt="Portrait" class="max-w-full max-h-full object-contain img-outline rounded-lg">
+              <img id="modal-unit-image" src="" alt="Portrait" width="176" height="176" loading="lazy" decoding="async" class="max-w-full max-h-full object-contain img-outline rounded-lg">
             </div>
             <div id="modal-anime-origin" class="mt-2 text-center text-xs text-sky-400 font-semibold">
               Origine : Inconnu

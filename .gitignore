@@ -1,5 +1,11 @@
 # Fichiers de secrets et régie publicitaire (Option A - géré via Secret GitHub)
 ads.txt
+public/ads.txt
+_site/ads.txt
+preview-style.html
+public/preview-style.html
+
+# Variables d'environnement et clés privées
 
 # Variables d'environnement et clés privées
 .env
@@ -10,11 +16,21 @@ ads.txt
 *secret*
 *credential*
 
-# Fichiers de logs
-*.log
-
-# Caches
+# Caches et environnements virtuels Python
 __pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Fichiers d'état et journaux d'exécution
+*.log
+_server.log
+data/sync.log
+data/sync_state.json
+data/changes.json
+_shots/
 
 # Fichiers système
 .DS_Store
