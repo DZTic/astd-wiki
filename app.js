@@ -489,6 +489,7 @@ const I18N = {
     compare_empty_desc: "Utilisez les champs de recherche ci-dessus pour désigner les deux unités à confronter, ou lancez un duel populaire en un clic.",
     compare_choose_second: "— choisissez la 2nde unité",
     compare_no_unit: "Aucune unité sélectionnée pour le moment.",
+    loading_data: "Chargement des données...",
     loading_units: "Chargement des unités en cours...",
     no_units_found: "Aucune unité trouvée",
     toast_added_to_compare: "« {name} » ajouté au comparateur",
@@ -1118,6 +1119,7 @@ const I18N = {
     compare_empty_desc: "Use the search inputs above to choose two units to compare, or start a popular duel in one click.",
     compare_choose_second: "— select the 2nd unit",
     compare_no_unit: "No unit selected yet.",
+    loading_data: "Loading data...",
     loading_units: "Loading units...",
     no_units_found: "No units found",
     toast_added_to_compare: "\"{name}\" added to comparator",
@@ -2913,8 +2915,80 @@ const ASTDCache = {
 // LAZY RENDERING DES ONGLETS (ISSUE #6)
 // ==========================================
 const renderedTabs = new Set();
+const loadedDatasets = new Set();
 
-function renderTabContent(tabId) {
+function showTabLoadingSkeleton(tabId) {
+  let targetContainer = null;
+  if (tabId === 'tierlist') targetContainer = document.getElementById('tierlist-categories-container');
+  else if (tabId === 'codes') targetContainer = document.getElementById('active-codes-container');
+  else if (tabId === 'orbs') targetContainer = document.getElementById('orbs-grid');
+  else if (tabId === 'gamemodes') targetContainer = document.getElementById('gamemodes-grid');
+
+  if (!targetContainer) return;
+  targetContainer.innerHTML = `
+    <div class="col-span-full py-12 text-center flex flex-col items-center justify-center space-y-3">
+      <div class="w-8 h-8 rounded-full border-2 border-sky-500 border-t-transparent animate-spin"></div>
+      <p class="text-xs text-slate-400 font-mono-num animate-pulse">${t('loading_data', 'Chargement des données...')}</p>
+    </div>
+  `;
+}
+
+async function ensureDatasetLoaded(datasetKey) {
+  if (loadedDatasets.has(datasetKey)) return true;
+
+  const dataPrefix = window.location.pathname.includes('/public/') ? '../data/' : './data/';
+  const cachedMeta = await ASTDCache.get('meta');
+  const isCacheFresh = META_DATA && META_DATA.last_updated && cachedMeta && cachedMeta.last_updated === META_DATA.last_updated;
+
+  if (isCacheFresh) {
+    const cached = await ASTDCache.get(datasetKey);
+    if (cached) {
+      applyDataset(datasetKey, cached);
+      loadedDatasets.add(datasetKey);
+      return true;
+    }
+  }
+
+  try {
+    const res = await fetch(`${dataPrefix}${datasetKey}.json`).then(r => r.json());
+    if (res) {
+      applyDataset(datasetKey, res);
+      ASTDCache.set(datasetKey, res);
+      loadedDatasets.add(datasetKey);
+      return true;
+    }
+  } catch (err) {
+    console.warn(`Impossible de charger ${datasetKey}:`, err);
+  }
+  return false;
+}
+
+function applyDataset(key, data) {
+  switch (key) {
+    case 'codes':
+      if (Array.isArray(data.active)) {
+        data.active.sort((a, b) => codeTimestamp(b) - codeTimestamp(a));
+      }
+      CODES_DATA = data;
+      if (data.active && data.active.length > 0) {
+        const heroCodeEl = document.getElementById('hero-code-name');
+        if (heroCodeEl) heroCodeEl.textContent = data.active[0].code;
+      }
+      break;
+    case 'orbs':
+      ORBS_DATA = Array.isArray(data) ? data : [];
+      break;
+    case 'tierlist':
+      TIERLIST_DATA = data || {};
+      window.TIERLIST_DATA = TIERLIST_DATA;
+      break;
+    case 'gamemodes':
+      GAMEMODES_DATA = Array.isArray(data) ? data : [];
+      break;
+  }
+}
+
+async function renderTabContent(tabId) {
   if (!tabId) tabId = 'units';
   const isAlreadyRendered = renderedTabs.has(tabId);
 
@@ -2927,24 +3001,40 @@ function renderTabContent(tabId) {
       break;
     case 'tierlist':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('tierlist')) {
+          showTabLoadingSkeleton('tierlist');
+          await ensureDatasetLoaded('tierlist');
+        }
         renderTierList();
         renderedTabs.add('tierlist');
       }
       break;
     case 'codes':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('codes')) {
+          showTabLoadingSkeleton('codes');
+          await ensureDatasetLoaded('codes');
+        }
         renderCodes();
         renderedTabs.add('codes');
       }
       break;
     case 'orbs':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('orbs')) {
+          showTabLoadingSkeleton('orbs');
+          await ensureDatasetLoaded('orbs');
+        }
         renderOrbs();
         renderedTabs.add('orbs');
       }
       break;
     case 'gamemodes':
       if (!isAlreadyRendered) {
+        if (!loadedDatasets.has('gamemodes')) {
+          showTabLoadingSkeleton('gamemodes');
+          await ensureDatasetLoaded('gamemodes');
+        }
         renderGameModes();
         renderedTabs.add('gamemodes');
       }
@@ -2990,52 +3080,34 @@ async function loadData() {
     const cachedMeta = await ASTDCache.get('meta');
     const isCacheFresh = remoteMeta && remoteMeta.last_updated && cachedMeta && cachedMeta.last_updated === remoteMeta.last_updated;
 
-    let unitsRes, codesRes, orbsRes, tierRes, modesRes, metaRes, matImagesRes;
+    let unitsRes, matImagesRes;
 
     if (isCacheFresh) {
-      // CACHE HIT : Restauration instantanée depuis IndexedDB (< 20ms, 0 octet réseau)
-      const [cachedUnits, cachedCodes, cachedOrbs, cachedTier, cachedModes, cachedMatImages] = await Promise.all([
+      // CACHE HIT : Restauration instantanée des unités depuis IndexedDB (< 20ms, 0 octet réseau)
+      const [cachedUnits, cachedMatImages] = await Promise.all([
         ASTDCache.get('units'),
-        ASTDCache.get('codes'),
-        ASTDCache.get('orbs'),
-        ASTDCache.get('tierlist'),
-        ASTDCache.get('gamemodes'),
         ASTDCache.get('material_images')
       ]);
 
-      if (cachedUnits && Array.isArray(cachedUnits) && cachedCodes && cachedOrbs && cachedTier && cachedModes) {
+      if (cachedUnits && Array.isArray(cachedUnits) && cachedUnits.length > 0) {
         unitsRes = cachedUnits;
-        codesRes = cachedCodes;
-        orbsRes = cachedOrbs;
-        tierRes = cachedTier;
-        modesRes = cachedModes;
-        metaRes = remoteMeta;
         matImagesRes = cachedMatImages || {};
       }
     }
 
-    // Si Cache Miss ou première visite : téléchargement réseau complet
+    // Si Cache Miss ou première visite : téléchargement réseau des unités uniquement (Lazy Data Fetching - Issue #16)
     if (!unitsRes) {
-      [unitsRes, codesRes, orbsRes, tierRes, modesRes, metaRes, matImagesRes] = await Promise.all([
+      [unitsRes, matImagesRes] = await Promise.all([
         fetch(`${dataPrefix}units.json`).then(r => r.json()),
-        fetch(`${dataPrefix}codes.json`).then(r => r.json()),
-        fetch(`${dataPrefix}orbs.json`).then(r => r.json()),
-        fetch(`${dataPrefix}tierlist.json`).then(r => r.json()),
-        fetch(`${dataPrefix}gamemodes.json`).then(r => r.json()),
-        Promise.resolve(remoteMeta && remoteMeta.last_updated ? remoteMeta : fetch(`${dataPrefix}meta.json`).then(r => r.json()).catch(() => ({}))),
         fetch(`${dataPrefix}material_images.json`).then(r => r.json()).catch(() => ({}))
       ]);
 
       // Sauvegarde asynchrone dans IndexedDB sans bloquer l'affichage
       if (Array.isArray(unitsRes) && unitsRes.length > 0) {
         ASTDCache.set('units', unitsRes);
-        ASTDCache.set('codes', codesRes);
-        ASTDCache.set('orbs', orbsRes);
-        ASTDCache.set('tierlist', tierRes);
-        ASTDCache.set('gamemodes', modesRes);
         ASTDCache.set('material_images', matImagesRes);
-        if (metaRes && metaRes.last_updated) {
-          ASTDCache.set('meta', metaRes);
+        if (remoteMeta && remoteMeta.last_updated) {
+          ASTDCache.set('meta', remoteMeta);
         }
       }
     }
@@ -3048,17 +3120,19 @@ async function loadData() {
     }
     ALL_UNITS = unitsRes;
     rebuildUnitsIndex();
-    // Le tableau du wiki n'est pas trié par date : on met les codes les plus récents en premier
-    if (Array.isArray(codesRes.active)) {
-      codesRes.active.sort((a, b) => codeTimestamp(b) - codeTimestamp(a));
-    }
-    CODES_DATA = codesRes;
-    ORBS_DATA = orbsRes;
-    TIERLIST_DATA = tierRes;
-    window.TIERLIST_DATA = tierRes;
-    GAMEMODES_DATA = modesRes;
-    META_DATA = metaRes;
+    loadedDatasets.add('units');
+    META_DATA = remoteMeta;
     MATERIAL_IMAGES = matImagesRes || {};
+
+    // Préchargement asynchrone non-bloquant des codes pour le ticker du header
+    if (typeof window !== 'undefined') {
+      const preloadCodes = () => ensureDatasetLoaded('codes');
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(preloadCodes, { timeout: 2000 });
+      } else {
+        setTimeout(preloadCodes, 100);
+      }
+    }
 
     // Intégrer les ajouts et modifications de la communauté
     if (window.CommunityManager) {
@@ -3071,7 +3145,7 @@ async function loadData() {
     if (unitsCountEl) unitsCountEl.textContent = ALL_UNITS.length.toLocaleString();
 
     const orbsCountEl = document.getElementById('stat-orbs-count');
-    if (orbsCountEl) orbsCountEl.textContent = ORBS_DATA.length;
+    if (orbsCountEl) orbsCountEl.textContent = (META_DATA && META_DATA.total_orbs) ? META_DATA.total_orbs : (ORBS_DATA.length || 49);
 
     const activeBadge = document.getElementById('badge-active-codes');
     if (activeBadge) activeBadge.textContent = CODES_DATA.active.length;
