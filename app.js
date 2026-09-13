@@ -36,6 +36,24 @@ let currentLevelView = 1; // 1 | 175 : niveau de carte affiché dans la fiche un
 let lastFocusedElement = null;
 
 // ==========================================
+// UTILITIES
+// ==========================================
+function debounce(fn, delay = 150) {
+  let timer;
+  const debounced = function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+  debounced.cancel = () => clearTimeout(timer);
+  debounced.now = (...args) => {
+    clearTimeout(timer);
+    return fn.apply(this, args);
+  };
+  return debounced;
+}
+window.debounce = debounce;
+
+// ==========================================
 // INTERNATIONALIZATION (I18N) - FR & EN
 // ==========================================
 let currentLang = localStorage.getItem('astd_lang') || 'fr';
@@ -3075,10 +3093,12 @@ function setupEventListeners() {
   const obtainableCheck = document.getElementById('filter-obtainable');
   const quickSearch = document.getElementById('quick-search');
 
+  const debouncedApplyUnitFilters = debounce(applyUnitFilters, 150);
+
   if (searchInput) {
     searchInput.addEventListener('input', () => {
       document.getElementById('clear-search')?.classList.toggle('hidden', !searchInput.value);
-      applyUnitFilters();
+      debouncedApplyUnitFilters();
     });
   }
 
@@ -3088,7 +3108,7 @@ function setupEventListeners() {
       if (searchInput) {
         searchInput.value = e.target.value;
         document.getElementById('clear-search')?.classList.toggle('hidden', !searchInput.value);
-        applyUnitFilters();
+        debouncedApplyUnitFilters();
       }
     });
   }
@@ -3100,7 +3120,7 @@ function setupEventListeners() {
       if (searchInput) {
         searchInput.value = e.target.value;
         document.getElementById('clear-search')?.classList.toggle('hidden', !searchInput.value);
-        applyUnitFilters();
+        debouncedApplyUnitFilters();
       }
     });
   }
@@ -4841,10 +4861,18 @@ function renderExpiredCodesList(list) {
   `).join('');
 }
 
-function filterExpiredCodes() {
+const debouncedFilterExpiredCodes = debounce(function() {
   const query = (document.getElementById('search-expired-codes')?.value || '').toLowerCase().trim();
   const filtered = CODES_DATA.expired.filter(c => c.code.toLowerCase().includes(query));
   renderExpiredCodesList(filtered);
+}, 150);
+
+function filterExpiredCodes(immediate = false) {
+  if (immediate) {
+    debouncedFilterExpiredCodes.now();
+  } else {
+    debouncedFilterExpiredCodes();
+  }
 }
 
 function toggleExpiredCodes() {
@@ -4961,7 +4989,7 @@ function renderOrbs() {
   if (window.lucide) lucide.createIcons();
 }
 
-function filterOrbs() {
+const debouncedFilterOrbs = debounce(function() {
   const query = (document.getElementById('search-orbs')?.value || '').toLowerCase().trim();
   const grid = document.getElementById('orbs-grid');
   if (!grid) return;
@@ -4992,6 +5020,14 @@ function filterOrbs() {
     grid.innerHTML = filtered.map(renderOrbCard).join('');
   }
   if (window.lucide) lucide.createIcons();
+}, 150);
+
+function filterOrbs(immediate = false) {
+  if (immediate) {
+    debouncedFilterOrbs.now();
+  } else {
+    debouncedFilterOrbs();
+  }
 }
 
 // ==========================================
@@ -5135,7 +5171,17 @@ function updateTeamStats() {
   }
 }
 
-function renderTeamPicker() {
+const debouncedRenderTeamPicker = debounce(_doRenderTeamPicker, 150);
+
+function renderTeamPicker(immediate = false) {
+  if (immediate) {
+    debouncedRenderTeamPicker.now();
+  } else {
+    debouncedRenderTeamPicker();
+  }
+}
+
+function _doRenderTeamPicker() {
   const query = (document.getElementById('team-search-input')?.value || '').toLowerCase().trim();
   const pickerGrid = document.getElementById('team-picker-grid');
   if (!pickerGrid) return;
@@ -5384,7 +5430,18 @@ function startCompareWithModalUnit() {
   }
 }
 
-function handleCompareSearch(slot) {
+const _compareTimers = { a: null, b: null };
+function handleCompareSearch(slot, immediate = false) {
+  if (immediate) {
+    if (_compareTimers[slot]) clearTimeout(_compareTimers[slot]);
+    _doCompareSearch(slot);
+    return;
+  }
+  if (_compareTimers[slot]) clearTimeout(_compareTimers[slot]);
+  _compareTimers[slot] = setTimeout(() => _doCompareSearch(slot), 150);
+}
+
+function _doCompareSearch(slot) {
   const input = document.getElementById(`compare-search-${slot}`);
   const dropdown = document.getElementById(`compare-dropdown-${slot}`);
   if (!input || !dropdown) return;
