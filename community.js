@@ -138,41 +138,46 @@ const CommunityManager = (function() {
     const currentList = window.getGlobalUnits ? window.getGlobalUnits() : window.ALL_UNITS;
     if (Array.isArray(currentList)) {
       if (!originalUnitsBackup) {
-        originalUnitsBackup = JSON.parse(JSON.stringify(currentList));
+        originalUnitsBackup = currentList.slice();
       }
 
-      // Recommencer à partir de la sauvegarde officielle
-      let workingList = JSON.parse(JSON.stringify(originalUnitsBackup));
+      const hasUnitChanges = (state.units && Object.keys(state.units).length > 0) ||
+                             (state.deleted_units && state.deleted_units.length > 0);
 
-      // 1. Filtrer les unités supprimées / masquées par la communauté
-      const deletedSet = new Set(state.deleted_units || []);
-      workingList = workingList.filter(u => !deletedSet.has(u.id));
-
-      // 2. Appliquer les unités modifiées ou ajoutées
-      const communityUnits = Object.values(state.units || {});
-      communityUnits.forEach(commUnit => {
-        if (deletedSet.has(commUnit.id)) return;
-        const existingIdx = workingList.findIndex(u => u.id === commUnit.id);
-        if (existingIdx >= 0) {
-          // Unité modifiée
-          workingList[existingIdx] = {
-            ...workingList[existingIdx],
-            ...commUnit,
-            _is_community_modified: true
-          };
+      if (!hasUnitChanges) {
+        if (window.setGlobalUnits) {
+          window.setGlobalUnits(originalUnitsBackup);
         } else {
-          // Nouvelle unité ajoutée
-          workingList.unshift({
-            ...commUnit,
-            _is_community_new: true
-          });
+          window.ALL_UNITS = originalUnitsBackup;
         }
-      });
-
-      if (window.setGlobalUnits) {
-        window.setGlobalUnits(workingList);
       } else {
-        window.ALL_UNITS = workingList;
+        let workingList = originalUnitsBackup.slice();
+        const deletedSet = new Set(state.deleted_units || []);
+        workingList = workingList.filter(u => !deletedSet.has(u.id));
+
+        const communityUnits = Object.values(state.units || {});
+        communityUnits.forEach(commUnit => {
+          if (deletedSet.has(commUnit.id)) return;
+          const existingIdx = workingList.findIndex(u => u.id === commUnit.id);
+          if (existingIdx >= 0) {
+            workingList[existingIdx] = {
+              ...workingList[existingIdx],
+              ...commUnit,
+              _is_community_modified: true
+            };
+          } else {
+            workingList.unshift({
+              ...commUnit,
+              _is_community_new: true
+            });
+          }
+        });
+
+        if (window.setGlobalUnits) {
+          window.setGlobalUnits(workingList);
+        } else {
+          window.ALL_UNITS = workingList;
+        }
       }
     }
 
@@ -180,40 +185,51 @@ const CommunityManager = (function() {
     const currentOrbs = window.getGlobalOrbs ? window.getGlobalOrbs() : window.ORBS_DATA;
     if (Array.isArray(currentOrbs)) {
       if (!originalOrbsBackup && currentOrbs.length > 0) {
-        originalOrbsBackup = JSON.parse(JSON.stringify(currentOrbs));
+        originalOrbsBackup = currentOrbs.slice();
       }
       if (originalOrbsBackup) {
-        let workingOrbs = JSON.parse(JSON.stringify(originalOrbsBackup));
-        const deletedOrbsSet = new Set((state.deleted_orbs || []).map(n => (n || '').toLowerCase()));
-        workingOrbs = workingOrbs.filter(o => !deletedOrbsSet.has((o.name || '').toLowerCase()));
-
-        const communityOrbs = Object.values(state.orbs || {});
-        communityOrbs.forEach(commOrb => {
-          if (!commOrb || !commOrb.name) return;
-          if (deletedOrbsSet.has(commOrb.name.toLowerCase())) return;
-          const existingIdx = workingOrbs.findIndex(o => (o.name || '').toLowerCase() === commOrb.name.toLowerCase());
-          if (existingIdx >= 0) {
-            workingOrbs[existingIdx] = {
-              ...workingOrbs[existingIdx],
-              ...commOrb,
-              _is_community_modified: true
-            };
+        const hasOrbChanges = (state.orbs && Object.keys(state.orbs).length > 0) ||
+                              (state.deleted_orbs && state.deleted_orbs.length > 0);
+        if (!hasOrbChanges) {
+          if (window.setGlobalOrbs) {
+            window.setGlobalOrbs(originalOrbsBackup);
           } else {
-            workingOrbs.unshift({
-              ...commOrb,
-              _is_community_new: true
-            });
+            window.ORBS_DATA = originalOrbsBackup;
           }
-        });
-
-        if (window.setGlobalOrbs) {
-          window.setGlobalOrbs(workingOrbs);
         } else {
-          window.ORBS_DATA = workingOrbs;
+          let workingOrbs = originalOrbsBackup.slice();
+          const deletedOrbsSet = new Set((state.deleted_orbs || []).map(n => (n || '').toLowerCase()));
+          workingOrbs = workingOrbs.filter(o => !deletedOrbsSet.has((o.name || '').toLowerCase()));
+
+          const communityOrbs = Object.values(state.orbs || {});
+          communityOrbs.forEach(commOrb => {
+            if (!commOrb || !commOrb.name) return;
+            if (deletedOrbsSet.has(commOrb.name.toLowerCase())) return;
+            const existingIdx = workingOrbs.findIndex(o => (o.name || '').toLowerCase() === commOrb.name.toLowerCase());
+            if (existingIdx >= 0) {
+              workingOrbs[existingIdx] = {
+                ...workingOrbs[existingIdx],
+                ...commOrb,
+                _is_community_modified: true
+              };
+            } else {
+              workingOrbs.unshift({
+                ...commOrb,
+                _is_community_new: true
+              });
+            }
+          });
+
+          if (window.setGlobalOrbs) {
+            window.setGlobalOrbs(workingOrbs);
+          } else {
+            window.ORBS_DATA = workingOrbs;
+          }
         }
 
+        const currentWorkingOrbs = window.getGlobalOrbs ? window.getGlobalOrbs() : window.ORBS_DATA;
         const statOrbsEl = document.getElementById('stat-orbs-count');
-        if (statOrbsEl) statOrbsEl.textContent = workingOrbs.length;
+        if (statOrbsEl) statOrbsEl.textContent = (currentWorkingOrbs || []).length;
         if (window.renderOrbs) window.renderOrbs();
       }
     }
@@ -235,17 +251,17 @@ const CommunityManager = (function() {
     // 5. Appliquer les modifications de Tier List
     if (state.tierlist && typeof state.tierlist === 'object') {
       if (window.setGlobalTierList) {
-        window.setGlobalTierList(JSON.parse(JSON.stringify(state.tierlist)));
+        window.setGlobalTierList(state.tierlist);
       } else {
-        window.TIERLIST_DATA = JSON.parse(JSON.stringify(state.tierlist));
+        window.TIERLIST_DATA = state.tierlist;
       }
       const badgeModified = document.getElementById('tierlist-badge-modified');
       if (badgeModified) badgeModified.classList.remove('hidden');
     } else if (originalTierlistBackup) {
       if (window.setGlobalTierList) {
-        window.setGlobalTierList(JSON.parse(JSON.stringify(originalTierlistBackup)));
+        window.setGlobalTierList(originalTierlistBackup);
       } else {
-        window.TIERLIST_DATA = JSON.parse(JSON.stringify(originalTierlistBackup));
+        window.TIERLIST_DATA = originalTierlistBackup;
       }
       const badgeModified = document.getElementById('tierlist-badge-modified');
       if (badgeModified) badgeModified.classList.add('hidden');

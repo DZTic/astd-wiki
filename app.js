@@ -14,7 +14,7 @@ var MATERIAL_IMAGES = {};
 
 window.ALL_UNITS = ALL_UNITS;
 window.getGlobalUnits = () => ALL_UNITS;
-window.setGlobalUnits = (list) => { ALL_UNITS = list; window.ALL_UNITS = list; };
+window.setGlobalUnits = (list) => { ALL_UNITS = list; window.ALL_UNITS = list; rebuildUnitsIndex(); };
 
 window.ORBS_DATA = ORBS_DATA;
 window.getGlobalOrbs = () => ORBS_DATA;
@@ -52,6 +52,39 @@ function debounce(fn, delay = 150) {
   return debounced;
 }
 window.debounce = debounce;
+
+let unitsByIdMap = new Map();
+let unitsByNameMap = new Map();
+
+function rebuildUnitsIndex() {
+  unitsByIdMap.clear();
+  unitsByNameMap.clear();
+  for (let i = 0; i < ALL_UNITS.length; i++) {
+    const u = ALL_UNITS[i];
+    if (u.id) unitsByIdMap.set(u.id, u);
+    if (u.name) unitsByNameMap.set(u.name.toLowerCase(), u);
+  }
+}
+
+function findUnitById(id) {
+  if (!id) return null;
+  return unitsByIdMap.get(id) || null;
+}
+
+function findUnitByName(name) {
+  if (!name) return null;
+  return unitsByNameMap.get(name.toLowerCase()) || null;
+}
+
+function findUnitByIdOrName(val) {
+  if (!val) return null;
+  return unitsByIdMap.get(val) || unitsByNameMap.get(val.toLowerCase()) || null;
+}
+
+window.findUnitById = findUnitById;
+window.findUnitByName = findUnitByName;
+window.findUnitByIdOrName = findUnitByIdOrName;
+window.rebuildUnitsIndex = rebuildUnitsIndex;
 
 function safeCreateIcons(root) {
   if (!window.lucide || typeof window.lucide.createIcons !== 'function') return;
@@ -3014,6 +3047,7 @@ async function loadData() {
       });
     }
     ALL_UNITS = unitsRes;
+    rebuildUnitsIndex();
     // Le tableau du wiki n'est pas trié par date : on met les codes les plus récents en premier
     if (Array.isArray(codesRes.active)) {
       codesRes.active.sort((a, b) => codeTimestamp(b) - codeTimestamp(a));
@@ -3988,7 +4022,7 @@ function renderModalAbilities(unit) {
 // ==========================================
 
 function openUnitModal(unitId) {
-  const unit = ALL_UNITS.find(u => u.id === unitId || u.name.toLowerCase() === unitId.toLowerCase());
+  const unit = findUnitByIdOrName(unitId);
   if (!unit) return;
 
   // Save active element to restore focus on modal close
@@ -4661,7 +4695,7 @@ function renderTierList() {
       const unitNames = TIERLIST_DATA[catName] || [];
       return unitNames.some(uName => {
         if (uName.toLowerCase().includes(filterQuery)) return true;
-        const uObj = ALL_UNITS.find(u => u.name.toLowerCase() === uName.toLowerCase());
+        const uObj = findUnitByName(uName);
         return uObj && (uObj.anime_origin || '').toLowerCase().includes(filterQuery);
       });
     });
@@ -4690,7 +4724,7 @@ function renderTierList() {
     if (filterQuery && !catName.toLowerCase().includes(filterQuery)) {
       unitNames = unitNames.filter(uName => {
         if (uName.toLowerCase().includes(filterQuery)) return true;
-        const uObj = ALL_UNITS.find(u => u.name.toLowerCase() === uName.toLowerCase());
+        const uObj = findUnitByName(uName);
         return uObj && (uObj.anime_origin || '').toLowerCase().includes(filterQuery);
       });
     }
@@ -4744,7 +4778,7 @@ function renderTierList() {
           ` : ''}
 
           ${unitNames.map(name => {
-            const unitMatch = ALL_UNITS.find(u => u.name.toLowerCase() === name.toLowerCase());
+            const unitMatch = findUnitByName(name);
             const escapeName = name.replace(/'/g, "\\'");
             const isDraggableAttr = isEditMode ? `draggable="true" ondragstart="CommunityUI.onTierDragStart(event, '${escapeName}', '${escapeCat}')" ondragend="CommunityUI.onTierDragEnd(event)"` : '';
             const dragClass = isEditMode ? 'tier-item-draggable group cursor-grab' : 'group';
@@ -4825,7 +4859,7 @@ function renderTierList() {
 }
 
 function openUnitByName(name) {
-  const unit = ALL_UNITS.find(u => u.name.toLowerCase() === name.toLowerCase());
+  const unit = findUnitByName(name);
   if (unit) {
     openUnitModal(unit.id);
   } else {
@@ -5253,7 +5287,7 @@ function focusTeamSearch() {
 }
 
 function addUnitToTeam(unitId) {
-  const unit = ALL_UNITS.find(u => u.id === unitId);
+  const unit = findUnitById(unitId);
   if (!unit) return;
 
   const emptyIndex = teamSlots.findIndex(s => s === null);
