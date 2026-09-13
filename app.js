@@ -2494,22 +2494,220 @@ function translateAbilityDescription(text) {
   return fr;
 }
 
+const UPGRADE_EFFECTS_FR = {
+  "Summons a tsunami between certain amounts of time. The tsunami’s health is 2x Whitestache’s damage.": "Fait apparaître un tsunami à intervalles réguliers. Les PV du tsunami équivalent à 2x les dégâts de Whitestache.",
+  "Summons a tsunami over certain amounts of time.": "Fait apparaître un tsunami à intervalles réguliers.",
+  "Special ability that deals AoE (Full) damage to both ground and air enemies in Whitestache’s range. The attack deals 5x Whitestache’s damage and also summons a large steamroller tsunami.": "Aptitude spéciale qui inflige des dégâts AoE (Cercle complet) aux ennemis terrestres et aériens à portée de Whitestache (5x dégâts et grand tsunami compresseur).",
+  "Special ability that deals full AoE damage to both ground and air enemies in Whitestache’s range. The attack deals 3x Whitestache’s damage and also summons a large steamroller tsunami.": "Aptitude spéciale qui inflige des dégâts AoE (Cercle complet) aux ennemis terrestres et aériens à portée de Whitestache (3x dégâts et grand tsunami compresseur).",
+  "Ruffy (Huge) summons Spade, Fire King, Koro (Mystical) and Janji (Wedding) in his attack animation.": "Ruffy (Huge) invoque Spade, Fire King, Koro (Mystical) et Janji (Wedding) dans son animation d'attaque.",
+  "Separates into Anger Demon and Pleasure Demon": "Se divise en Démon de la Colère et Démon du Plaisir",
+  "Separates into Joy Demon & Grief Demon": "Se divise en Démon de la Joie et Démon du Chagrin",
+  "Also deploy Wind Dragon upon fusion": "Déploie également le Dragon de Vent lors de la fusion",
+  "Fuses all emotions": "Fusionne toutes les émotions",
+  "Airren summons Colossal Giants": "Airren invoque des Géants Colossaux",
+  "Airren summons Killer Giants": "Airren invoque des Géants Tueurs",
+  "Wears his iconic vampire outfit.": "Porte sa tenue de vampire emblématique.",
+  "Changes to her assassin outfit": "Enfile sa tenue d'assassin",
+  "Temporarily changes into her Bankai form everytime she attacks": "Prend temporairement sa forme Bankai à chaque attaque",
+  "Upgrade gives him the Black Flames effect and Increases AoE size": "L'amélioration confère l'effet Flammes Noires et augmente la taille de l'AoE",
+  "Ability gives him the Black Flames effect": "L'aptitude confère l'effet Flammes Noires",
+  "New Status Effect": "Nouvel effet de statut",
+  "+ New Status Effect": "+ Nouvel effet de statut",
+  "Visual Changes": "Changements visuels",
+  "Visual changes": "Changements visuels"
+};
+
 function translateUpgradeEffect(eff) {
   if (!eff || currentLang === 'en') return eff;
+  const rawKey = eff.trim();
+  if (UPGRADE_EFFECTS_FR[rawKey]) return UPGRADE_EFFECTS_FR[rawKey];
+  const stripped = stripWikiMarkup(rawKey).trim();
+  if (UPGRADE_EFFECTS_FR[stripped]) return UPGRADE_EFFECTS_FR[stripped];
+  if (typeof ABILITY_DESCRIPTIONS_FR !== 'undefined' && ABILITY_DESCRIPTIONS_FR[rawKey]) {
+    return ABILITY_DESCRIPTIONS_FR[rawKey];
+  }
+
   let fr = eff;
-  fr = fr.replace(/Obtains\s+['"]?([^'"]+?)['"]?\s+(?:manual|passive)?\s*ability/gi, 'Obtient l\'aptitude « $1 »');
-  fr = fr.replace(/Attack becomes (.+) and can hit air/gi, 'L\'attaque devient $1 et touche les aériens');
-  fr = fr.replace(/Attack type changes to (.+)/gi, 'Le type d\'attaque passe en $1');
-  fr = fr.replace(/Attack changes to (.+)/gi, 'L\'attaque passe en $1');
-  fr = fr.replace(/Unlocks\s+Ability/gi, "Débloque l'aptitude");
-  fr = fr.replace(/Unlocks\s+(.+)/gi, 'Débloque $1');
-  fr = fr.replace(/Changes\s+attack\s+type\s+to\s+(.+)/gi, "Change le type d'attaque en $1");
-  fr = fr.replace(/Changes\s+to\s+(.+)/gi, 'Passe à $1');
+
+  // 1. Obtains / Gains / Replaces / Unlocks abilities
+  fr = fr.replace(/Obtains?\s+['"]?(.+?)['"]?(?:\s+(?:manual|passive))?\s*abil(?:it|t)?y(?:,\s*loses?\s+['"]?(.+?)['"]?(?:\s+(?:manual|passive))?\s*abil(?:it|t)?y)?/gi, (m, g1, g2) => {
+    let res = "Obtient l'aptitude « " + g1.trim() + " »";
+    if (g2) res += ", perd l'aptitude « " + g2.trim() + " »";
+    return res;
+  });
+  fr = fr.replace(/Gains?\s+['"]?(.+?)['"]?(?:\s+(?:manual|passive))?\s*abil(?:it|t)?y/gi, "Obtient l'aptitude « $1 »");
+  fr = fr.replace(/Replaces?\s+['"]?(.+?)['"]?\s+with\s+['"]?(.+?)['"]?(?:\s+(?:manual|passive))?\s*(?:abil(?:it|t)?y)?/gi, "Remplace « $1 » par « $2 »");
+  fr = fr.replace(/Unlocks?\s+['"]?(.+?)['"]?(?:\s+(?:manual|passive))?\s*(?:abil(?:it|t)?y|passive)/gi, "Débloque l'aptitude « $1 »");
+  fr = fr.replace(/Unlocks?\s+Ability/gi, "Débloque l'aptitude");
+  fr = fr.replace(/Unlocks?\s+(.+)/gi, "Débloque $1");
+  fr = fr.replace(/New manual ability:\s*(.+)/gi, "Nouvelle aptitude manuelle : $1");
+  fr = fr.replace(/New ability:\s*(.+)/gi, "Nouvelle aptitude : $1");
+  fr = fr.replace(/^(\+\s*)Ability:\s*(.+)/gi, "$1Aptitude : $2");
+  fr = fr.replace(/^(\+\s*)Ability Coming/gi, "$1Aptitude à venir");
+  fr = fr.replace(/^(\+\s*)Ability\b/gi, "$1Aptitude");
+  fr = fr.replace(/^(\+\s*)Buff Ability/gi, "$1Aptitude de Buff");
+  fr = fr.replace(/^(\+\s*)Summon Ability\s*\+\s*New Move/gi, "$1Aptitude d'invocation + Nouvelle attaque");
+  fr = fr.replace(/^(\+\s*)([A-Za-z0-9 '’-]+?)\s+Ability\s*\(Lose Buff\)/gi, "$1Aptitude $2 (Perte du Buff)");
+  fr = fr.replace(/^(\+\s*)([A-Za-z0-9 '’-]+?)\s+Ability/gi, "$1Aptitude $2");
+  fr = fr.replace(/^Special Ability:\s*(.+)/gi, "Aptitude Spéciale : $1");
+  fr = fr.replace(/^Special ability that\s+(.+)/gi, "Aptitude spéciale qui $1");
+  fr = fr.replace(/^Manual ability that\s+(.+)/gi, "Aptitude manuelle qui $1");
+  fr = fr.replace(/^(\+\s*)With Helpers!/gi, "$1Avec des assistants !");
+
+  // 2. Gains damage per wave / Deals damage to base (Vegu, Super 31, etc.)
+  fr = fr.replace(/(?:=\s*)?([A-Za-z0-9 ()-]+?\s+)?gains?\s+an\s+additional\s+([0-9,]+(?:\.\d+)?)\s*(?:damage)?\s*(?:per\s*waves?|for\s*every\s*new\s*wave|every\s*new\s*wave)\s*(?:and\s*deals?\s+([0-9,]+(?:\.\d+)?)\s*damage\s*to\s*the\s*base)?\s*(?:up\s*to\s*a\s*cap\s*of\s*([0-9,]+(?:\.\d+)?))?\.?/gi, (m, who, dmg, baseDmg, cap) => {
+    let prefix = who ? who.trim() + ' ' : '';
+    let res = prefix + 'gagne ' + dmg + ' dégâts supplémentaires par vague';
+    if (baseDmg) res += ' et inflige ' + baseDmg + ' dégâts à la base';
+    if (cap) res += ' (plafond : ' + cap + ')';
+    return res + '.';
+  });
+
+  fr = fr.replace(/(?:=\s*)?([A-Za-z0-9 ()-]+?\s+)?gains?\s+an\s+additional\s+([0-9,]+(?:\.\d+)?)\s*(?:damage)?\s*(?:per\s*wave\s*)?for\s+(\d+|five)\s+waves?\.?/gi, (m, who, dmg, waves) => {
+    let prefix = who ? who.trim() + ' ' : '';
+    let w = waves.toLowerCase() === 'five' ? '5' : waves;
+    return prefix + 'gagne ' + dmg + ' dégâts supplémentaires pendant ' + w + ' vagues.';
+  });
+
+  fr = fr.replace(/deals?\s+([0-9,]+(?:\.\d+)?)\s+damage\s+to\s+the\s+base\s+per\s+wave\.?/gi, 'inflige $1 dégâts à la base par vague.');
+  fr = fr.replace(/deals?\s+([0-9,]+(?:\.\d+)?)\s+damage\s+to\s+the\s+base\.?/gi, 'inflige $1 dégâts à la base.');
+  fr = fr.replace(/DMG,\s*-(\d+)\s*(?:DMG,\s*-)?\s*TowerHP\s*Per\s*Wave/gi, 'DMG, -$1 PV de Tour par Vague');
+
+  // 3. Rage / Ability states / conditions
+  fr = fr.replace(/^(\+\s*)with\s+maximum\s+([A-Za-z0-9 '’-]+?)\s+effect\s+and\s+([A-Za-z0-9 '’-]+?)\s+ability\.?/gi, (m, p, eff1, eff2) => {
+    return (p || '') + 'avec l\'effet ' + eff1.trim() + ' au maximum et l\'aptitude ' + eff2.trim() + '.';
+  });
+  fr = fr.replace(/^with\s+maximum\s+([A-Za-z0-9 '’-]+?)\s+effect\s+and\s+([A-Za-z0-9 '’-]+?)\s+ability\.?/gi, (m, eff1, eff2) => {
+    return 'avec l\'effet ' + eff1.trim() + ' au maximum et l\'aptitude ' + eff2.trim() + '.';
+  });
+  fr = fr.replace(/^(\+\s*)with\s+maximum\s+([A-Za-z0-9 '’-]+?)\s+effect\.?/gi, (m, p, eff1) => {
+    return (p || '') + 'avec l\'effet ' + eff1.trim() + ' au maximum.';
+  });
+  fr = fr.replace(/^with\s+maximum\s+([A-Za-z0-9 '’-]+?)\s+effect\.?/gi, (m, eff1) => {
+    return 'avec l\'effet ' + eff1.trim() + ' au maximum.';
+  });
+  fr = fr.replace(/^(\+\s*)with\s+([A-Za-z0-9 '’-]+?)\s+ability\.?/gi, (m, p, ab) => {
+    return (p || '') + 'avec l\'aptitude ' + ab.trim() + '.';
+  });
+  fr = fr.replace(/^with\s+([A-Za-z0-9 '’-]+?)\s+ability\.?/gi, (m, ab) => {
+    return 'avec l\'aptitude ' + ab.trim() + '.';
+  });
+  fr = fr.replace(/Stats\s+with\s+([A-Za-z0-9 '’-]+?)\s+Ability/gi, 'Stats avec l\'aptitude $1');
+  fr = fr.replace(/Stats\s+after\s+meditating\s+for\s+(\d+)\s+waves\.?/gi, 'Stats après avoir médité pendant $1 vagues.');
+  fr = fr.replace(/Stats\s+when\s+Mask\s+On\s+Special\s+Abilty\s+is\s+activated\.?/gi, 'Stats quand la capacité spéciale Mask On est activée.');
+
+  // 4. Attack type changes and AoE modifications
+  fr = fr.replace(/Att?a?ck\s+type\s+changes?\s+(?:a\s+to|into|to|back\s+into)\s+(.+)/gi, 'Le type d\'attaque passe en $1');
+  fr = fr.replace(/Att?a?ck\s+type\s+turns?\s+(?:into|to)\s+(.+)/gi, 'Le type d\'attaque passe en $1');
+  fr = fr.replace(/Att?a?ck\s+type\s+becomes?\s+(.+)/gi, 'Le type d\'attaque devient $1');
+  fr = fr.replace(/Att?a?ck\s+changes?\s+(?:from\s+Single\s+to|into|to)\s+(.+)/gi, 'L\'attaque passe en $1');
+  fr = fr.replace(/Att?a?ck\s+becomes?\s+(.+)/gi, 'L\'attaque devient $1');
+  fr = fr.replace(/Changes?\s+attack\s+type\s+to\s+(.+)/gi, 'Change le type d\'attaque en $1');
+  fr = fr.replace(/Changes?\s+to\s+(.+)/gi, 'Passe à $1');
+  fr = fr.replace(/Attach\s+changes\s+to\s+(.+)/gi, 'L\'attaque passe en $1');
+  fr = fr.replace(/Gravity\s+Shot\s+switchs\s+to\s+(.+)/gi, 'Gravity Shot passe en $1');
+  fr = fr.replace(/Kid\s+Jitruto\s+is\s+now\s+(.+)/gi, 'Kid Jitruto passe en $1');
+
+  // AoE size changes
+  fr = fr.replace(/AoE\s*[\(\{](?:Circle|Cone|Full)[\)\}]\s*(?:become|becomes|gets|is)\s*(?:getting\s*)?(COLOSSAL|GIGANTIC!|massive|huge|very\s*big|very\s*large(?:\s*size)?|even\s*bigger|bigger|larger|more\s*bigger)/gi, 'L\'AoE s\'agrandit fortement');
+  fr = fr.replace(/AoE\s*\((?:Circle|Cone)\)\s*(?:become|becomes|gets|is)\s*(?:getting\s*)?(smaller|tighter|narrower|size\s*decrease)/gi, 'L\'AoE rétrécit');
+  fr = fr.replace(/AoE\s*\((?:Circle|Cone)\)\s*(?:become|becomes|gets|is)\s*(?:getting\s*)?(wider|a\s*bit\s*wider|a\s*lot\s*wider(?:\s*\(\d+°\))?|slightly\s*wider\.?|widens)/gi, 'L\'AoE s\'élargit');
+  fr = fr.replace(/AoE\s*Circle\s*(?:becomes|gets)\s*(?:bigger|larger)/gi, 'Le cercle AoE s\'agrandit');
+  fr = fr.replace(/AoE\s*Cone\s*(?:becomes|gets)\s*wider/gi, 'Le cône AoE s\'élargit');
+  fr = fr.replace(/AoE\s*Cone\s*becomes\s*narrower/gi, 'Le cône AoE rétrécit');
+  fr = fr.replace(/AoE\s*cone\s*(?:become\s*wider|widens)/gi, 'Le cône AoE s\'élargit');
+  fr = fr.replace(/AoE\s*circle\s*(?:becomes|gets)\s*(?:bigger|slightly\s*larger)/gi, 'Le cercle AoE s\'agrandit');
+  fr = fr.replace(/AoE\s*circle\s*gets\s*smaller\.?/gi, 'Le cercle AoE rétrécit');
+  fr = fr.replace(/AoE\s*becomes\s*bigger/gi, 'L\'AoE s\'agrandit');
+  fr = fr.replace(/Bigger\s+circle\s+of\s+AoE/gi, 'Plus grand cercle AoE');
+  fr = fr.replace(/Larger\s+cone\s+of\s+AoE/gi, 'Plus grand cône AoE');
+  fr = fr.replace(/Widens\s+AoE\s+Cone/gi, 'Élargit le cône AoE');
+  fr = fr.replace(/Size\s+of\s+AoE\s+increases\s+to\s+(\d+°)/gi, 'La taille de l\'AoE augmente à $1');
+  fr = fr.replace(/The\s+AoE\s+cone\s+is\s+about\s+(\d+°)\.?/gi, 'Le cône AoE est d\'environ $1.');
+  fr = fr.replace(/AoE\s*Target\s+covers\s+about\s+(\d+)\s+studs\s+in\s+diameter\.?/gi, 'La zone AoE couvre environ $1 studs de diamètre.');
+  fr = fr.replace(/Attack\s+angle\s+widens\s+to\s+(\d+°)\.?/gi, 'L\'angle d\'attaque s\'élargit à $1.');
+  fr = fr.replace(/Type\s+attack\s+AoE\s*\(Circle\)\s+getting\s+bigger/gi, 'L\'attaque AoE (Cercle) s\'agrandit');
+
+  // 5. Targeting, Air, and Hits
+  fr = fr.replace(/and\s+can\s+hit\s+air(?:\s+(?:enemies|troops|units|mobs))?/gi, 'et touche les ennemis aériens');
+  fr = fr.replace(/Attacks?\s+can\s+now\s+hit\s+air\s+(?:enemies|troops|units|mobs)\.?/gi, 'Les attaques peuvent désormais toucher les aériens.');
+  fr = fr.replace(/Attacks?\s+can\s+now\s+only\s+hit\s+air\s+units\.?/gi, 'Les attaques ne touchent désormais que les aériens.');
+  fr = fr.replace(/Attacks?\s+can\s+only\s+hit\s+air\s+mobs\.?/gi, 'Les attaques ne touchent que les aériens.');
+  fr = fr.replace(/Attacks?\s+now\s+hits?\s+air\s+enemies\.?/gi, 'Les attaques touchent désormais les aériens.');
+  fr = fr.replace(/Can\s+hit\s+Air\s+enemies\s+but\s+cannot\s+hit\s+ground\s+enemies\.?/gi, 'Touche les aériens mais ne peut pas toucher les terrestres.');
+  fr = fr.replace(/Can\s+now\s+attack\s+Air\s+enemies\.?/gi, 'Peut désormais attaquer les ennemis aériens.');
+  fr = fr.replace(/Summons\s+now\s+only\s+hit\s+Airs/gi, 'Les invocations ne touchent plus que les aériens');
+  fr = fr.replace(/\(Attacks\s+Bleeding\s+Enemies\s+Only\)/gi, '(Attaque uniquement les ennemis qui saignent)');
+
+  // 6. Status effects infliction
+  fr = fr.replace(/Attacks?\s+can\s+now\s+freeze\s+enemies\.?/gi, 'Les attaques peuvent désormais geler les ennemis.');
+  fr = fr.replace(/Attacks?\s+can\s+freeze\s+enemies\.?/gi, 'Les attaques peuvent geler les ennemis.');
+  fr = fr.replace(/He\s+can\s+freeze\s+enemies\.?/gi, 'Il peut geler les ennemis.');
+  fr = fr.replace(/Attacks?\s+can\s+slow\s+enemies\.?/gi, 'Les attaques peuvent ralentir les ennemis.');
+  fr = fr.replace(/Attacks?\s+can\s+stun\s+enemies\.?/gi, 'Les attaques peuvent étourdir les ennemis.');
+  fr = fr.replace(/Attacks?\s+apply\s+wax\s+slow\s+to\s+enemies/gi, 'Les attaques appliquent un ralentissement de cire');
+  fr = fr.replace(/Attacks?\s+freeze\s+enemies(?:\s+at\s+every\s+upgrade|\s+on\s+all\s+upgrades|\s+every\s+upgrade)?\.?/gi, 'Les attaques gèlent les ennemis à chaque palier.');
+  fr = fr.replace(/Stuns?\s+enemies(?:\s+every\s+upgrade)?\.?/gi, 'Étourdit les ennemis à chaque palier.');
+  fr = fr.replace(/Slows?\s+enemies(?:\s+when\s+attacks?)?\.?/gi, 'Ralentit les ennemis lors de l\'attaque.');
+  fr = fr.replace(/Stuns?\s+enemies(?:\s+when\s+attacks?)?\.?/gi, 'Étourdit les ennemis lors de l\'attaque.');
+  fr = fr.replace(/Attacks?\s+now\s+burn\s+and\s+freeze(?:\s+units)?\.?/gi, 'Les attaques brûlent et gèlent désormais.');
+  fr = fr.replace(/Attacks?\s+now\s+freeze,\s*but\s+no\s+longer\s+burn\.?/gi, 'Les attaques gèlent désormais, mais ne brûlent plus.');
+  fr = fr.replace(/Attacks?\s+now\s+deals?\s+(?:bleeding|bleed)\s+damage\.?/gi, 'Les attaques infligent désormais des dégâts de saignement.');
+  fr = fr.replace(/Attacks?\s+now\s+deals?\s+burn\s+damage\.?/gi, 'Les attaques infligent désormais des dégâts de brûlure.');
+  fr = fr.replace(/Attacks?\s+now\s+deals?\s+Rupture\s+damage\.?/gi, 'Les attaques infligent désormais des dégâts de Rupture.');
+  fr = fr.replace(/Attacks?\s+now\s+inflicts?\s+Black\s+Flames\s+damage\.?/gi, 'Les attaques infligent désormais Flammes Noires.');
+  fr = fr.replace(/Attacks?\s+now\s+inflicts?\s+GaleSlow\.?/gi, 'Les attaques infligent désormais GaleSlow.');
+  fr = fr.replace(/Attacks?\s+now\s+inflicts?\s+Sunburn\.?/gi, 'Les attaques infligent désormais Coup de Soleil.');
+  fr = fr.replace(/Attacks?\s+now\s+inflicts?\s+(?:the\s+)?slow\s+effect\.?/gi, 'Les attaques infligent désormais l\'effet de ralentissement.');
+  fr = fr.replace(/Attacks?\s+now\s+does\s+(\d+)-second\s+stun\.?/gi, 'L\'attaque étourdit désormais pendant $1 secondes.');
+  fr = fr.replace(/Attacks?\s+inflicts?\s+([A-Za-z0-9 ]+?)\.?$/gi, (m, eff) => 'Les attaques infligent ' + eff.trim() + '.');
+  fr = fr.replace(/Attacks?\s+changes?\s+(?:Enemies'|enemies['’]?\s+)?Enchant\s+to\s+([A-Za-z0-9 ]+?)\.?$/gi, 'Les attaques changent l\'enchantement ennemi en $1.');
+  fr = fr.replace(/Attacks?\s+can\s+apply\s+([A-Za-z0-9 ]+?)\.?$/gi, 'Les attaques peuvent appliquer $1.');
+  fr = fr.replace(/Freezes?\s+enemies(?:\s+at\s+every\s+upgrade|\s+on\s+all\s+upgrades|\s+every\s+upgrade)?\.?/gi, 'Gèle les ennemis à chaque palier.');
   fr = fr.replace(/Enchant enemy with\s+(.+)/gi, 'Enchante les ennemis avec $1');
+
+  // Critical strikes
+  fr = fr.replace(/Critical,\s*does\s+(\d+x)\s+damage\s+(?:on\s+|every\s+)?(?:every\s+)?(\d+)(?:st|nd|rd|th)?\s+attack/gi, 'Critique, inflige $1 dégâts toutes les $2 attaques');
+  fr = fr.replace(/Every\s+(second|third|fourth|\d+(?:st|nd|rd|th)?)\s+attacks?\s+(?:deals?|does)\s+Critical\s+damage/gi, (m, ord) => {
+    const o = ord.toLowerCase();
+    const map = { second: '2e', third: '3e', fourth: '4e' };
+    return 'Chaque ' + (map[o] || ord) + ' attaque inflige des dégâts critiques';
+  });
+
+  // Traps, Summons, and Buffs
+  fr = fr.replace(/Trap\s+HP:\s*([0-9,]+)/gi, 'PV du piège : $1');
+  fr = fr.replace(/\bClone\s+Trap\b/gi, 'Piège de clone');
+  fr = fr.replace(/\bString\s+Trap\b/gi, 'Piège de fils');
+  fr = fr.replace(/Buffs?\s+units\s+around\s+him\s+by\s+(\d+)%\s+and\s+increases\s+range/gi, 'Buff les unités autour de lui de $1% et augmente la portée');
+  fr = fr.replace(/Summon\s+Henchman\s+(\d+)/gi, 'Invoque le sbire $1');
+  fr = fr.replace(/Summon\s+Path\s+\((.+?)\)/gi, 'Invoque la Voie ($1)');
+  fr = fr.replace(/ZIO\s+gains\s+a\s+new\s+ability\s+that\s+deals\s+damage\s+during\s+the\s+5\s+second\s+stun\.?/gi, "ZIO obtient une nouvelle aptitude qui inflige des dégâts pendant l'étourdissement de 5 secondes.");
+  fr = fr.replace(/ZIO\s+gains\s+an\s+ability\s+that\s+stuns\s+enemies\s+for\s+5\s+seconds\.?/gi, "ZIO obtient une aptitude qui étourdit les ennemis pendant 5 secondes.");
+
+  // Tower Types
+  fr = fr.replace(/Tower\s+Type:\s*(.+)/gi, 'Type de Tour : $1');
+  fr = fr.replace(/Tower\s+Type\s+Ground\s*->\s*Hybrid/gi, 'Type de Tour : Terrestre -> Hybride');
+  fr = fr.replace(/Becomes\s+Hybrid/gi, 'Devient Hybride');
+
+  // Transformations and Cosmetics
+  fr = fr.replace(/Transforms?\s+into\s+(.+)/gi, 'Se transforme en $1');
+  fr = fr.replace(/Cosmetic\s+Changes?:\s*(.+)/gi, 'Changement cosmétique : $1');
+
+  // General keywords and terms
+  fr = fr.replace(/\(Ability\)/gi, '(Aptitude)');
   fr = fr.replace(/\bDamage Buff\b/gi, 'Buff de Dégâts');
   fr = fr.replace(/\bRange Buff\b/gi, 'Buff de Portée');
   fr = fr.replace(/\bProvides\s*per\s*wave\b/gi, 'Fournit par vague');
   fr = fr.replace(/\bProvides\b/gi, 'Fournit');
+  fr = fr.replace(/\bSingle\s+Target\b/gi, 'Cible unique');
+  fr = fr.replace(/\bCircle\s+AoE\b/gi, 'AoE (Cercle)');
+  fr = fr.replace(/\bFull\s+AoE\b/gi, 'AoE (Cercle complet)');
+  fr = fr.replace(/\bAoE\s*\((?:Circe|Circle)\)/gi, 'AoE (Cercle)');
+  fr = fr.replace(/\bAoE\s*\(Cone\)/gi, 'AoE (Cône)');
+  fr = fr.replace(/\bAoE\s*\(Full\)/gi, 'AoE (Cercle complet)');
+  fr = fr.replace(/\bAoE\s*Full\b/gi, 'AoE (Cercle complet)');
+  fr = fr.replace(/\bAoE\s*Circle\b/gi, 'AoE (Cercle)');
+  fr = fr.replace(/\bAoE\s*cone\b/gi, 'AoE (Cône)');
   fr = fr.replace(/\bElectric\b/gi, 'Électrique');
   fr = fr.replace(/\bFire\b/gi, 'Feu');
   fr = fr.replace(/\bWater\b/gi, 'Eau');
@@ -2519,7 +2717,7 @@ function translateUpgradeEffect(eff) {
   fr = fr.replace(/\bGround\b/gi, 'Terrestre');
   fr = fr.replace(/\bHill\b/gi, 'Colline');
   fr = fr.replace(/\bHybrid\b/gi, 'Hybride');
-  fr = fr.replace(/Leader Skill/gi, 'Compétence de Leader');
+  fr = fr.replace(/\bLeader Skill\b/gi, 'Compétence de Leader');
   fr = fr.replace(/\bManual Ability\b/gi, 'Aptitude Manuelle');
   fr = fr.replace(/\bPassive Ability\b/gi, 'Passif');
   fr = fr.replace(/\bBurn\b/gi, 'Brûlure');
