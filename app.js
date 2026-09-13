@@ -3688,7 +3688,7 @@ function renderUnitsTable() {
     <tr class="hover:bg-slate-800/60 transition-colors duration-100 cursor-pointer" onclick="openUnitModal('${u.id}')" tabindex="0" role="button" aria-label="${u.name}, ${u.star}★. ${t('table_view_sheet', 'Voir la fiche.')}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openUnitModal('${u.id}');}">
       <td class="p-3 flex items-center space-x-2.5">
         <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 p-0.5 shrink-0 flex items-center justify-center">
-          <img src="${u.image || fallbackImg}" alt="" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+          <img src="${u.image || fallbackImg}" alt="" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
         </div>
         <div class="min-w-0 font-sans">
           <div class="font-bold text-white truncate">${u.name}</div>
@@ -3816,7 +3816,7 @@ function createUnitCardHTML(unit) {
 
       <!-- Avatar Framed with concentric radius & neutral outline -->
       <div class="w-full h-32 rounded-lg bg-[#070b14] border border-slate-800/80 p-2 my-1 flex items-center justify-center relative overflow-hidden group-hover:border-sky-500/40 transition-colors duration-150">
-        <img src="${imgSrc}" alt="" loading="lazy"
+        <img src="${imgSrc}" alt="" width="128" height="128" loading="lazy" decoding="async"
              onerror="this.src='${fallbackImg}'"
              class="max-h-full max-w-full object-contain filter drop-shadow img-outline rounded-md group-hover:scale-105 transition-transform duration-150 ease-out">
       </div>
@@ -3982,7 +3982,7 @@ function renderModalAbilities(unit) {
         <div class="shrink-0 flex sm:flex-col items-center justify-center">
           <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center justify-center overflow-hidden p-1 shadow-md">
             ${ab.icon_url ? `
-              <img src="${ab.icon_url}" alt="${localizedName}" class="max-w-full max-h-full object-contain img-outline rounded-lg"
+              <img src="${ab.icon_url}" alt="${localizedName}" width="48" height="48" loading="lazy" decoding="async" class="max-w-full max-h-full object-contain img-outline rounded-lg"
                    onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
               <i data-lucide="${cfg.icon}" class="w-6 h-6 ${cfg.iconColor} hidden"></i>
             ` : `
@@ -4156,7 +4156,7 @@ function openUnitModal(unitId) {
                   title="Voir la fiche de ${evoTargetUnit.name}"
                   class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-amber-500/40 hover:border-amber-400 hover:bg-slate-800 tap-scale transition-colors shadow-sm group">
             <span class="w-7 h-7 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
-              <img src="${evoTargetUnit.image || fallbackImg}" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
+              <img src="${evoTargetUnit.image || fallbackImg}" width="28" height="28" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
             </span>
             <span class="text-xs font-bold text-amber-400 group-hover:text-amber-300 transition-colors">${evoTargetUnit.name}</span>
             <span class="inline-block text-[10px] font-mono-num font-bold star-${evoTargetUnit.star}-badge px-1 rounded">${evoTargetUnit.star}★</span>
@@ -4197,7 +4197,7 @@ function openUnitModal(unitId) {
                           title="Voir la fiche de ${matUnit.name}"
                           class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700/90 hover:border-sky-500/60 hover:bg-slate-800 tap-scale transition-colors shadow-sm group text-left">
                     <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
-                      <img src="${imgSrc}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
+                      <img src="${imgSrc}" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
                     </span>
                     <span class="min-w-0 pr-0.5">
                       <span class="block text-xs font-semibold text-slate-200 group-hover:text-white truncate max-w-[130px] sm:max-w-[160px]">${mName}</span>
@@ -4213,7 +4213,7 @@ function openUnitModal(unitId) {
                 return `
                   <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-700/70 shadow-sm text-left">
                     <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
-                      <img src="${imgSrc}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
+                      <img src="${imgSrc}" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="${mName}" onerror="this.src='${fallbackImg}'">
                     </span>
                     <span class="min-w-0 pr-0.5">
                       <span class="block text-xs font-semibold text-slate-200 truncate max-w-[130px] sm:max-w-[160px]">${mName}</span>
@@ -4269,7 +4269,7 @@ function openUnitModal(unitId) {
             <button onclick="openUnitModal('${p.id}')"
                     class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-sky-500/50 hover:bg-slate-800 tap-scale transition-colors shadow-sm">
               <span class="w-8 h-8 rounded-md bg-slate-950 border border-slate-800 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
-                <img src="${p.image || fallbackImg}" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
+                <img src="${p.image || fallbackImg}" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="" onerror="this.src='${fallbackImg}'">
               </span>
               <span class="text-left min-w-0">
                 <span class="block text-[11px] font-bold text-white truncate max-w-[150px]" title="${p.name}">${p.name}</span>
@@ -4832,7 +4832,7 @@ function renderTierList() {
                 <button onclick="openUnitModal('${unitMatch.id}')"
                         class="w-[92px] rounded-xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-1.5 flex flex-col items-center gap-1 tap-scale transition-colors">
                   <div class="w-full h-[76px] rounded-lg bg-[#070b14] border border-slate-800/80 flex items-center justify-center overflow-hidden">
-                    <img src="${thumb}" alt="${escapeHtml(name)}" loading="lazy"
+                    <img src="${thumb}" alt="${escapeHtml(name)}" width="76" height="76" loading="lazy" decoding="async"
                          onerror="this.onerror=null;this.closest('div').classList.add('tier-img-fallback');this.style.display='none'"
                          class="max-h-full max-w-full object-contain img-outline rounded group-hover:scale-105 transition-transform duration-150 ease-out pointer-events-none">
                   </div>
@@ -5019,7 +5019,7 @@ function renderOrbCard(o) {
       <div>
         <div class="flex items-center space-x-3 mb-2.5">
           <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center shrink-0">
-            <img src="${o.image || fallback}" alt="${o.name}" class="max-h-full max-w-full object-contain img-outline rounded"
+            <img src="${o.image || fallback}" alt="${o.name}" width="40" height="40" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded"
                  onerror="this.src='${fallback}'">
           </div>
           <div class="min-w-0 flex-1">
@@ -5169,7 +5169,7 @@ function renderTeamBuilder() {
             <i data-lucide="x" class="w-3.5 h-3.5" stroke-width="2.5"></i>
           </button>
           <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
-            <img src="${unit.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${unit.name}">
+            <img src="${unit.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" width="64" height="64" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="${unit.name}">
           </div>
           <div class="font-bold text-xs text-white truncate w-full" title="${unit.name}">
             ${unit.name}
@@ -5271,7 +5271,7 @@ function _doRenderTeamPicker() {
   pickerGrid.innerHTML = filtered.map(u => `
     <div class="tactical-card p-2.5 rounded-xl border border-slate-800/80 bg-[#0f1629]/95 text-center flex flex-col items-center justify-between group">
       <div class="w-12 h-12 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center my-1 overflow-hidden">
-        <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="max-h-full max-w-full object-contain img-outline rounded" alt="${u.name}">
+        <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" width="48" height="48" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" alt="${u.name}">
       </div>
       <div class="text-[11px] font-bold text-white truncate w-full" title="${u.name}">${u.name}</div>
       <span class="text-[10px] star-${u.star}-badge px-1.5 py-0.5 rounded my-1 font-mono-num font-bold">${u.star}★</span>
@@ -5550,7 +5550,7 @@ function _doCompareSearch(slot) {
          role="option" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setCompareUnit('${slot}','${u.id}');}">
       <div class="flex items-center space-x-2.5 min-w-0">
         <div class="w-8 h-8 rounded-lg bg-[#070b14] border border-slate-800 p-0.5 shrink-0 flex items-center justify-center overflow-hidden">
-          <img src="${u.image || fallbackImg}" alt="" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+          <img src="${u.image || fallbackImg}" alt="" width="32" height="32" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
         </div>
         <div class="min-w-0">
           <div class="text-xs font-bold text-white truncate">${u.name}</div>
@@ -5804,7 +5804,7 @@ function renderCompareView() {
         <div class="flex items-start justify-between gap-3">
           <div class="flex items-center space-x-3 min-w-0">
             <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800 p-1 flex items-center justify-center shrink-0 overflow-hidden">
-              <img src="${compareUnitA.image || fallbackImg}" alt="${compareUnitA.name}" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+              <img src="${compareUnitA.image || fallbackImg}" alt="${compareUnitA.name}" width="64" height="64" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
@@ -5841,7 +5841,7 @@ function renderCompareView() {
         <div class="flex items-start justify-between gap-3">
           <div class="flex items-center space-x-3 min-w-0">
             <div class="w-16 h-16 rounded-lg bg-[#070b14] border border-slate-800 p-1 flex items-center justify-center shrink-0 overflow-hidden">
-              <img src="${compareUnitB.image || fallbackImg}" alt="${compareUnitB.name}" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
+              <img src="${compareUnitB.image || fallbackImg}" alt="${compareUnitB.name}" width="64" height="64" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded" onerror="this.src='${fallbackImg}'">
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">

@@ -1154,7 +1154,7 @@ const CommunityManager = (function() {
               ${modifiedUnitsList.map(u => `
                 <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex flex-col justify-between space-y-2 hover:border-sky-500/40 transition-colors">
                   <div class="flex items-start gap-2.5">
-                    <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="w-12 h-12 rounded-lg bg-slate-900 border border-slate-800 p-1 object-contain shrink-0">
+                    <img src="${u.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" width="48" height="48" loading="lazy" decoding="async" class="w-12 h-12 rounded-lg bg-slate-900 border border-slate-800 p-1 object-contain shrink-0" alt="${u.name}">
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-1.5">
                         <span class="font-bold text-white text-xs truncate">${u.name}</span>
@@ -1230,7 +1230,7 @@ const CommunityManager = (function() {
               ${modifiedOrbsList.map(o => `
                 <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex flex-col justify-between space-y-2 hover:border-cyan-500/40 transition-colors">
                   <div class="flex items-start gap-2.5">
-                    <img src="${o.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" class="w-12 h-12 rounded-lg bg-slate-900 border border-slate-800 p-1 object-contain shrink-0" onerror="this.src='https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'">
+                    <img src="${o.image || 'https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'}" width="48" height="48" loading="lazy" decoding="async" class="w-12 h-12 rounded-lg bg-slate-900 border border-slate-800 p-1 object-contain shrink-0" alt="${o.name}" onerror="this.src='https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'">
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-1.5">
                         <span class="font-bold text-white text-xs truncate">${escapeHtml(o.name)}</span>
@@ -2424,7 +2424,7 @@ const CommunityUI = (function() {
           </div>
 
           <div class="w-full h-28 rounded-lg bg-[#070b14] border border-slate-800 p-2 my-1 flex items-center justify-center overflow-hidden">
-            <img src="${image}" onerror="this.src='https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'"
+            <img src="${image}" width="112" height="112" loading="lazy" decoding="async" onerror="this.src='https://static.wikia.nocookie.net/allstartd/images/b/bc/Wiki.png'"
                  class="max-h-full max-w-full object-contain filter drop-shadow rounded">
           </div>
 
@@ -3118,7 +3118,7 @@ const CommunityUI = (function() {
         <div>
           <div class="flex items-center space-x-3 mb-2.5">
             <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800/80 p-1 flex items-center justify-center shrink-0">
-              <img src="${image}" alt="${escapeHtml(name)}" class="max-h-full max-w-full object-contain img-outline rounded"
+              <img src="${image}" alt="${escapeHtml(name)}" width="40" height="40" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain img-outline rounded"
                    onerror="this.src='${fallbackImg}'">
             </div>
             <div class="min-w-0 flex-1">
@@ -3397,7 +3397,7 @@ const CommunityUI = (function() {
                 onclick="${isAlreadyAdded ? `if(window.showToast) window.showToast(t('tierlist_already_in_cat', 'Cette unité est déjà dans cette catégorie'));` : `CommunityUI.addUnitToTier('${currentTargetTierCategory.replace(/'/g, "\\'")}', '${escapeUName}')`}"
                 class="p-2 rounded-xl border text-left flex items-center gap-2 tap-scale transition-all ${isAlreadyAdded ? 'bg-slate-900/40 border-slate-800/40 opacity-50 cursor-not-allowed' : 'bg-[#0e162a] hover:bg-sky-600/20 border-slate-800 hover:border-sky-500/50 group'}">
           <div class="w-10 h-10 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
-            <img src="${thumb || ''}" alt="${escapeHtml(u.name)}" loading="lazy"
+            <img src="${thumb || ''}" alt="${escapeHtml(u.name)}" width="40" height="40" loading="lazy" decoding="async"
                  onerror="this.style.display='none'"
                  class="max-h-full max-w-full object-contain">
           </div>
@@ -3652,7 +3652,7 @@ const CommunityUI = (function() {
         <!-- Résumé unité -->
         <div class="p-3 rounded-xl bg-[#090e1c] border border-slate-800 flex items-center gap-3">
           <div class="w-12 h-12 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
-            <img src="${thumb || ''}" alt="${escapeHtml(unitName)}" class="max-h-full max-w-full object-contain">
+            <img src="${thumb || ''}" alt="${escapeHtml(unitName)}" width="48" height="48" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain">
           </div>
           <div>
             <div class="flex items-center gap-1.5">
