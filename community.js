@@ -253,6 +253,10 @@ const CommunityManager = (function() {
       window.renderTierList();
     }
 
+    if (window.invalidateRenderedTabs) {
+      window.invalidateRenderedTabs(window.currentTab || 'units');
+    }
+
     updateCommunityBadge();
   }
 
