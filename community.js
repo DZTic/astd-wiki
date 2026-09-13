@@ -289,6 +289,10 @@ const CommunityManager = (function() {
       window.invalidateRenderedTabs(window.currentTab || 'units');
     }
 
+    if (window.updateActiveCodesBadge) {
+      window.updateActiveCodesBadge();
+    }
+
     updateCommunityBadge();
   }
 

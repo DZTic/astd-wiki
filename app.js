@@ -2963,6 +2963,20 @@ async function ensureDatasetLoaded(datasetKey) {
   return false;
 }
 
+function updateActiveCodesBadge() {
+  const activeBadge = document.getElementById('badge-active-codes');
+  if (!activeBadge) return;
+  let count = 0;
+  if (CODES_DATA && Array.isArray(CODES_DATA.active) && CODES_DATA.active.length > 0) {
+    count = CODES_DATA.active.length;
+  } else if (loadedDatasets.has('codes')) {
+    count = (CODES_DATA && Array.isArray(CODES_DATA.active)) ? CODES_DATA.active.length : 0;
+  } else if (META_DATA && typeof META_DATA.total_active_codes === 'number') {
+    count = META_DATA.total_active_codes;
+  }
+  activeBadge.textContent = count;
+}
+
 function applyDataset(key, data) {
   switch (key) {
     case 'codes':
@@ -2970,10 +2984,14 @@ function applyDataset(key, data) {
         data.active.sort((a, b) => codeTimestamp(b) - codeTimestamp(a));
       }
       CODES_DATA = data;
+      if (window.CommunityManager && typeof window.CommunityManager.applyToGlobalData === 'function') {
+        window.CommunityManager.applyToGlobalData();
+      }
       if (data.active && data.active.length > 0) {
         const heroCodeEl = document.getElementById('hero-code-name');
         if (heroCodeEl) heroCodeEl.textContent = data.active[0].code;
       }
+      updateActiveCodesBadge();
       break;
     case 'orbs':
       ORBS_DATA = Array.isArray(data) ? data : [];
@@ -3147,8 +3165,7 @@ async function loadData() {
     const orbsCountEl = document.getElementById('stat-orbs-count');
     if (orbsCountEl) orbsCountEl.textContent = (META_DATA && META_DATA.total_orbs) ? META_DATA.total_orbs : (ORBS_DATA.length || 49);
 
-    const activeBadge = document.getElementById('badge-active-codes');
-    if (activeBadge) activeBadge.textContent = CODES_DATA.active.length;
+    updateActiveCodesBadge();
 
     const ribbonUpdated = document.getElementById('stat-last-updated');
     if (ribbonUpdated && META_DATA.last_updated) {
@@ -5001,6 +5018,7 @@ function renderCodes() {
   const expiredList = document.getElementById('expired-codes-list');
 
   if (expiredCount) expiredCount.textContent = CODES_DATA.expired.length;
+  updateActiveCodesBadge();
 
   if (activeGrid) {
     activeGrid.innerHTML = CODES_DATA.active.map(c => `
@@ -6218,6 +6236,7 @@ if (typeof window !== 'undefined') {
   // Codes & Orbes & Utilitaires
   window.toggleExpiredCodes = toggleExpiredCodes;
   window.filterExpiredCodes = filterExpiredCodes;
+  window.updateActiveCodesBadge = updateActiveCodesBadge;
   window.copyCodeText = copyCodeText;
   window.copyLatestCode = copyLatestCode;
   window.filterOrbs = filterOrbs;
