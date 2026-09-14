@@ -17,51 +17,37 @@
       "reward": "150 Stardust, 4 000 Gemmes",
       "date": "03.09.2026",
       "status": "active"
-    },
-    {
-      "code": "tboicats",
-      "reward": "170 Stardust, 3 000 Gemmes",
-      "date": "23.06.2026",
-      "status": "active"
-    },
-    {
-      "code": "sorryfordelayandmonkeyking",
-      "reward": "280 Stardust, 4 000 Gemmes",
-      "date": "23.06.2026",
-      "status": "active"
-    },
-    {
-      "code": "yickadee",
-      "reward": "230 Stardust, 2 000 Gemmes → Sky God (Balrog) • Requis : Level 100+",
-      "date": "23.06.2026",
-      "status": "active"
-    },
-    {
-      "code": "twete93dont",
-      "reward": "140 Stardust, 2 000 Gemmes",
-      "date": "30.05.2026",
-      "status": "active"
-    },
-    {
-      "code": "omgupdate2026",
-      "reward": "170 Stardust, 2 700 Gemmes • Requis : Level 50+",
-      "date": "29.05.2026",
-      "status": "active"
-    },
-    {
-      "code": "cosmicrebel",
-      "reward": "170 Stardust, 2 700 Gemmes",
-      "date": "29.05.2026",
-      "status": "active"
-    },
-    {
-      "code": "ultramicro",
-      "reward": "100 Stardust, 300 Gemmes",
-      "date": "15.03.2026",
-      "status": "active"
     }
   ],
   "expired": [
+    {
+      "code": "tboicats",
+      "status": "expired"
+    },
+    {
+      "code": "sorryfordelayandmonkeyking",
+      "status": "expired"
+    },
+    {
+      "code": "yickadee",
+      "status": "expired"
+    },
+    {
+      "code": "twete93dont",
+      "status": "expired"
+    },
+    {
+      "code": "omgupdate2026",
+      "status": "expired"
+    },
+    {
+      "code": "cosmicrebel",
+      "status": "expired"
+    },
+    {
+      "code": "ultramicro",
+      "status": "expired"
+    },
     {
       "code": "tungtungnobannersahur",
       "status": "expired"
