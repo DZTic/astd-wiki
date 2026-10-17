@@ -1,6 +1,24 @@
 {
   "active": [
     {
+      "code": "soulworld",
+      "reward": "100 Stardust, 4 000 Gemmes",
+      "date": "16.10.2026",
+      "status": "active"
+    },
+    {
+      "code": "nobrandgirls",
+      "reward": "100 Stardust, 4 000 Gemmes",
+      "date": "16.10.2026",
+      "status": "active"
+    },
+    {
+      "code": "totallyinconspicuouscode",
+      "reward": "50 Stardust, 4 000 Gemmes",
+      "date": "16.10.2026",
+      "status": "active"
+    },
+    {
       "code": "AwesomeBeginnerCode",
       "reward": "50 Stardust, 4 000 Gemmes",
       "date": "03.09.2026",
